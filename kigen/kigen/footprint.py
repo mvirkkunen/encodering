@@ -11,7 +11,7 @@ class GraphicsItem(Node):
 class Group(NodeGroup):
     pass
 
-Group.allowed_children = (GraphicsItem, Group)
+Group.child_types = (GraphicsItem, Group)
 
 class BaseLine(GraphicsItem):
     start: Annotated[Vec2, Transform]
@@ -54,14 +54,6 @@ class Rect(BaseLine):
         ):
         super().__init__(locals())
 
-class PropertyPair:
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-
-    def to_sexpr(self):
-        return [self.key, self.value]
-
 class FootprintType(SymbolEnum):
     Smd = "smd"
     ThroughHole = "through_hole"
@@ -84,7 +76,7 @@ class FootprintAttributes(Node):
 
 class BaseFootprint(ContainerNode):
     node_name = "footprint"
-    allowed_children = (GraphicsItem, Group)
+    child_types = (GraphicsItem, Group)
 
     layer: str
     descr: Optional[str]
@@ -98,7 +90,7 @@ class BaseFootprint(ContainerNode):
 class Footprint(BaseFootprint):
     library_link: Annotated[Optional[str], Positional]
     tstamp: Optional[Uuid]
-    at: Pos2
+    at: Annotated[Pos2, Transform]
     path: str
 
     def __init__(
@@ -119,8 +111,8 @@ class FootprintFile(BaseFootprint):
     order_attrs = ("version", "generator")
 
     name: Annotated[str, Positional]
-    version: Symbol
-    generator: Symbol
+    version: int
+    generator: Generator
 
     def __init__(
         self,
@@ -130,8 +122,8 @@ class FootprintFile(BaseFootprint):
         tags: str = None,
         properties: ToProperties = {},
         attr: FootprintAttributes = None,
-        version: Symbol = KIGEN_VERSION,
-        generator: Symbol = KIGEN_GENERATOR,
+        version: int = KIGEN_VERSION,
+        generator: Generator = KIGEN_GENERATOR,
     ):
         super().__init__(locals())
 

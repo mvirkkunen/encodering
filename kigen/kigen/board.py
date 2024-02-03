@@ -87,7 +87,7 @@ class BoardLayer(Node):
 
 class BoardLayers(ContainerNode):
     node_name = "layers"
-    allowed_children = (BoardLayer,)
+    child_types = (BoardLayer,)
 
     def __init__(self, children):
         super().__init__(locals())
@@ -155,8 +155,8 @@ class BoardFile(ContainerNode):
     node_name = "kicad_pcb"
     order_attrs = ("version", "generator")
 
-    version: Symbol
-    generator: Symbol
+    version: int
+    generator: Generator
     general: BoardGeneralSettings
     page: PageSettings
     layers: BoardLayers
@@ -168,8 +168,8 @@ class BoardFile(ContainerNode):
         general: BoardGeneralSettings = BoardGeneralSettings(thickness=1.6),
         page: PageSettings = PageSettings(PaperSize.A4),
         setup: BoardSetup = BoardSetup(),
-        version: Symbol = KIGEN_VERSION,
-        generator: Symbol = KIGEN_GENERATOR,
+        version: int = KIGEN_VERSION,
+        generator: Generator = KIGEN_GENERATOR,
     ):
         if not isinstance(layers, list):
             layers = BoardLayer.generate_layers(layers)

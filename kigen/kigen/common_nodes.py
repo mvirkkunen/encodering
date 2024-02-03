@@ -1,7 +1,15 @@
 import math
+from enum import Flag, auto
 
 from .node import *
 from .values import *
+
+class Generator(SymbolEnum):
+    Kigen = "kigen"
+    KicadSymbolEditor = "kicad_symbol_editor"
+
+KIGEN_VERSION = 20211014
+KIGEN_GENERATOR = Generator.Kigen
 
 class NodeGroup(ContainerNode):
     at: Pos2
@@ -23,17 +31,19 @@ class NodeGroup(ContainerNode):
         pos = Pos2(pos)
         at = super().transform(self.at)
 
-        if at.r != 0:
-            s = math.sin(at.r / 180 * math.pi)
-            c = math.cos(at.r / 180 * math.pi)
+        print(at, self.at, pos.rotate(at.r))
+        return at + pos.rotate(at.r)
+        #if at.r != 0:
+            #s = math.sin(at.r / 180 * math.pi)
+            #c = math.cos(at.r / 180 * math.pi)
 
-            return Pos2(
-                at.x + c * pos.x - s * pos.y,
-                at.y + s * pos.x + c * pos.y,
-                pos.r + at.r,
-            )
-        else:
-            return Pos2(at.x + pos.x, at.y + pos.y, pos.r)
+            #return Pos2(
+            #    at.x + c * pos.x - s * pos.y,
+            #    at.y + s * pos.x + c * pos.y,
+            #    pos.r + at.r,
+            #)
+        #else:
+        #    return Pos2(at.x + pos.x, at.y + pos.y, pos.r)
 
 class PaperSize(SymbolEnum):
     A0 = "A0"
@@ -69,9 +79,13 @@ class PageSettings(Node):
 
 ToProperties: TypeAlias = "Properties | dict[str, str]"
 
-class Properties(dict, Node):
+class Properties(dict[str, str], Node):
     def __init__(self, init: ToProperties):
         super().__init__(init)
+
+    @classmethod
+    def from_sexpr(self, e):
+        return Properties({v[0]: v[1] for v in e})
 
     def to_sexpr(self):
         return [
@@ -80,3 +94,65 @@ class Properties(dict, Node):
             in self.items()
         ]
 
+class Font(Node):
+    face: Optional[str]
+    size: Vec2
+    thickness: Optional[float]
+    bold: bool
+    italic: bool
+    line_spacing: Optional[float]
+
+    def __init__(
+            self,
+            face: Optional[str] = None,
+            size: Vec2 = Vec2(1.27, 1.27),
+            thickness: Optional[float] = None,
+            bold: bool = False,
+            italic: bool = False,
+            line_spacing: Optional[float] = None,
+    ):
+        super().__init__(locals())
+
+class TextJustify(Flag):
+    Left = auto()
+    Right = auto()
+    Top = auto()
+    Bottom = auto()
+    Mirror = auto()
+
+    def to_sexpr(self):
+        r = []
+
+        if TextJustify.Left in self:
+            r.append(Symbol("left"))
+        elif TextJustify.Right in self:
+            r.append(Symbol("right"))
+
+        if TextJustify.Top in self:
+            r.append(Symbol("top"))
+        elif TextJustify.Bottom in self:
+            r.append(Symbol("bottom"))
+
+        if TextJustify.Mirror in self:
+            r.append(Symbol("mirror"))
+
+        return r
+
+    @classmethod
+    def from_sexpr(cls, e):
+        return TextJustify.Left # TODO
+
+class TextEffects(Node):
+    node_name = "text_effects"
+
+    font: Font
+    justify: Optional[TextJustify]
+    hide: bool
+
+    def __init__(
+            self,
+            font: Font = Font(),
+            justify: Optional[TextJustify] = None,
+            hide: bool = False,
+    ):
+        super().__init__(locals())

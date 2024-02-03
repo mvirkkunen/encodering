@@ -28,12 +28,40 @@ class NoConnect(Node):
             uuid: Uuid = Uuid()):
         super().__init__(locals())
 
+class LabelShape(SymbolEnum):
+    Input = "input"
+    Output = "output"
+    Bidirectional = "bidirectional"
+    TriState = "tri_state"
+    Passive = "passive"
+
+class GlobalLabel(Node):
+    name: Annotated[str, Positional]
+    shape: LabelShape
+    fields_autoplaced: Annotated[bool, BoolSerialization.SymbolInList]
+    effects: TextEffects
+    at: Pos2
+    uuid: Uuid
+    properties: Properties
+
+    def __init__(
+            self,
+            name: str,
+            at: Pos2,
+            shape: LabelShape = LabelShape.Input,
+            fields_autoplaced: bool = True,
+            effects: TextEffects = TextEffects(),
+            uuid: Uuid = Uuid(),
+            properties: ToProperties = {},
+    ):
+        super().__init__(locals())
+
 class SchematicFile(ContainerNode):
     node_name = "kicad_sch"
     order_attrs = ("version", "generator")
 
-    version: Symbol
-    generator: Symbol
+    version: int
+    generator: Generator
     uuid: Uuid
     page: PageSettings
 
@@ -41,8 +69,8 @@ class SchematicFile(ContainerNode):
         self,
         uuid: Uuid = Uuid(),
         page: PageSettings = PageSettings(PaperSize.A4),
-        version: Symbol = KIGEN_VERSION,
-        generator: Symbol = KIGEN_GENERATOR,
+        version: int = KIGEN_VERSION,
+        generator: Generator = KIGEN_GENERATOR,
     ):
         super().__init__(locals())
 

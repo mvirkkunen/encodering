@@ -5,12 +5,8 @@ from collections.abc import Iterable
 from functools import cache
 from typing import get_type_hints, ClassVar, Annotated, Optional, _UnionGenericAlias
 
-from .util import reorder_dict
-from .sexpr import sexpr_serialize
+from .sexpr import sexpr_parse, sexpr_serialize, SExpr, Symbol
 from .values import *
-
-KIGEN_VERSION = Symbol("20211014")
-KIGEN_GENERATOR = Symbol("kigen")
 
 class BoolSerialization(Enum):
     Symbol = 1
@@ -85,9 +81,11 @@ class Node(ABC):
     transform_attrs: ClassVar[Optional[(str)]]
 
     parent: "Annotated[Optional[Node], Special]"
+    unknown: Annotated[Optional[list[SExpr]], Special]
 
     def __init__(self, attrs):
         self.parent = None
+        self.unknown = None
 
         parent = attrs.pop("parent", None)
 
@@ -106,7 +104,6 @@ class Node(ABC):
 
             setattr(self, a.name, value)
 
-        self.parent = None
         if parent:
             parent.append(self)
 
@@ -151,10 +148,76 @@ class Node(ABC):
             else:
                 r.append([Symbol(a.name), val])
 
+        if self.unknown:
+            r += self.unknown
+
         return [r]
+
+    @classmethod
+    def from_sexpr(cls, expr):
+        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == Symbol(cls.node_name)):
+            raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression")
+
+        node_name = cls.node_name
+        attrs = {}
+        unknown = []
+        meta = AttributeMeta.get(cls)
+
+        positional = [a for a in meta if a.get_meta(Positional)]
+        named = {a.name: a for a in meta if not a.get_meta(Positional)}
+
+        print(node_name, positional, named)
+
+        for e in expr[1:]:
+            a = None
+
+            if isinstance(e, Symbol):
+                a = named.get(e.name, None)
+                if a and a.type == bool and a.get_meta(BoolSerialization) in (BoolSerialization.Symbol, None):
+                    attrs[a.name] = True
+                    continue
+
+            if not isinstance(e, list):
+                if len(positional) == 0:
+                    print(e)
+                    raise ValueError(f"Too many positional arguments in {node_name}")
+
+                a = positional[0]
+                del positional[0]
+                attrs[a.name] = e
+                continue
+
+            if isinstance(e[0], Symbol):
+                a = named.get(e[0].name, None)
+
+            if not a:
+                unknown.append(e)
+                continue
+
+            if a.get_meta(BoolSerialization) == BoolSerialization.SymbolInList:
+                attrs[a.name] = True
+                continue
+
+            if a.get_meta(BoolSerialization) == BoolSerialization.YesNo:
+                attrs[a.name] = e[1] == "yes"
+                continue
+
+            if hasattr(a.type, "from_sexpr"):
+                attrs[a.name] = a.type.from_sexpr(e[1:])
+            else:
+                print(e)
+                attrs[a.name] = e[1]
+
+        node = cls(**attrs)
+        node.unknown = unknown or None
+        return node
 
     def serialize(self):
         return sexpr_serialize(self.to_sexpr()[0])
+
+    @classmethod
+    def parse(cls, s):
+        return cls.from_sexpr(sexpr_parse(s))
 
     def transform(self, pos: ToPos2) -> Pos2:
         if self.parent:
@@ -182,7 +245,7 @@ class ContainerNode(Node):
         if not node:
             return
 
-        if not isinstance(node, getattr(self.__class__, "allowed_children")):
+        if not isinstance(node, self.__class__.child_types):
             raise RuntimeError(f"{node.__class__.__name__} is not allowed to be a child of {self.__class__.__name__}")
 
         if node.parent:
@@ -194,6 +257,28 @@ class ContainerNode(Node):
     def extend(self, nodes):
         for n in nodes:
             self.append(n)
+
+    @classmethod
+    def from_sexpr(cls, expr: SExpr):
+        node = super().from_sexpr(expr)
+
+        unknown = []
+
+        for u in node.unknown:
+            if not isinstance(u[0], Symbol):
+                unknown.append(u)
+                continue
+
+            child_type = next((t for t in cls.child_types if t.node_name == u[0].name), None)
+            if not child_type:
+                unknown.append(u)
+                continue
+
+            node.append(child_type.from_sexpr(u))
+
+        node.unknown = unknown
+
+        return node
 
     def to_sexpr(self):
         r = super().to_sexpr()[0]

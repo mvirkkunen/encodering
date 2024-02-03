@@ -1,25 +1,11 @@
-import re
+import math
 import uuid
 
 from dataclasses import dataclass
 from enum import Enum
 from typing import overload, Iterable, TypeAlias
 
-@dataclass(frozen=True)
-class Symbol:
-    name: str
-
-    def __init__(self, name: "str | Symbol"):
-        if isinstance(name, Symbol):
-            self.__init(name.name)
-        else:
-            self.__init(name)
-
-    def __init(self, name):
-        if not re.match(r"^[a-zA-Z0-9_.-]+$", name):
-            raise ValueError(f"Invalid symbol: '{name}'")
-
-        object.__setattr__(self, "name", name)
+from .sexpr import Symbol
 
 ToVec2: TypeAlias = "list[float] | (float, float) | () | Vec2 | Pos2"
 
@@ -57,6 +43,29 @@ class Vec2:
     def to_sexpr(self):
         return [self.x, self.y]
 
+    @classmethod
+    def from_sexpr(cls, e):
+        return Vec2(*e)
+
+    def rotate(self, angle):
+        if angle == 0:
+            return self
+
+        s = math.sin(angle / 180 * math.pi)
+        c = math.cos(angle / 180 * math.pi)
+
+        return Vec2(
+            c * self.x - s * self.y,
+            s * self.x + c * self.y,
+        )
+
+    def __add__(self, other):
+        other = Vec2(other)
+        return Vec2(self.x + other.x, self.y + other.y)
+
+    def __mul__(self, other):
+        return Vec2(self.x * other, self.y * other)
+
 ToPos2: TypeAlias = "Pos2 | ToVec2"
 
 @dataclass(frozen=True)
@@ -73,12 +82,12 @@ class Pos2(Vec2):
     def __init__(self, xy: ToVec2, r: float = 0): ...
 
     def __init__(self, *args, **kwargs):
-        if len(args) == 0 or len(args) == 2:
-            self.__init(args)
-        elif len(args) == 1 and isinstance(args[0], Pos2):
-            self.__init(args[0])
+        if len(args) == 1 and isinstance(args[0], Pos2):
+            self.__init(args[0], args[0].r)
         elif len(args) <= 2 and isinstance(args[0], (Vec2, tuple, list)):
             self.__init(args[0], args[1] if len(args) == 2 else kwargs.get("r", 0))
+        elif len(args) == 0 or len(args) == 2:
+            self.__init(args)
         elif len(args) == 3:
             self.__init(args[:2], args[2])
         else:
@@ -93,6 +102,20 @@ class Pos2(Vec2):
             return [self.x, self.y, self.r]
         else:
             return [self.x, self.y]
+
+    @classmethod
+    def from_sexpr(cls, e):
+        return Pos2(*e)
+
+    def rotate(self, angle):
+        if angle == 0:
+            return self
+
+        return Pos2(Vec2(self).rotate(angle), self.r + angle)
+
+    def __add__(self, other):
+        other = Pos2(other)
+        return Pos2(self.x + other.x, self.y + other.y, self.r + other.y)
 
 @dataclass(frozen=True)
 class Rgba:
@@ -131,6 +154,10 @@ class Rgba:
     def to_sexpr(self):
         return [self.r, self.g, self.b, self.a]
 
+    @classmethod
+    def from_sexpr(cls, e):
+        return Rgba(*e)
+
 class Uuid():
     __value: str
 
@@ -149,7 +176,26 @@ class Uuid():
     def to_sexpr(self):
         return [Symbol(self.value)]
 
+    @classmethod
+    def from_sexpr(cls, e):
+        return Uuid(e[0].name)
+
 class SymbolEnum(Enum):
+    def to_sexpr(self):
+        return [Symbol(self.value)]
+
+    @classmethod
+    def from_sexpr(cls, e):
+        for item in cls:
+            if item.value == e[0].name:
+                return item
+
+        return SymbolEnumUnknownValue(e[0].name)
+
+@dataclass(frozen=True)
+class SymbolEnumUnknownValue:
+    value: str
+
     def to_sexpr(self):
         return [Symbol(self.value)]
 
@@ -212,6 +258,3 @@ class Layer:
     User7 = "User.7"
     User8 = "User.8"
     User9 = "User.9"
-
-Value: TypeAlias = str | int | float | Symbol | Vec2
-

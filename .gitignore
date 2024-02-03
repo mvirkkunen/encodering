@@ -1,0 +1,5 @@
+.vscode/
+*.pdf
+**/*-backups/
+__pycache__/
+

@@ -1,8 +1,29 @@
+import re
+
+from dataclasses import dataclass
 from typing import Any, TypeAlias
-from .values import Symbol
+
 from .util import flatten_list
 
+@dataclass(frozen=True)
+class Symbol:
+    name: str
+
+    def __init__(self, name: "str | Symbol"):
+        if isinstance(name, Symbol):
+            self.__init(name.name)
+        else:
+            self.__init(name)
+
+    def __init(self, name):
+        if not re.match(r"^[a-zA-Z0-9_.-]+$", name):
+            raise ValueError(f"Invalid symbol: '{name}'")
+
+        object.__setattr__(self, "name", name)
+
 FlatSExpr: TypeAlias = str | list[str]
+
+SExpr: TypeAlias = "str | float | int | Symbol | list[SExpr]"
 
 def length(e: FlatSExpr):
     """Calculates length of flattened s-expr element."""
@@ -59,5 +80,51 @@ def sexpr_serialize(obj: Any, width: int = 120) -> str:
             return [flatten_list(flatten(c) for c in o)]
 
     return sexpr_format(flatten(obj)[0], width)
+
+numeric = "-0123456789."
+symbol = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+
+def sexpr_parse(s: str) -> SExpr:
+    root = []
+    stack = [root]
+
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if c == "(":
+            l = []
+            stack[-1].append(l)
+            stack.append(l)
+            i += 1
+        elif c == ")":
+            stack.pop()
+            i += 1
+        elif c == "\"":
+            i += 1
+            ss = ""
+            while s[i] != "\"":
+                ss += s[i]
+                i += 1
+
+            stack[-1].append(ss)
+            i += 1
+        elif c in numeric:
+            ss = ""
+            while s[i] in numeric:
+                ss += s[i]
+                i += 1
+
+            stack[-1].append(float(ss) if "." in ss else int(ss))
+        elif c in symbol:
+            ss = ""
+            while s[i] in symbol:
+                ss += s[i]
+                i += 1
+
+            stack[-1].append(Symbol(ss))
+        else:
+            i += 1
+
+    return root[0]
 
 __all__ = ["sexpr_serialize", "FlatSexpr"]
