@@ -1,11 +1,11 @@
-import math
+import copy
 
 from abc import ABC
 from collections.abc import Iterable
 from functools import cache
 from typing import get_type_hints, ClassVar, Annotated, Optional, _UnionGenericAlias
 
-from .sexpr import sexpr_parse, sexpr_serialize, SExpr, Symbol
+from .sexpr import sexpr_parse, sexpr_serialize, SExpr, Sym, UnknownExpr
 from .values import *
 
 class BoolSerialization(Enum):
@@ -74,6 +74,18 @@ class AttributeMeta:
     def __repr__(self):
         return f"AttributeMeta('{self.name}', {self.type}, {self.optional}, {self.metadata})"
 
+def remove_where(l: list, pred):
+    i = 0
+    r = []
+    while i < len(l):
+        if pred(l[i]):
+            r.append(l[i])
+            del l[i]
+        else:
+            i += 1
+
+    return r
+
 class Node(ABC):
     node_name: ClassVar[Optional[str]]
     positional_attrs: ClassVar[Optional[(str)]]
@@ -83,7 +95,10 @@ class Node(ABC):
     parent: "Annotated[Optional[Node], Special]"
     unknown: Annotated[Optional[list[SExpr]], Special]
 
-    def __init__(self, attrs):
+    def __init__(self, attrs=None):
+        if not attrs:
+            attrs = {}
+
         self.parent = None
         self.unknown = None
 
@@ -98,8 +113,9 @@ class Node(ABC):
 
                 setattr(self, a.name, None)
                 continue
-
-            if not isinstance(value, a.type):
+            if value == ():
+                value = a.type()
+            elif not isinstance(value, a.type):
                 value = a.type(value)
 
             setattr(self, a.name, value)
@@ -107,113 +123,95 @@ class Node(ABC):
         if parent:
             parent.append(self)
 
+    def clone(self):
+        node = copy.copy(self)
+        node.parent = None
+        return node
+
     def to_sexpr(self):
         r = []
 
         node_name = getattr(self, "node_name", None)
         if node_name:
-            r.append(Symbol(node_name))
+            r.append(Sym(node_name))
 
-        meta = AttributeMeta.get(self.__class__)
-
-        attrs = {
-            a.name: v
-            for (a, v) in ((a, getattr(self, a.name)) for a in meta)
-            if v is not None
-        }
-
-        for a in meta:
-            val = attrs.get(a.name, None)
-            if not val:
+        for a in AttributeMeta.get(self.__class__):
+            val = getattr(self, a.name, None)
+            if val is None:
                 continue
 
             if a.get_meta(Transform):
                 val = a.type(self.transform(val))
 
-            bool_ser: BoolSerialization = a.get_meta(BoolSerialization) or BoolSerialization.Symbol
-
-            if isinstance(val, bool):
+            if issubclass(a.type, bool):
+                bool_ser: BoolSerialization = a.get_meta(BoolSerialization) or BoolSerialization.Symbol
                 if bool_ser == BoolSerialization.Symbol:
                     if val:
-                        r.append(Symbol(a.name))
+                        r.append(Sym(a.name))
                 elif bool_ser == BoolSerialization.SymbolInList:
                     if val:
-                        r.append([Symbol(a.name)])
+                        r.append([Sym(a.name)])
                 elif bool_ser == BoolSerialization.YesNo:
-                    r.append([Symbol(a.name), Symbol("yes" if val else "no")])
-            elif isinstance(val, Node):
-                r.append(val)
-            elif a.get_meta(Positional):
+                    r.append([Sym(a.name), Sym("yes" if val else "no")])
+            elif a.get_meta(Positional) or isinstance(val, Node):
                 r.append(val)
             else:
-                r.append([Symbol(a.name), val])
+                r.append([Sym(a.name), val])
 
         if self.unknown:
-            r += self.unknown
+            r.extend(map(UnknownExpr, self.unknown))
 
         return [r]
 
     @classmethod
     def from_sexpr(cls, expr):
-        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == Symbol(cls.node_name)):
+        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == Sym(cls.node_name)):
             raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression")
 
+        expr = list(expr[1:])
         node_name = cls.node_name
         attrs = {}
-        unknown = []
-        meta = AttributeMeta.get(cls)
 
-        positional = [a for a in meta if a.get_meta(Positional)]
-        named = {a.name: a for a in meta if not a.get_meta(Positional)}
+        for a in AttributeMeta.get(cls):
+            if a.get_meta(Positional):
+                if len(expr) == 0:
+                    raise ValueError(f"Not enough positional arguments in {node_name}")
 
-        print(node_name, positional, named)
-
-        for e in expr[1:]:
-            a = None
-
-            if isinstance(e, Symbol):
-                a = named.get(e.name, None)
-                if a and a.type == bool and a.get_meta(BoolSerialization) in (BoolSerialization.Symbol, None):
-                    attrs[a.name] = True
-                    continue
-
-            if not isinstance(e, list):
-                if len(positional) == 0:
-                    print(e)
-                    raise ValueError(f"Too many positional arguments in {node_name}")
-
-                a = positional[0]
-                del positional[0]
-                attrs[a.name] = e
-                continue
-
-            if isinstance(e[0], Symbol):
-                a = named.get(e[0].name, None)
-
-            if not a:
-                unknown.append(e)
-                continue
-
-            if a.get_meta(BoolSerialization) == BoolSerialization.SymbolInList:
-                attrs[a.name] = True
-                continue
-
-            if a.get_meta(BoolSerialization) == BoolSerialization.YesNo:
-                attrs[a.name] = e[1] == "yes"
-                continue
-
-            if hasattr(a.type, "from_sexpr"):
-                attrs[a.name] = a.type.from_sexpr(e[1:])
+                if hasattr(a.type, "from_sexpr"):
+                    attrs[a.name] = a.type.from_sexpr([expr[0]])
+                else:
+                    attrs[a.name] = expr[0]
+                del expr[0]
+            elif a.type == bool:
+                bool_ser: BoolSerialization = a.get_meta(BoolSerialization) or BoolSerialization.Symbol
+                if bool_ser == BoolSerialization.Symbol:
+                    v = remove_where(expr, lambda e: e == Sym(a.name))
+                    attrs[a.name] = (len(v) > 0)
+                elif bool_ser == BoolSerialization.SymbolInList:
+                    v = remove_where(expr, lambda e: e == [Sym(a.name)])
+                    attrs[a.name] = (len(v) > 0)
+                elif bool_ser == BoolSerialization.YesNo:
+                    v = remove_where(expr, lambda e: isinstance(e, list) and len(e) == 2 and e[0] == Sym(a.name))
+                    attrs[a.name] = (len(v) > 0 and v[0][1] == Sym("yes"))
+                    print(a, bool_ser, v, attrs[a.name])
             else:
-                print(e)
-                attrs[a.name] = e[1]
+                v = remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == Sym(a.name))
+                if len(v) >= 1:
+                    if issubclass(a.type, Node):
+                        attrs[a.name] = a.type.from_sexpr(v[0])
+                    elif hasattr(a.type, "from_sexpr"):
+                        attrs[a.name] = a.type.from_sexpr(v[0][1:])
+                    else:
+                        attrs[a.name] = v[0][1]
+
+                    expr += v[1:]
 
         node = cls(**attrs)
-        node.unknown = unknown or None
+        node.unknown = expr
         return node
 
-    def serialize(self):
-        return sexpr_serialize(self.to_sexpr()[0])
+    def serialize(self, show_unknown=False):
+        return sexpr_serialize(self.to_sexpr()[0], show_unknown=show_unknown)
 
     @classmethod
     def parse(cls, s):
@@ -228,7 +226,10 @@ class Node(ABC):
 class ContainerNode(Node):
     children: Annotated[list[Node], Special]
 
-    def __init__(self, attrs):
+    def __init__(self, attrs=None):
+        if not attrs:
+            attrs = {}
+
         children = attrs.pop("children", None)
         super().__init__(attrs)
 
@@ -240,6 +241,12 @@ class ContainerNode(Node):
 
             for child in children:
                 self.append(child)
+
+    def clone(self):
+        node = super().clone()
+        node.children = []
+        node.extend(c.clone() for c in self.children)
+        return node
 
     def append(self, node):
         if not node:
@@ -260,24 +267,26 @@ class ContainerNode(Node):
 
     @classmethod
     def from_sexpr(cls, expr: SExpr):
-        node = super().from_sexpr(expr)
+        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == Sym(cls.node_name)):
+            raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression")
 
         unknown = []
+        children = []
 
-        for u in node.unknown:
-            if not isinstance(u[0], Symbol):
-                unknown.append(u)
+        for e in expr[1:]:
+            if not isinstance(e[0], Sym):
+                unknown.append(e)
                 continue
 
-            child_type = next((t for t in cls.child_types if t.node_name == u[0].name), None)
+            child_type = next((t for t in cls.child_types if t.node_name == e[0].name), None)
             if not child_type:
-                unknown.append(u)
+                unknown.append(e)
                 continue
 
-            node.append(child_type.from_sexpr(u))
+            children.append(child_type.from_sexpr(e))
 
-        node.unknown = unknown
-
+        node = super().from_sexpr([expr[0], *unknown])
+        node.extend(children)
         return node
 
     def to_sexpr(self):

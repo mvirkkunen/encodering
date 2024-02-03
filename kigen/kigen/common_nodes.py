@@ -89,12 +89,14 @@ class Properties(dict[str, str], Node):
 
     def to_sexpr(self):
         return [
-            [Symbol("property"), k, v]
+            [Sym("property"), k, v]
             for k, v
             in self.items()
         ]
 
 class Font(Node):
+    node_name = "font"
+
     face: Optional[str]
     size: Vec2
     thickness: Optional[float]
@@ -124,17 +126,17 @@ class TextJustify(Flag):
         r = []
 
         if TextJustify.Left in self:
-            r.append(Symbol("left"))
+            r.append(Sym("left"))
         elif TextJustify.Right in self:
-            r.append(Symbol("right"))
+            r.append(Sym("right"))
 
         if TextJustify.Top in self:
-            r.append(Symbol("top"))
+            r.append(Sym("top"))
         elif TextJustify.Bottom in self:
-            r.append(Symbol("bottom"))
+            r.append(Sym("bottom"))
 
         if TextJustify.Mirror in self:
-            r.append(Symbol("mirror"))
+            r.append(Sym("mirror"))
 
         return r
 

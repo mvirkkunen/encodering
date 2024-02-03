@@ -2,6 +2,7 @@ from kigen import *
 from kigen.footprint import *
 from kigen.board import *
 from kigen import symbol as sym
+from kigen import schematic as sch
 
 fp = Footprint("spöörsh", path="", layer=Layer.FCu, at=(2, 2))
 fp.properties["vaca"] = "pollo"
@@ -28,7 +29,7 @@ print(board.serialize())
 
 print(fp.serialize())
 
-lf = sym.SymbolLibFile.parse("""(kicad_symbol_lib (version 20220914) (generator kicad_symbol_editor)
+library: sym.SymbolLibFile = sym.SymbolLibFile.parse("""(kicad_symbol_lib (version 20220914) (generator kicad_symbol_editor)
   (symbol "4P2C" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
     (property "Reference" "J" (at -5.08 8.89 0)
       (effects (font (size 1.27 1.27)) (justify right))
@@ -114,8 +115,29 @@ lf = sym.SymbolLibFile.parse("""(kicad_symbol_lib (version 20220914) (generator 
         (fill (type background))
       )
     )
+    (symbol "4P2C_1_1"
+      (pin passive line (at 10.16 0 180) (length 2.54)
+        (name "~" (effects (font (size 1.27 1.27))))
+        (number "1" (effects (font (size 1.27 1.27))))
+      )
+      (pin passive line (at 10.16 2.54 180) (length 2.54)
+        (name "~" (effects (font (size 1.27 1.27))))
+        (number "2" (effects (font (size 1.27 1.27))))
+      )
+    )
   )
 )""")
 
-print(lf.children)
-print(lf.serialize())
+print(library.serialize())
+
+connector = library.get("4P2C")
+
+test = sch.SchematicFile()
+test.place(
+    connector,
+    "J1",
+    (10, 10, 90),
+)
+
+
+print(test.serialize())

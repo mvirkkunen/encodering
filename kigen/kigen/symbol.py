@@ -20,7 +20,7 @@ class SymbolProperty(Node):
 
     name: Annotated[str, Positional]
     value: Annotated[str, Positional]
-    at: Pos2
+    at: Annotated[Pos2, Transform]
     effects: TextEffects
 
     def __init__(
@@ -32,9 +32,80 @@ class SymbolProperty(Node):
     ):
         super().__init__(locals())
 
-class SSymbol(ContainerNode):
+class PinElectricalType(SymbolEnum):
+    Input = "input"
+    Output = "output"
+    Bidirectional = "bidirectional"
+    TriState = "tri_state"
+    Passive = "passive"
+    Free = "free"
+    Unspecified = "unspecified"
+    PowerIn = "power_in"
+    PowerOut = "power_out"
+    OpenCollector = "open_collector"
+    OpenEmitter = "open_emitter"
+    No_Connect = "no_connect"
+
+class PinGraphicalType(SymbolEnum):
+    Line = "line"
+    Inverted = "inverted"
+    Clock = "clock"
+    InvertedClock = "inverted_clock"
+    InputLow = "input_low"
+    ClockLow = "clock_low"
+    OutputLow = "output_low"
+    EdgeClockHigh = "edge_clock_high"
+    NonLogic = "non_logic"
+
+class PinName(Node):
+    node_name = "name"
+
+    name: Annotated[str, Positional]
+    effects: TextEffects
+
+    def __init__(
+            self,
+            name: str,
+            effects: TextEffects = (),
+    ):
+        super().__init__(locals())
+
+class PinNumber(Node):
+    node_name = "number"
+
+    number: Annotated[str, Positional]
+    effects: TextEffects
+
+    def __init__(
+            self,
+            number: str,
+            effects: TextEffects = (),
+    ):
+        super().__init__(locals())
+
+class Pin(Node):
+    node_name = "pin"
+
+    electrical_type: Annotated[PinElectricalType, Positional]
+    graphical_type: Annotated[PinGraphicalType, Positional]
+    at: Annotated[Pos2, Transform]
+    length: float
+    name: PinName
+    number: PinNumber
+
+    def __init__(
+            self,
+            electrical_type: PinElectricalType,
+            graphical_type: PinGraphicalType,
+            at: Pos2,
+            length: float,
+            name: PinName,
+            number: PinNumber,
+    ):
+        super().__init__(locals())
+
+class LibSymbol(ContainerNode):
     node_name = "symbol"
-    child_types = (SymbolProperty,)
 
     name: Annotated[str, Positional]
     extends: Optional[str]
@@ -55,9 +126,22 @@ class SSymbol(ContainerNode):
         ):
         super().__init__(locals())
 
+    def recursive_pins(self) -> list[Pin]:
+        r = []
+
+        for child in self.children:
+            if isinstance(child, Pin):
+                r.append(child)
+            elif isinstance(child, LibSymbol):
+                r.extend(child.recursive_pins())
+
+        return r
+
+LibSymbol.child_types = (SymbolProperty, Pin, LibSymbol)
+
 class SymbolLibFile(ContainerNode):
     node_name = "kicad_symbol_lib"
-    child_types = (SSymbol,)
+    child_types = (LibSymbol,)
     order_attrs = ("version", "generator")
 
     version: int

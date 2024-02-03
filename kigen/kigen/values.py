@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import overload, Iterable, TypeAlias
 
-from .sexpr import Symbol
+from .sexpr import Sym
 
 ToVec2: TypeAlias = "list[float] | (float, float) | () | Vec2 | Pos2"
 
@@ -174,7 +174,7 @@ class Uuid():
         return self.__value
 
     def to_sexpr(self):
-        return [Symbol(self.value)]
+        return [Sym(self.value)]
 
     @classmethod
     def from_sexpr(cls, e):
@@ -182,7 +182,7 @@ class Uuid():
 
 class SymbolEnum(Enum):
     def to_sexpr(self):
-        return [Symbol(self.value)]
+        return [Sym(self.value)]
 
     @classmethod
     def from_sexpr(cls, e):
@@ -197,7 +197,7 @@ class SymbolEnumUnknownValue:
     value: str
 
     def to_sexpr(self):
-        return [Symbol(self.value)]
+        return [Sym(self.value)]
 
 class Layer:
     FCu = "F.Cu"
