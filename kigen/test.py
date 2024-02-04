@@ -1,35 +1,35 @@
-from kigen import *
-from kigen.footprint import *
-from kigen.board import *
-from kigen import symbol as sym
-from kigen import schematic as sch
+from kigen.values import *
+import kigen.footprint as fp
+import kigen.symbol as sym
+import kigen.schematic as sch
+import kigen.board as pcb
 
-fp = Footprint("spöörsh", path="", layer=Layer.FCu, at=(2, 2))
-fp.properties["vaca"] = "pollo"
-fp.properties["perro"] = "cocodrilo"
+f = fp.Footprint("spöörsh", path="", layer=Layer.FCu, at=(2, 2))
+f.properties["vaca"] = "pollo"
+f.properties["perro"] = "cocodrilo"
 
-fp.append(Line(
+f.append(fp.Line(
     start=(0, 0),
     end=(5, 10),
     layer=Layer.FCu,
     width=1,
 ))
 
-gr = Group(at=Pos2(0, 0, 1), parent=fp)
+xf = fp.Transform(at=Pos2(0, 0, 1), parent=f)
 
-gr.append(Line(
+xf.append(fp.Line(
     start=(5, 10),
     end=(10, 10),
     layer=Layer.FCu,
     width=2,
 ))
 
-board = BoardFile(layers=2)
-print(board.serialize())
+#board = pcb.BoardFile(layers=2)
+#print(board.serialize())
 
-print(fp.serialize())
+#print(fp.serialize())
 
-library: sym.SymbolLibFile = sym.SymbolLibFile.parse("""(kicad_symbol_lib (version 20220914) (generator kicad_symbol_editor)
+library = sym.SymbolLibFile.parse("""(kicad_symbol_lib (version 20220914) (generator kicad_symbol_editor)
   (symbol "4P2C" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
     (property "Reference" "J" (at -5.08 8.89 0)
       (effects (font (size 1.27 1.27)) (justify right))
@@ -136,8 +136,8 @@ test = sch.SchematicFile()
 test.place(
     connector,
     "J1",
-    (10, 10, 90),
+    (11, 12, 90),
 )
 
-
 print(test.serialize())
+print(Pos2((11, 12, 13)))

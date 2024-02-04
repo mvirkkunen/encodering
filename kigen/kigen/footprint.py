@@ -1,21 +1,19 @@
-import math
 from typing import Optional
 
 from .common_nodes import *
 from .values import *
-from .util import reorder_dict
 
 class GraphicsItem(Node):
     pass
 
-class Group(NodeGroup):
+class Transform(BaseTransform):
     pass
 
-Group.child_types = (GraphicsItem, Group)
+Transform.child_types = (GraphicsItem, Transform)
 
 class BaseLine(GraphicsItem):
-    start: Annotated[Vec2, Transform]
-    end: Annotated[Vec2, Transform]
+    start: Annotated[Vec2, TransformMeta]
+    end: Annotated[Vec2, TransformMeta]
     layer: str
     width: float
     locked: bool
@@ -61,7 +59,7 @@ class FootprintType(SymbolEnum):
 class FootprintAttributes(Node):
     node_name = "attr"
 
-    type: Annotated[FootprintType, Positional]
+    type: Annotated[FootprintType, PositionalMeta]
     board_only: bool
     exclude_from_pos_files: bool
     exclude_from_bom: bool
@@ -76,7 +74,7 @@ class FootprintAttributes(Node):
 
 class BaseFootprint(ContainerNode):
     node_name = "footprint"
-    child_types = (GraphicsItem, Group)
+    child_types = (GraphicsItem, Transform)
 
     layer: str
     descr: Optional[str]
@@ -88,9 +86,9 @@ class BaseFootprint(ContainerNode):
         super().__init__(attrs)
 
 class Footprint(BaseFootprint):
-    library_link: Annotated[Optional[str], Positional]
+    library_link: Annotated[Optional[str], PositionalMeta]
     tstamp: Optional[Uuid]
-    at: Annotated[Pos2, Transform]
+    at: Annotated[Pos2, TransformMeta]
     path: str
 
     def __init__(
@@ -110,7 +108,7 @@ class Footprint(BaseFootprint):
 class FootprintFile(BaseFootprint):
     order_attrs = ("version", "generator")
 
-    name: Annotated[str, Positional]
+    name: Annotated[str, PositionalMeta]
     version: int
     generator: Generator
 

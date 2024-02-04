@@ -3,7 +3,7 @@ import uuid
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import overload, Iterable, TypeAlias
+from typing import overload, Iterable, Self, TypeAlias
 
 from .sexpr import Sym
 
@@ -44,7 +44,7 @@ class Vec2:
         return [self.x, self.y]
 
     @classmethod
-    def from_sexpr(cls, e):
+    def from_sexpr(cls, e) -> Self:
         return Vec2(*e)
 
     def rotate(self, angle):
@@ -84,7 +84,9 @@ class Pos2(Vec2):
     def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], Pos2):
             self.__init(args[0], args[0].r)
-        elif len(args) <= 2 and isinstance(args[0], (Vec2, tuple, list)):
+        elif len(args) == 1 and isinstance(args[0], (Vec2, tuple, list)):
+            self.__init(args[0], args[0][2] if len(args[0]) >= 3 else kwargs.get("r", 0))
+        elif len(args) == 2 and isinstance(args[0], (Vec2, tuple, list)):
             self.__init(args[0], args[1] if len(args) == 2 else kwargs.get("r", 0))
         elif len(args) == 0 or len(args) == 2:
             self.__init(args)
@@ -104,7 +106,7 @@ class Pos2(Vec2):
             return [self.x, self.y]
 
     @classmethod
-    def from_sexpr(cls, e):
+    def from_sexpr(cls, e) -> Self:
         return Pos2(*e)
 
     def rotate(self, angle):
@@ -155,7 +157,7 @@ class Rgba:
         return [self.r, self.g, self.b, self.a]
 
     @classmethod
-    def from_sexpr(cls, e):
+    def from_sexpr(cls, e) -> Self:
         return Rgba(*e)
 
 class Uuid():
@@ -177,7 +179,7 @@ class Uuid():
         return [Sym(self.value)]
 
     @classmethod
-    def from_sexpr(cls, e):
+    def from_sexpr(cls, e) -> Self:
         return Uuid(e[0].name)
 
 class SymbolEnum(Enum):
@@ -185,7 +187,7 @@ class SymbolEnum(Enum):
         return [Sym(self.value)]
 
     @classmethod
-    def from_sexpr(cls, e):
+    def from_sexpr(cls, e) -> Self:
         for item in cls:
             if item.value == e[0].name:
                 return item

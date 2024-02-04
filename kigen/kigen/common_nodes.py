@@ -1,5 +1,5 @@
-import math
 from enum import Flag, auto
+from typing import Self
 
 from .node import *
 from .values import *
@@ -11,7 +11,7 @@ class Generator(SymbolEnum):
 KIGEN_VERSION = 20211014
 KIGEN_GENERATOR = Generator.Kigen
 
-class NodeGroup(ContainerNode):
+class BaseTransform(ContainerNode):
     at: Pos2
 
     def __init__(
@@ -21,7 +21,7 @@ class NodeGroup(ContainerNode):
             parent: Node = None):
         super().__init__(locals())
 
-    def to_sexpr(self):
+    def to_sexpr(self) -> Self:
         r = []
         for child in self.children:
             r += child.to_sexpr()
@@ -30,20 +30,7 @@ class NodeGroup(ContainerNode):
     def transform(self, pos: Pos2) -> Pos2:
         pos = Pos2(pos)
         at = super().transform(self.at)
-
-        print(at, self.at, pos.rotate(at.r))
         return at + pos.rotate(at.r)
-        #if at.r != 0:
-            #s = math.sin(at.r / 180 * math.pi)
-            #c = math.cos(at.r / 180 * math.pi)
-
-            #return Pos2(
-            #    at.x + c * pos.x - s * pos.y,
-            #    at.y + s * pos.x + c * pos.y,
-            #    pos.r + at.r,
-            #)
-        #else:
-        #    return Pos2(at.x + pos.x, at.y + pos.y, pos.r)
 
 class PaperSize(SymbolEnum):
     A0 = "A0"
@@ -61,9 +48,9 @@ class PaperSize(SymbolEnum):
 class PageSettings(Node):
     node_name = "paper"
 
-    width: Annotated[Optional[float], Positional]
-    height: Annotated[Optional[float], Positional]
-    paper_size: Annotated[Optional[PaperSize], Positional]
+    width: Annotated[Optional[float], PositionalMeta]
+    height: Annotated[Optional[float], PositionalMeta]
+    paper_size: Annotated[Optional[PaperSize], PositionalMeta]
 
     def __init__(
             self,
@@ -84,7 +71,7 @@ class Properties(dict[str, str], Node):
         super().__init__(init)
 
     @classmethod
-    def from_sexpr(self, e):
+    def from_sexpr(self, e) -> Self:
         return Properties({v[0]: v[1] for v in e})
 
     def to_sexpr(self):
@@ -141,7 +128,7 @@ class TextJustify(Flag):
         return r
 
     @classmethod
-    def from_sexpr(cls, e):
+    def from_sexpr(cls, e) -> Self:
         return TextJustify.Left # TODO
 
 class TextEffects(Node):

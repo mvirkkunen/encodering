@@ -37,9 +37,9 @@ class LabelShape(SymbolEnum):
     Passive = "passive"
 
 class GlobalLabel(Node):
-    name: Annotated[str, Positional]
+    name: Annotated[str, PositionalMeta]
     shape: LabelShape
-    fields_autoplaced: Annotated[bool, BoolSerialization.SymbolInList]
+    fields_autoplaced: Annotated[bool, BoolSerializationMeta.SymbolInList]
     effects: TextEffects
     at: Pos2
     uuid: Uuid
@@ -61,7 +61,7 @@ class GlobalLabel(Node):
 class SchematicSymbolPin(Node):
     node_name = "pin"
 
-    name: Annotated[str, Positional]
+    name: Annotated[str, PositionalMeta]
     uuid: Uuid
 
     def __init__(
@@ -74,7 +74,7 @@ class SchematicSymbolPin(Node):
 class SchematicSymbolInstancePath(Node):
     node_name = "path"
 
-    path: Annotated[str, Positional]
+    path: Annotated[str, PositionalMeta]
     reference: str
     unit: int
 
@@ -89,7 +89,7 @@ class SchematicSymbolInstancePath(Node):
 class SchematicSymbolInstanceProject(Node):
     node_name = "project"
 
-    name: Annotated[str, Positional]
+    name: Annotated[str, PositionalMeta]
     path: SchematicSymbolInstancePath
 
     def __init__(
@@ -109,16 +109,19 @@ class SchematicSymbolInstances(ContainerNode):
         ):
         super().__init__(locals())
 
+class Transform(BaseTransform):
+    pass
+
 class SchematicSymbol(ContainerNode):
-    child_types = (SymbolProperty, SchematicSymbolPin,)
+    child_types = (SymbolProperty, Transform, SchematicSymbolPin,)
     node_name = "symbol"
 
     lib_id: str
-    at: Annotated[Pos2, Transform]
+    at: Annotated[Pos2, TransformMeta]
     unit: int
-    in_bom: Annotated[bool, BoolSerialization.YesNo]
-    on_board: Annotated[bool, BoolSerialization.YesNo]
-    dnp: Annotated[bool, BoolSerialization.YesNo]
+    in_bom: Annotated[bool, BoolSerializationMeta.YesNo]
+    on_board: Annotated[bool, BoolSerializationMeta.YesNo]
+    dnp: Annotated[bool, BoolSerializationMeta.YesNo]
     uuid: Uuid
     instances: SchematicSymbolInstances
 
@@ -136,13 +139,15 @@ class SchematicSymbol(ContainerNode):
         ):
         super().__init__(locals())
 
+Transform.child_types = (SymbolProperty, SchematicSymbol, Transform)
+
 class SchematicLibrarySymbols(ContainerNode):
     node_name = "lib_symbols"
     child_types = (LibSymbol,)
 
 class SchematicFile(ContainerNode):
     node_name = "kicad_sch"
-    child_types = (Junction, NoConnect, GlobalLabel, SchematicSymbol)
+    child_types = (Junction, NoConnect, GlobalLabel, SchematicSymbol, Transform)
     order_attrs = ("version", "generator")
 
     version: int
@@ -165,7 +170,7 @@ class SchematicFile(ContainerNode):
             self,
             symbol: LibSymbol,
             reference: str,
-            at: Vec2,
+            at: Pos2 = None,
             in_bom: bool = None,
             on_board: bool = None,
             dnp: bool = False):
@@ -186,7 +191,14 @@ class SchematicFile(ContainerNode):
                     SchematicSymbolInstancePath(f"/{self.uuid.value}", reference, 1)
                 )
             ),
-            children=[SchematicSymbolPin(pin.number.number) for pin in symbol.recursive_pins()],
+            children=[
+                *(SchematicSymbolPin(pin.number.number) for pin in symbol.recursive_pins()),
+                *(prop.clone() for prop in symbol.children if isinstance(prop, SymbolProperty)),
+            ],
         )
         ssym.unknown = list(symbol.unknown)
+
+        if at:
+            ssym = Transform(at, [ssym])
+
         self.append(ssym)

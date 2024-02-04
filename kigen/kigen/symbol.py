@@ -18,9 +18,9 @@ class PinNames(Node):
 class SymbolProperty(Node):
     node_name = "property"
 
-    name: Annotated[str, Positional]
-    value: Annotated[str, Positional]
-    at: Annotated[Pos2, Transform]
+    name: Annotated[str, PositionalMeta]
+    value: Annotated[str, PositionalMeta]
+    at: Annotated[Pos2, TransformMeta]
     effects: TextEffects
 
     def __init__(
@@ -60,7 +60,7 @@ class PinGraphicalType(SymbolEnum):
 class PinName(Node):
     node_name = "name"
 
-    name: Annotated[str, Positional]
+    name: Annotated[str, PositionalMeta]
     effects: TextEffects
 
     def __init__(
@@ -73,7 +73,7 @@ class PinName(Node):
 class PinNumber(Node):
     node_name = "number"
 
-    number: Annotated[str, Positional]
+    number: Annotated[str, PositionalMeta]
     effects: TextEffects
 
     def __init__(
@@ -86,9 +86,9 @@ class PinNumber(Node):
 class Pin(Node):
     node_name = "pin"
 
-    electrical_type: Annotated[PinElectricalType, Positional]
-    graphical_type: Annotated[PinGraphicalType, Positional]
-    at: Annotated[Pos2, Transform]
+    electrical_type: Annotated[PinElectricalType, PositionalMeta]
+    graphical_type: Annotated[PinGraphicalType, PositionalMeta]
+    at: Annotated[Pos2, TransformMeta]
     length: float
     name: PinName
     number: PinNumber
@@ -107,12 +107,12 @@ class Pin(Node):
 class LibSymbol(ContainerNode):
     node_name = "symbol"
 
-    name: Annotated[str, Positional]
+    name: Annotated[str, PositionalMeta]
     extends: Optional[str]
     pin_numbers: Optional[PinNumberVisibility]
     pin_names: Optional[PinNames]
-    in_bom: Annotated[bool, BoolSerialization.YesNo]
-    on_board: Annotated[bool, BoolSerialization.YesNo]
+    in_bom: Annotated[bool, BoolSerializationMeta.YesNo]
+    on_board: Annotated[bool, BoolSerializationMeta.YesNo]
     unit_name: Optional[str]
 
     def __init__(
@@ -121,8 +121,8 @@ class LibSymbol(ContainerNode):
             extends: Optional[str] = None,
             pin_numbers: Optional[PinNumberVisibility] = None,
             pin_names: Optional[PinNames] = None,
-            in_bom: BoolSerialization.YesNo = True,
-            on_board: BoolSerialization.YesNo = True,
+            in_bom: BoolSerializationMeta.YesNo = True,
+            on_board: BoolSerializationMeta.YesNo = True,
         ):
         super().__init__(locals())
 
