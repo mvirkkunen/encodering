@@ -49,16 +49,16 @@ class Attr:
     name: str
     value_type: type
     optional: bool
-    metadata: dict[type[Meta], Meta | type[Meta]]
+    meta: dict[type[Meta], Meta | type[Meta]]
 
-    def __init__(self, name: str, value_type: type, optional: bool, metadata: list[Meta | type[Meta]]) -> None:
+    def __init__(self, name: str, value_type: type, optional: bool, meta: dict[type[Meta], Meta | type[Meta]]) -> None:
         self.name = name
         self.value_type = value_type
         self.optional = optional
-        self.metadata = metadata
+        self.meta = meta
 
     def get_meta(self, type: type[Meta]) -> Optional[Meta | type[Meta]]:
-        return self.metadata.get(type, None)
+        return self.meta.get(type, None)
 
     @staticmethod
     @cache
@@ -101,7 +101,7 @@ class Attr:
         return r
 
     def __repr__(self) -> str:
-        return f"Attr('{self.name}', {self.value_type}, {self.optional}, {self.metadata})"
+        return f"Attr('{self.name}', {self.value_type}, {self.optional}, {self.meta})"
 
 class Node(ABC):
     """
@@ -180,7 +180,9 @@ class Node(ABC):
         node.__parent = None
         return node
 
-    def closest(self, node_type: "type[Node]") -> "Optional[Node]":
+    _T = TypeVar("_T", bound="Node")
+
+    def closest(self, node_type: "type[_T]") -> "Optional[_T]":
         """
         Finds the closest parent of the specified type up the node tree, or the node itself if the node itself is the specified type.
         """

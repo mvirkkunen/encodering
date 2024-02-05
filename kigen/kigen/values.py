@@ -149,7 +149,7 @@ class Pos2:
         return Pos2(self.x + v.x, self.y + v.y, v.r)
 
     def __sub__(self, other: "ToPos2") -> "Pos2":
-        return self + (-other)
+        return self + (-Pos2(other))
 
     def __neg__(self) -> "Pos2":
         return Pos2(-self.x, -self.y, -self.r)

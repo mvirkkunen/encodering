@@ -132,7 +132,7 @@ class SchematicSymbolInstances(ContainerNode):
 
     def __init__(
             self,
-            children: list[SchematicSymbolInstanceProject] = None,
+            children: Optional[list[SchematicSymbolInstanceProject]] = None,
         ):
         super().__init__(locals())
 
@@ -165,7 +165,7 @@ class SchematicSymbol(ContainerNode):
             dnp: bool = False,
             uuid: Uuid = NEW_INSTANCE,
             instances: SchematicSymbolInstances = NEW_INSTANCE,
-            children: list[(symbol.Property | SchematicSymbolPin)] = None,
+            children: Optional[list[symbol.Property | SchematicSymbolPin]] = None,
         ):
         super().__init__(locals())
 
@@ -183,7 +183,7 @@ class SchematicSymbol(ContainerNode):
         if not schematic_file:
             raise RuntimeError("Cannot get pin position because there is no parent schematic")
 
-        lib_sym: symbol.Symbol = schematic_file.lib_symbols.get(self.lib_id)
+        lib_sym = schematic_file.lib_symbols.get(self.lib_id)
         if not lib_sym:
             raise RuntimeError(f"Could not find library symbol '{self.lib_id}' in schematic")
 
@@ -204,7 +204,7 @@ class SchematicLibSymbols(ContainerNode):
     node_name = "lib_symbols"
     child_types = (symbol.Symbol,)
 
-    def get(self, name) -> Optional[symbol.Symbol]:
+    def get(self, name: str) -> Optional[symbol.Symbol]:
         """
         Gets a symbol by name.
         """
@@ -224,7 +224,7 @@ class SchematicFile(ContainerNode):
     def __init__(
         self,
         uuid: Uuid = NEW_INSTANCE,
-        page: PageSettings = None,
+        page: Optional[PageSettings] = None,
         lib_symbols: SchematicLibSymbols = NEW_INSTANCE,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
@@ -250,7 +250,7 @@ class SchematicFile(ContainerNode):
             raise RuntimeError("The parent SymbolLibFile does not have a filename")
 
         lib_id = f"{lib_file.filename}:{sym.name}"
-        if not self.lib_symbols.find_one(symbol.Symbol, lambda s: s.lib_id == lib_id):
+        if not self.lib_symbols.find_one(symbol.Symbol, lambda s: s.name == lib_id):
             lsym = sym.clone()
             lsym.name = lib_id
             self.lib_symbols.append(lsym)
@@ -262,8 +262,8 @@ class SchematicFile(ContainerNode):
             sym: symbol.Symbol,
             reference: str,
             at: Pos2,
-            in_bom: bool = None,
-            on_board: bool = None,
+            in_bom: Optional[bool] = None,
+            on_board: Optional[bool] = None,
             dnp: bool = False
     ) -> SchematicSymbol:
         """
@@ -287,12 +287,12 @@ class SchematicFile(ContainerNode):
             in_bom=sym.in_bom if in_bom is None else in_bom,
             on_board=sym.on_board if on_board is None else on_board,
             dnp=dnp,
-            instances=SchematicSymbolInstances(
+            instances=SchematicSymbolInstances([
                 SchematicSymbolInstanceProject(
                     "project",
                     SchematicSymbolInstancePath(f"/{self.uuid.value}", reference, 1)
                 )
-            ),
+            ]),
         )
         ssym.unknown = copy.copy(sym.unknown)
 
@@ -308,7 +308,7 @@ class SchematicFile(ContainerNode):
 
         return ssym
 
-    def save(self, path):
+    def save(self, path: str) -> None:
         data = self.serialize()
         with open(path, "w") as f:
             f.write(data)
