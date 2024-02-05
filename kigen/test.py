@@ -7,8 +7,8 @@ import kigen.schematic as sch
 import kigen.board as pcb
 
 f = fp.Footprint("spöörsh", path="", layer=Layer.FCu, at=(2, 2))
-f.properties["vaca"] = "pollo"
-f.properties["perro"] = "cocodrilo"
+#f.properties["vaca"] = "pollo"
+#f.properties["perro"] = "cocodrilo"
 
 f.append(fp.Line(
     start=(0, 0),
@@ -37,7 +37,7 @@ connector = connectors.get("Conn_01x04_Pin")
 
 #print(connectors.serialize())
 
-schematic = sch.SchematicFile()
+schematic = sch.SchematicFile(page=sch.PageSettings(paper_size=sch.PaperSize.A4))
 
 conn = schematic.place_symbol(
     connector,

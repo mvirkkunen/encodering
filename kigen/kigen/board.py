@@ -147,7 +147,8 @@ class TrackSegment(Node):
             width: float,
             layer: str,
             net: int,
-            tstamp: Uuid = ()):
+            tstamp: Uuid = NEW_INSTANCE
+    ):
         super().__init__(locals())
 
 
@@ -164,10 +165,10 @@ class BoardFile(ContainerNode):
 
     def __init__(
         self,
-        layers: int | list[BoardLayer] = 2,
-        general: BoardGeneralSettings = BoardGeneralSettings(thickness=1.6),
-        page: PageSettings = PageSettings(PaperSize.A4),
-        setup: BoardSetup = BoardSetup(),
+        layers: list[BoardLayer],
+        general: BoardGeneralSettings,
+        page: PageSettings,
+        setup: BoardSetup,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
     ):
@@ -177,3 +178,22 @@ class BoardFile(ContainerNode):
         layers = BoardLayers(layers)
 
         super().__init__(locals())
+
+    @staticmethod
+    def create(
+        layers: int | list[BoardLayer] = 2,
+        general: Optional[BoardGeneralSettings] = None,
+        page: Optional[PageSettings] = None,
+        setup: Optional[BoardSetup] = None,
+    ):
+        if not isinstance(layers, list):
+            layers = BoardLayer.generate_layers(layers)
+
+        layers = BoardLayers(layers)
+
+        return BoardFile(
+            layers=BoardLayers(layers),
+            general=general or BoardGeneralSettings(),
+            page=page or PageSettings(PaperSize.A4),
+            setup=setup or BoardSetup()
+        )

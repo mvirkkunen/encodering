@@ -1,5 +1,5 @@
 from .common import *
-from .symbol import Symbol, Property, SymbolLibrary
+from . import symbol
 
 class Junction(Node):
     node_name = "junction"
@@ -13,8 +13,9 @@ class Junction(Node):
             self,
             at: Vec2,
             diameter: float = 0,
-            color: Rgba = Rgba(),
-            uuid: Uuid = ()):
+            color: Rgba = NEW_INSTANCE,
+            uuid: Uuid = NEW_INSTANCE
+    ):
         super().__init__(locals())
 
 class NoConnect(Node):
@@ -26,7 +27,8 @@ class NoConnect(Node):
     def __init__(
             self,
             at: Vec2,
-            uuid: Uuid = ()):
+            uuid: Uuid = NEW_INSTANCE
+    ):
         super().__init__(locals())
 
 class LabelShape(SymbolEnum):
@@ -53,8 +55,8 @@ class GlobalLabel(Node):
             at: Pos2,
             shape: LabelShape = LabelShape.Input,
             fields_autoplaced: bool = True,
-            effects: TextEffects = TextEffects(),
-            uuid: Uuid = (),
+            effects: TextEffects = NEW_INSTANCE,
+            uuid: Uuid = NEW_INSTANCE,
             properties: ToProperties = {},
     ):
         super().__init__(locals())
@@ -66,9 +68,9 @@ class BaseWire(Node):
 
     def __init__(
             self,
-            pts: "CoordinatePointList | Iterable[ToVec2 | CoordinatePoint]" = (),
-            stroke: StrokeDefinition = (),
-            uuid: Uuid = (),
+            pts: "CoordinatePointList | Iterable[ToVec2 | CoordinatePoint]" = NEW_INSTANCE,
+            stroke: StrokeDefinition = NEW_INSTANCE,
+            uuid: Uuid = NEW_INSTANCE,
     ):
         super().__init__(locals())
 
@@ -87,7 +89,7 @@ class SchematicSymbolPin(Node):
     def __init__(
             self,
             number: str,
-            uuid: Uuid = ()
+            uuid: Uuid = NEW_INSTANCE
         ):
         super().__init__(locals())
 
@@ -115,7 +117,7 @@ class SchematicSymbolInstanceProject(Node):
     def __init__(
             self,
             name: str,
-            path: SchematicSymbolInstancePath = (),
+            path: SchematicSymbolInstancePath = NEW_INSTANCE,
         ):
         super().__init__(locals())
 
@@ -135,8 +137,8 @@ class Transform(BaseTransform):
 class Rotate(BaseRotate):
     pass
 
-class SchematicSymbol(TransformMixin, ContainerNode):
-    child_types = (Property, Transform, SchematicSymbolPin,)
+class SchematicSymbol(ContainerNode):
+    child_types = (symbol.Property, Transform, SchematicSymbolPin)
     node_name = "symbol"
 
     lib_id: str
@@ -156,9 +158,9 @@ class SchematicSymbol(TransformMixin, ContainerNode):
             in_bom: bool = True,
             on_board: bool = True,
             dnp: bool = False,
-            uuid: Uuid = (),
-            instances: SchematicSymbolInstances = (),
-            children: list[(Property | SchematicSymbolPin)] = (),
+            uuid: Uuid = NEW_INSTANCE,
+            instances: SchematicSymbolInstances = NEW_INSTANCE,
+            children: list[(symbol.Property | SchematicSymbolPin)] = None,
         ):
         super().__init__(locals())
 
@@ -167,26 +169,32 @@ class SchematicSymbol(TransformMixin, ContainerNode):
         if not schematic_file:
             raise RuntimeError("Cannot get pin position because there is no parent schematic")
 
-        lib_sym: Symbol = schematic_file.lib_symbols.find_one(Symbol, lambda c: c.name == self.lib_id)
+        lib_sym: symbol.Symbol = schematic_file.lib_symbols.get(self.lib_id)
         if not lib_sym:
             raise RuntimeError(f"Could not find library symbol '{self.lib_id}' in schematic")
 
         pin = next((p for p in lib_sym.all_pins() if p.number.number == number), None)
         if not pin:
-            raise RuntimeError(f"Symbol does not have a pin called '{number}'")
+            raise RuntimeError(f"Symbol does not have a pin with number '{number}'")
 
-        return self.transform(pin.at.flip_y())
+        return self.transform(Transform(self.at).transform(pin.at.flip_y()))
 
     @property
     def pins(self) -> Iterable[SchematicSymbolPin]:
         return self.find_all(SchematicSymbolPin)
 
-Transform.child_types = (Property, SchematicSymbol, Transform, Rotate)
-Rotate.child_types = (Property, SchematicSymbol, Transform, Rotate)
+Transform.child_types = (symbol.Property, SchematicSymbol, Transform, Rotate)
+Rotate.child_types = (symbol.Property, SchematicSymbol, Transform, Rotate)
 
 class SchematicLibrarySymbols(ContainerNode):
     node_name = "lib_symbols"
-    child_types = (Symbol,)
+    child_types = (symbol.Symbol,)
+
+    def get(self, name) -> Optional[symbol.Symbol]:
+        """
+        Gets a symbol by name.
+        """
+        return self.find_one(symbol.Symbol, lambda c: c.name == name)
 
 class SchematicFile(ContainerNode):
     node_name = "kicad_sch"
@@ -201,40 +209,63 @@ class SchematicFile(ContainerNode):
 
     def __init__(
         self,
-        uuid: Uuid = (),
-        page: PageSettings = PageSettings(PaperSize.A4),
-        lib_symbols: SchematicLibrarySymbols = (),
+        uuid: Uuid = NEW_INSTANCE,
+        page: PageSettings = NEW_INSTANCE,
+        lib_symbols: SchematicLibrarySymbols = NEW_INSTANCE,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
     ):
         super().__init__(locals())
 
-    def place_symbol(
+    def import_symbol(
             self,
-            symbol: Symbol,
-            reference: str,
-            at: Pos2 = None,
-            in_bom: bool = None,
-            on_board: bool = None,
-            dnp: bool = False
-    ):
+            sym: symbol.Symbol,
+    ) -> str:
+        """
+        Imports a symbol into lib_symbols and returns the lib_id. If the symbol has already been imported, this does nothing.
+        """
 
-        lib_file = symbol.closest(SymbolLibrary)
+        lib_file = sym.closest(symbol.SymbolLibrary)
         if not lib_file:
             raise RuntimeError("Only LibSymbols that are part of a SymbolLibFile can be imported")
 
-        lib_id = f"{lib_file.filename}:{symbol.name}"
-        if not self.lib_symbols.find_one(Symbol, lambda s: s.lib_id == lib_id):
-            lsym = symbol.clone()
+        lib_id = f"{lib_file.filename}:{sym.name}"
+        if not self.lib_symbols.find_one(symbol.Symbol, lambda s: s.lib_id == lib_id):
+            lsym = sym.clone()
             lsym.name = lib_id
             self.lib_symbols.append(lsym)
+
+        return lib_id
+
+    def place_symbol(
+            self,
+            sym: symbol.Symbol,
+            reference: str,
+            at: Pos2,
+            in_bom: bool = None,
+            on_board: bool = None,
+            dnp: bool = False
+    ) -> SchematicSymbol:
+        """
+        Places a library symbol onto the schematic. If the symbol has not already been imported, it is automatically imported into lib_symbols.
+
+        :param symbol: The library symbol to place.
+        :param reference: Reference designator for the symbol.
+        :param at: Position and rotation angle for the symbol.
+        :param in_bom: True is the part should be included in the BOM. By default, inherited from the library symbol.
+        :param on_board: True is the part should be placed onto the PCB. By default, inherited from the library symbol.
+        :param dnp: True to set Do Not Place for the part.
+        :returns: a SchematicSymbol instance
+        """
+
+        lib_id = self.import_symbol(sym)
 
         ssym = SchematicSymbol(
             lib_id=lib_id,
             at=at,
             unit=1,
-            in_bom=in_bom or symbol.in_bom,
-            on_board=on_board or symbol.on_board,
+            in_bom=sym.in_bom if in_bom is None else in_bom,
+            on_board=sym.on_board if on_board is None else on_board,
             dnp=dnp,
             instances=SchematicSymbolInstances(
                 SchematicSymbolInstanceProject(
@@ -243,14 +274,14 @@ class SchematicFile(ContainerNode):
                 )
             ),
         )
-        ssym.unknown = list(symbol.unknown)
+        ssym.unknown = list(sym.unknown)
 
-        for pin in symbol.all_pins():
+        for pin in sym.all_pins():
             ssym.append(SchematicSymbolPin(pin.number.number))
 
-        for prop in symbol.find_all(Property):
+        for prop in sym.find_all(symbol.Property):
             sprop = prop.clone()
-            sprop.at = sprop.at.flip_y()
+            sprop.at = Transform(at).transform(sprop.at.flip_y())
             ssym.append(sprop)
 
         self.append(ssym)

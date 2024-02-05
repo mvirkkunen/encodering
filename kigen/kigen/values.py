@@ -3,11 +3,11 @@ import uuid
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import overload, Iterable, Self, TypeAlias
+from typing import overload, Any, Iterable, Optional, Tuple, TypeAlias
 
 from . import sexpr
 
-ToVec2: TypeAlias = "list[float] | (float, float) | () | Vec2 | Pos2"
+ToVec2: TypeAlias = "list[float] | Tuple[float, float] | Tuple[()] | Vec2 | Pos2"
 
 @dataclass(frozen=True)
 class Vec2:
@@ -15,39 +15,39 @@ class Vec2:
     y: float
 
     @overload
-    def __init__(self): ...
+    def __init__(self) -> None: ...
 
     @overload
-    def __init__(self, x: float, y: float): ...
+    def __init__(self, x: float, y: float) -> None: ...
 
     @overload
-    def __init__(self, xy: ToVec2): ...
+    def __init__(self, xy: ToVec2) -> None: ...
 
-    def __init__(self, *args):
-        if len(args) == 0 or (isinstance(args[0], Iterable) and len(args[0]) == 0):
+    def __init__(self, *arg: Any) -> None:
+        if len(arg) == 0 or (isinstance(arg[0], (list, tuple)) and len(arg[0]) == 0):
             self.__init(0, 0)
-        elif len(args) == 1:
-            if isinstance(args[0], Iterable):
-                self.__init(*args[0][:2])
+        elif len(arg) == 1:
+            if isinstance(arg[0], (list, tuple)):
+                self.__init(*arg[0][:2])
             else:
-                self.__init(args[0].x, args[0].y)
-        elif len(args) == 2:
-            self.__init(*args)
+                self.__init(arg[0].x, arg[0].y)
+        elif len(arg) == 2:
+            self.__init(*arg)
         else:
-            raise ValueError(f"Invalid arguments for Vec2(): {args}")
+            raise ValueError(f"Invalid arguments for Vec2(): {arg}")
 
-    def __init(self, x: float, y: float):
+    def __init(self, x: float, y: float) -> None:
         object.__setattr__(self, "x", x)
         object.__setattr__(self, "y", y)
 
-    def to_sexpr(self):
+    def to_sexpr(self) -> sexpr.SExpr:
         return [self.x, self.y]
 
     @classmethod
-    def from_sexpr(cls, e) -> Self:
+    def from_sexpr(cls, e: sexpr.SExpr) -> "Vec2":
         return Vec2(*e)
 
-    def rotate(self, angle) -> Self:
+    def rotate(self, angle: float) -> "Vec2":
         if angle == 0:
             return self
 
@@ -59,12 +59,9 @@ class Vec2:
             s * self.x + c * self.y,
         )
 
-    def __add__(self, other) -> Self:
+    def __add__(self, other: "Vec2") -> "Vec2":
         other = Vec2(other)
         return Vec2(self.x + other.x, self.y + other.y)
-
-    def __mul__(self, other) -> Self:
-        return Vec2(self.x * other, self.y * other)
 
 ToPos2: TypeAlias = "Pos2 | ToVec2"
 
@@ -73,15 +70,15 @@ class Pos2(Vec2):
     r: float
 
     @overload
-    def __init__(self): ...
+    def __init__(self) -> None:...
 
     @overload
-    def __init__(self, x: float, y: float, r: float = 0): ...
+    def __init__(self, x: float, y: float, r: float = 0) -> None: ...
 
     @overload
-    def __init__(self, xy: ToVec2, r: float = 0): ...
+    def __init__(self, xy: ToVec2, r: float = 0) -> None: ...
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         if len(args) == 1 and isinstance(args[0], Pos2):
             self.__init(args[0], args[0].r)
         elif len(args) == 1 and isinstance(args[0], Vec2):
@@ -97,30 +94,30 @@ class Pos2(Vec2):
         else:
             raise ValueError(f"Invalid arguments for Pos2(): {args}")
 
-    def __init(self, super_init: ToVec2 = (), r: float = 0):
+    def __init(self, super_init: ToVec2 = (), r: float = 0) -> None:
         super().__init__(super_init)
         object.__setattr__(self, "r", r)
 
-    def to_sexpr(self):
+    def to_sexpr(self) -> sexpr.SExpr:
         return [self.x, self.y, self.r]
 
     @classmethod
-    def from_sexpr(cls, e: sexpr.SExpr) -> Self:
+    def from_sexpr(cls, e: sexpr.SExpr) -> "Pos2":
         return Pos2(*e)
 
-    def rotate(self, angle: float) -> Self:
+    def rotate(self, angle: float) -> "Pos2":
         if angle == 0:
             return self
 
         return Pos2(Vec2(self).rotate(angle), self.r + angle)
 
-    def set_rotation(self, r: float) -> Self:
+    def set_rotation(self, r: float) -> "Pos2":
         return Pos2(self.x, self.y, r)
 
-    def flip_y(self) -> Self:
+    def flip_y(self) -> "Pos2":
         return Pos2(self.x, -self.y, self.r)
 
-    def __add__(self, other: Self) -> Self:
+    def __add__(self, other: "Pos2") -> "Pos2":
         other = Pos2(other).rotate(self.r)
 
         return Pos2(self.x + other.x, self.y + other.y, other.r)
@@ -133,15 +130,15 @@ class Rgba:
     a: float
 
     @overload
-    def __init__(self): ...
+    def __init__(self) -> None: ...
 
     @overload
-    def __init__(self, r: float, g: float, b: float, a: float): ...
+    def __init__(self, r: float, g: float, b: float, a: float) -> None: ...
 
     @overload
-    def __init__(self, rgba: ToVec2): ...
+    def __init__(self, rgba: ToVec2) -> None: ...
 
-    def __init__(self, *args):
+    def __init__(self, *args: Any) -> None:
         if len(args) == 0:
             self.__init(0, 0, 0, 0)
         elif len(args) == 1 and isinstance(args[0], Rgba):
@@ -153,23 +150,25 @@ class Rgba:
         else:
             raise ValueError("Invalid arguments for Rgba()")
 
-    def __init(self, r: float, g: float, b: float, a: float):
+    def __init(self, r: float, g: float, b: float, a: float) -> None:
         object.__setattr__(self, "r", r)
-        object.__setattr__(self, "g", r)
-        object.__setattr__(self, "b", r)
-        object.__setattr__(self, "a", r)
+        object.__setattr__(self, "g", g)
+        object.__setattr__(self, "b", b)
+        object.__setattr__(self, "a", a)
 
-    def to_sexpr(self):
+    def to_sexpr(self) -> sexpr.SExpr:
         return [self.r, self.g, self.b, self.a]
 
     @classmethod
-    def from_sexpr(cls, e) -> Self:
-        return Rgba(*e)
+    def from_sexpr(cls, expr: sexpr.SExpr) -> "Rgba":
+        assert isinstance(expr, list) and all(isinstance(e, float) or isinstance(e, int) for e in expr)
+
+        return Rgba(*expr)
 
 class Uuid():
     __value: str
 
-    def __init__(self, value: "str | Uuid" = None):
+    def __init__(self, value: "Optional[str | Uuid]" = None):
         if not value:
             self.__value = str(uuid.uuid4())
         elif isinstance(value, Uuid):
@@ -178,33 +177,37 @@ class Uuid():
             self.__value = value
 
     @property
-    def value(self):
+    def value(self) -> str:
         return self.__value
 
-    def to_sexpr(self):
+    def to_sexpr(self) -> sexpr.SExpr:
         return [sexpr.Sym(self.value)]
 
     @classmethod
-    def from_sexpr(cls, e) -> Self:
-        return Uuid(e[0].name)
+    def from_sexpr(cls, expr: sexpr.SExpr) -> "Uuid":
+        assert isinstance(expr, list) and isinstance(expr[0], sexpr.Sym)
+
+        return Uuid(expr[0].name)
 
 class SymbolEnum(Enum):
-    def to_sexpr(self):
+    def to_sexpr(self) -> sexpr.SExpr:
         return [sexpr.Sym(self.value)]
 
     @classmethod
-    def from_sexpr(cls, e) -> Self:
+    def from_sexpr(cls, expr: sexpr.SExpr) -> "SymbolEnum | SymbolEnumUnknownValue":
+        assert isinstance(expr, list) and isinstance(expr[0], sexpr.Sym)
+
         for item in cls:
-            if item.value == e[0].name:
+            if item.value == expr[0].name:
                 return item
 
-        return SymbolEnumUnknownValue(e[0].name)
+        return SymbolEnumUnknownValue(expr[0].name)
 
 @dataclass(frozen=True)
 class SymbolEnumUnknownValue:
     value: str
 
-    def to_sexpr(self):
+    def to_sexpr(self) -> sexpr.SExpr:
         return [sexpr.Sym(self.value)]
 
 class Layer:

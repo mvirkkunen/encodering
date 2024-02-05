@@ -101,7 +101,7 @@ class Footprint(BaseFootprint):
         tags: str = None,
         properties: ToProperties = {},
         attr: FootprintAttributes = None,
-        tstamp: Uuid = (),
+        tstamp: Uuid = NEW_INSTANCE,
     ):
         super().__init__(locals())
 

@@ -16,7 +16,7 @@ class Property(Node):
             name: str,
             value: str,
             at: Pos2,
-            effects: TextEffects = TextEffects(),
+            effects: TextEffects = NEW_INSTANCE,
     ):
         """
         :param name: The name of the property. Must be unique within symbol.
@@ -54,8 +54,8 @@ class Arc(Node):
             start: Vec2,
             mid: Vec2,
             end: Vec2,
-            stroke: StrokeDefinition = (),
-            fill: FillDefinition = (),
+            stroke: StrokeDefinition = NEW_INSTANCE,
+            fill: FillDefinition = NEW_INSTANCE,
     ):
         """
         :param start: Start point of the arc.
@@ -78,8 +78,8 @@ class Circle(Node):
             self,
             center: Vec2,
             radius: float,
-            stroke: StrokeDefinition = (),
-            fill: FillDefinition = (),
+            stroke: StrokeDefinition = NEW_INSTANCE,
+            fill: FillDefinition = NEW_INSTANCE,
     ):
         """
         :param center: Center point of the circle.
@@ -99,9 +99,9 @@ class Bezier(Node):
 
     def __init__(
             self,
-            pts: CoordinatePointList = (),
-            stroke: StrokeDefinition = (),
-            fill: FillDefinition = (),
+            pts: CoordinatePointList = NEW_INSTANCE,
+            stroke: StrokeDefinition = NEW_INSTANCE,
+            fill: FillDefinition = NEW_INSTANCE,
     ):
         """
         :param pts: Points that define the cubic bezier curve. Exactly 4 must be defined before serialization.
@@ -126,9 +126,9 @@ class PolyLine(Node):
 
     def __init__(
             self,
-            pts: CoordinatePointList = (),
-            stroke: StrokeDefinition = (),
-            fill: FillDefinition = (),
+            pts: CoordinatePointList = NEW_INSTANCE,
+            stroke: StrokeDefinition = NEW_INSTANCE,
+            fill: FillDefinition = NEW_INSTANCE,
     ):
         """
         :param pts: Points that define the polyline. At least 2 must be defined before serialization.
@@ -156,8 +156,8 @@ class Rectangle(Node):
             self,
             start: Vec2,
             end: Vec2,
-            stroke: StrokeDefinition = (),
-            fill: FillDefinition = (),
+            stroke: StrokeDefinition = NEW_INSTANCE,
+            fill: FillDefinition = NEW_INSTANCE,
     ):
         """
         :param start: Start (e.g. top left) point of the rectangle.
@@ -179,7 +179,7 @@ class Text(Node):
             self,
             text: str,
             at: Vec2,
-            effects: TextEffects = (),
+            effects: TextEffects = NEW_INSTANCE,
     ):
         """
         :param text: Text to display.
@@ -198,7 +198,7 @@ class PinName(Node):
     def __init__(
             self,
             name: str,
-            effects: TextEffects = (),
+            effects: TextEffects = NEW_INSTANCE,
     ):
         """
         :param name: Name of the pin.
@@ -216,7 +216,7 @@ class PinNumber(Node):
     def __init__(
             self,
             number: str,
-            effects: TextEffects = (),
+            effects: TextEffects = NEW_INSTANCE,
     ):
         """
         :param number: Number of the pin.
@@ -363,7 +363,7 @@ class Symbol(BaseSymbol):
             pin_names: Optional[PinNames] = None,
             in_bom: Attr.Bool.YesNo = None,
             on_board: Attr.Bool.YesNo = None,
-        ):
+    ):
         """
         :param name: Name of the symbol.
         :param extends: If defined, this symbol extends another symbol.

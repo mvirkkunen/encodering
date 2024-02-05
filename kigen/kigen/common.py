@@ -1,7 +1,7 @@
 from enum import Flag, auto
 from typing import Annotated, Iterable, Optional, Self
 
-import sexpr
+from . import sexpr
 from .node import *
 from .values import *
 
@@ -14,27 +14,26 @@ class Generator(SymbolEnum):
 KIGEN_VERSION = 20230121
 KIGEN_GENERATOR = Generator.Kigen
 
-class TransformMixin:
-    at: Pos2
-
-    def transform(self, pos: Pos2) -> Pos2:
-        pos = Pos2(pos)
-        at = super().transform(self.at)
-        return at + pos.rotate(at.r)
-
-class BaseTransform(ContainerNode, TransformMixin):
+class BaseTransform(ContainerNode):
     node_name = None
+
+    at: Pos2
 
     def __init__(
             self,
             at: Pos2,
-            children: list[Node] = None,
-            parent: Node = None):
+            children: Optional[list[Node]] = None,
+            parent: Optional[Node] = None):
         super().__init__(locals())
 
-    def to_sexpr(self) -> Self:
-        r = []
-        for child in self:
+    def transform(self, pos: ToPos2) -> Pos2:
+        pos = Pos2(pos)
+        at = super().transform(self.at)
+        return at + pos.rotate(at.r)
+
+    def to_sexpr(self) -> list[list[sexpr.SExpr]]:
+        r: list[list[sexpr.SExpr]] = []
+        for child in iter(self):
             r += child.to_sexpr()
         return r
 
@@ -46,18 +45,18 @@ class BaseRotate(ContainerNode):
     def __init__(
             self,
             angle: float,
-            children: list[Node] = None,
-            parent: Node = None):
+            children: Optional[list[Node]] = None,
+            parent: Optional[Node] = None):
         super().__init__(locals())
 
-    def to_sexpr(self) -> Self:
-        r = []
-        for child in self:
+    def transform(self, pos: ToPos2) -> Pos2:
+        return Pos2(pos).rotate(self.angle)
+
+    def to_sexpr(self) -> list[list[sexpr.SExpr]]:
+        r: list[list[sexpr.SExpr]] = []
+        for child in iter(self):
             r += child.to_sexpr()
         return r
-
-    def transform(self, pos: Pos2) -> Pos2:
-        return pos.rotate(self.angle)
 
 class PaperSize(SymbolEnum):
     A0 = "A0"
@@ -81,15 +80,17 @@ class PageSettings(Node):
 
     def __init__(
             self,
-            paper_size: PaperSize = None,
-            width: float = None,
-            height: float = None):
-        if not (
-                (width is not None and height is not None and paper_size is None)
-                or (width is None and height is None and paper_size is not None)):
-            raise ValueError("PageSettings must define either width and height, or paper_size, but not both.")
-
+            paper_size: Optional[PaperSize] = None,
+            width: Optional[float] = None,
+            height: Optional[float] = None
+    ):
         super().__init__(locals())
+
+    def validate(self):
+        if not (
+                (self.width is not None and self.height is not None and self.paper_size is None)
+                or (self.width is None and self.height is None and self.paper_size is not None)):
+            raise ValueError("PageSettings must define either width and height, or paper_size, but not both.")
 
 ToProperties: TypeAlias = "Properties | dict[str, str]"
 
@@ -98,10 +99,17 @@ class Properties(dict[str, str], Node):
         super().__init__(init)
 
     @classmethod
-    def from_sexpr(self, e) -> Self:
-        return Properties({v[0]: v[1] for v in e})
+    def from_sexpr(self, expr: sexpr.SExpr) -> "Properties":
+        assert isinstance(expr, list)
 
-    def to_sexpr(self):
+        r: dict[str, str] = {}
+        for e in expr:
+            assert isinstance(e, list) and isinstance(e[0], str) and isinstance(e[1], str)
+            r[e[0]] = e[1]
+
+        return Properties(r)
+
+    def to_sexpr(self) -> list[list[sexpr.SExpr]]:
         return [
             [sexpr.Sym("property"), k, v]
             for k, v
@@ -136,8 +144,8 @@ class TextJustify(Flag):
     Bottom = auto()
     Mirror = auto()
 
-    def to_sexpr(self):
-        r = []
+    def to_sexpr(self) -> list[sexpr.SExpr]:
+        r: list[sexpr.SExpr] = []
 
         if TextJustify.Left in self:
             r.append(sexpr.Sym("left"))
@@ -155,7 +163,7 @@ class TextJustify(Flag):
         return r
 
     @classmethod
-    def from_sexpr(cls, e) -> Self:
+    def from_sexpr(cls, expr: sexpr.SExpr) -> "TextJustify":
         return TextJustify.Left # TODO
 
 class TextEffects(Node):
@@ -167,7 +175,7 @@ class TextEffects(Node):
 
     def __init__(
             self,
-            font: Font = Font(),
+            font: Font = NEW_INSTANCE,
             justify: Optional[TextJustify] = None,
             hide: bool = False,
     ):
@@ -192,7 +200,7 @@ class StrokeDefinition(Node):
             self,
             width: float = 0,
             type: StrokeType = StrokeType.Default,
-            color: Rgba = (),
+            color: Rgba = NEW_INSTANCE,
     ):
         super().__init__(locals())
 
@@ -231,7 +239,7 @@ class CoordinatePointList(ContainerNode):
 
     def __init__(
             self,
-            children: "Iterable[ToVec2 | CoordinatePoint]" = None,
+            children: "Optional[Iterable[ToVec2 | CoordinatePoint]]" = None,
     ):
         if children:
             new_children = []

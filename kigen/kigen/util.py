@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, Callable
 
 def flatten_list(iterable: Iterable[Iterable[Any]]) -> list[Any]:
     return [x for y in iterable for x in y]
@@ -10,7 +10,7 @@ def reorder_dict(dict: dict, keys: (str)) -> dict:
         **{k: v for k, v in dict.items() if k not in keys},
     }
 
-def remove_where(l: list, pred):
+def remove_where(l: list, pred: Callable[[Any], bool]) -> list:
     i = 0
     r = []
     while i < len(l):

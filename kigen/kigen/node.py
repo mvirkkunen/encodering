@@ -2,15 +2,18 @@ import copy
 import enum
 
 from abc import ABC
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from functools import cache
-from typing import get_type_hints, Callable, ClassVar, Annotated, Optional, TypeAlias, Self, _UnionGenericAlias
+import typing
+from typing import Any, Callable, ClassVar, Annotated, Optional, TypeAlias, Union, Self
 
-import sexpr
-import values
-from . import util
+from . import sexpr, util, values
 
-__all__ = ["Attr", "Node", "ContainerNode"]
+__all__ = ["NEW_INSTANCE", "Attr", "Node", "ContainerNode"]
+
+class NewInstance: pass
+
+NEW_INSTANCE: Any = NewInstance()
 
 class Attr:
     """
@@ -41,20 +44,20 @@ class Attr:
         Type annotation. Attribute is processed by Node.transform() when serializing.
         """
 
-    MetaAttribute: TypeAlias = Ignore | Positional | Bool | Transform
+    Meta: TypeAlias = Ignore | Positional | Bool | Transform
 
     name: str
-    type: type
+    value_type: type
     optional: bool
-    metadata: list[MetaAttribute]
+    metadata: list[Meta | type[Meta]]
 
-    def __init__(self, name, type, optional, metadata):
+    def __init__(self, name: str, value_type: type, optional: bool, metadata: list[Meta | type[Meta]]) -> None:
         self.name = name
-        self.type = type
+        self.value_type = value_type
         self.optional = optional
         self.metadata = metadata
 
-    def get_meta(self, type: MetaAttribute) -> Optional[MetaAttribute]:
+    def get_meta(self, type: type[Meta]) -> Optional[Meta | type[Meta]]:
         return next((m for m in self.metadata if m is type or isinstance(m, type)), None)
 
     @staticmethod
@@ -62,24 +65,24 @@ class Attr:
     def get_class_attributes(cls: type) -> "list[Attr]":
         r = []
 
-        for name, hint in get_type_hints(cls, include_extras=True).items():
-            if hint.__name__ == "ClassVar":
+        for name, hint in typing.get_type_hints(cls, include_extras=True).items():
+            if typing.get_origin(hint) is ClassVar:
                 continue
 
             optional = False
             metadata = []
 
-            if hint.__name__ == "Annotated":
-                metadata = hint.__metadata__
-                hint = hint.__origin__
+            if typing.get_origin(hint) is Annotated:
+                hint, *metadata = typing.get_args(hint)
 
             if any(m for m in metadata if m is Attr.Ignore or isinstance(m, Attr.Ignore)):
                 continue
 
-            # Uhh.....
-            if _UnionGenericAlias in type(hint).__mro__ and len(hint.__args__) == 2 and hint.__args__[1] == type(None):
-                optional = True
-                hint = hint.__args__[0]
+            if typing.get_origin(hint) is Union:
+                args = typing.get_args(hint)
+                if len(args) == 2 and args[1] == type(None):
+                    optional = True
+                    hint = args[0]
 
             r.append(Attr(name, hint, optional, metadata))
 
@@ -89,8 +92,8 @@ class Attr:
 
         return r
 
-    def __repr__(self):
-        return f"Attr('{self.name}', {self.type}, {self.optional}, {self.metadata})"
+    def __repr__(self) -> str:
+        return f"Attr('{self.name}', {self.value_type}, {self.optional}, {self.metadata})"
 
 class Node(ABC):
     """
@@ -108,7 +111,7 @@ class Node(ABC):
     # Unknown S-expression data that was encountered while deserializing. Will be retained when serializing.
     unknown: Annotated[Optional[list[sexpr.SExpr]], Attr.Ignore]
 
-    def __init__(self, attrs=None):
+    def __init__(self, attrs: Optional[dict[str, Any]] = None) -> None:
         if not attrs:
             attrs = {}
 
@@ -126,10 +129,10 @@ class Node(ABC):
 
                 setattr(self, a.name, None)
                 continue
-            if value == ():
-                value = a.type()
-            elif not isinstance(value, a.type):
-                value = a.type(value)
+            if value is NEW_INSTANCE:
+                value = a.value_type()
+            elif not isinstance(value, a.value_type):
+                value = a.value_type(value)
 
             setattr(self, a.name, value)
 
@@ -137,14 +140,21 @@ class Node(ABC):
             parent.append(self)
 
     @property
-    def parent(self) -> "Optional[Node]":
+    def parent(self) -> "Optional[ContainerNode]":
         """
         Gets the parent of the node, or None if it has none.
         """
 
         return self.__parent
 
-    def detach(self):
+    def _set_parent(self, parent: "Optional[ContainerNode]") -> None:
+        """
+        For internal use. Sets the parent reference of the node.
+        """
+
+        self.__parent = parent
+
+    def detach(self) -> None:
         """
         Detaches node from its parent, if any.
         """
@@ -157,11 +167,11 @@ class Node(ABC):
         Creates a recursive clone of this node. The new node will not have a parent.
         """
 
-        node = copy.deepcopy(self)
+        node = copy.copy(self)
         node.__parent = None
         return node
 
-    def closest(self, node_type: type):
+    def closest(self, node_type: "type[Node]") -> "Optional[Node]":
         """
         Finds the closest parent of the specified type up the node tree, or the node itself if the node itself is the specified type.
         """
@@ -173,10 +183,10 @@ class Node(ABC):
         else:
             return None
 
-    def to_sexpr(self):
+    def to_sexpr(self) -> list[list[sexpr.SExpr]]:
         self.validate()
 
-        r = []
+        r: list[sexpr.SExpr] = []
 
         node_name = getattr(self, "node_name", None)
         if node_name:
@@ -188,10 +198,10 @@ class Node(ABC):
                 continue
 
             if a.get_meta(Attr.Transform) and self.__parent:
-                val = a.type(self.__parent.transform(val))
+                val = a.value_type(self.__parent.transform(val))
 
-            if issubclass(a.type, bool):
-                bool_ser: Attr.Bool = a.get_meta(Attr.Bool) or Attr.Bool.Symbol
+            if issubclass(a.value_type, bool):
+                bool_ser: Attr.Bool = typing.cast(Attr.Bool, a.get_meta(Attr.Bool) or Attr.Bool.Symbol)
                 if bool_ser == Attr.Bool.Symbol:
                     if val:
                         r.append(sexpr.Sym(a.name))
@@ -211,9 +221,12 @@ class Node(ABC):
         return [r]
 
     @classmethod
-    def from_sexpr(cls, expr) -> Self:
-        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == sexpr.Sym(cls.node_name)):
-            raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression")
+    def from_sexpr(cls, expr: sexpr.SExpr) -> Self:
+        if not cls.node_name:
+            raise TypeError(f"{cls.__name__} does not have a node name and therefore cannot be deserialized from an S-expression")
+
+        if (not (isinstance(expr, list) and len(expr) >= 1 and expr[0] == sexpr.Sym(cls.node_name))):
+            raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression because it does not start with {cls.node_name}")
 
         expr = list(expr[1:])
         node_name = cls.node_name
@@ -224,13 +237,13 @@ class Node(ABC):
                 if len(expr) == 0:
                     raise ValueError(f"Not enough positional arguments in {node_name}")
 
-                if hasattr(a.type, "from_sexpr"):
-                    attrs[a.name] = a.type.from_sexpr([expr[0]])
+                if hasattr(a.value_type, "from_sexpr"):
+                    attrs[a.name] = a.value_type.from_sexpr([expr[0]])
                 else:
                     attrs[a.name] = expr[0]
                 del expr[0]
-            elif a.type == bool:
-                bool_ser: Attr.Bool = a.get_meta(Attr.Bool) or Attr.Bool.Symbol
+            elif a.value_type == bool:
+                bool_ser = typing.cast(Attr.Bool, a.get_meta(Attr.Bool) or Attr.Bool.Symbol)
                 if bool_ser == Attr.Bool.Symbol:
                     v = util.remove_where(expr, lambda e: e == sexpr.Sym(a.name))
                     attrs[a.name] = (len(v) > 0)
@@ -243,23 +256,23 @@ class Node(ABC):
             else:
                 v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == sexpr.Sym(a.name))
                 if len(v) >= 1:
-                    if issubclass(a.type, Node):
-                        attrs[a.name] = a.type.from_sexpr(v[0])
-                    elif hasattr(a.type, "from_sexpr"):
-                        attrs[a.name] = a.type.from_sexpr(v[0][1:])
+                    if issubclass(a.value_type, Node):
+                        attrs[a.name] = a.value_type.from_sexpr(v[0])
+                    elif hasattr(a.value_type, "from_sexpr"):
+                        attrs[a.name] = a.value_type.from_sexpr(v[0][1:])
                     else:
                         attrs[a.name] = v[0][1]
 
                     expr += v[1:]
 
-        node = cls(**attrs)
+        node: Self = cls(**attrs)
         node.unknown = expr
         return node
 
-    def serialize(self, show_unknown=False):
+    def serialize(self, show_unknown: bool=False) -> str:
         return sexpr.sexpr_serialize(self.to_sexpr()[0], show_unknown=show_unknown)
 
-    def validate(self):
+    def validate(self) -> None:
         """
         Can be overridden in a child class to validate node attributes before serialization.
         """
@@ -275,7 +288,7 @@ class Node(ABC):
             return values.Pos2(pos)
 
     @classmethod
-    def parse(cls, s):
+    def parse(cls, s: str) -> Self:
         return cls.from_sexpr(sexpr.sexpr_parse(s))
 
 class ContainerNode(Node):
@@ -283,15 +296,18 @@ class ContainerNode(Node):
     Base class for KiCad data nodes that contain children.
     """
 
+    child_types: ClassVar[tuple[type[Node]]]
+
     __children: Annotated[list[Node], Attr.Ignore]
 
-    def __init__(self, attrs=None):
+    def __init__(self, attrs: Optional[dict[str, Any]] = None) -> None:
         self.__children = []
 
         if not attrs:
             attrs = {}
 
         children = attrs.pop("children", None)
+
         super().__init__(attrs)
 
         if children:
@@ -301,70 +317,70 @@ class ContainerNode(Node):
             for child in children:
                 self.append(child)
 
-#    def clone(self):
-#        """
-#        Creates a recursive clone of this node. The new node will not have a parent.
-#        """
-#
-#        node = super().clone()
-#        node.__children = []
-#        node.extend(c.clone() for c in self.__children)
-#        return node
+    def clone(self):
+        """
+        Creates a recursive clone of this node. The new node will not have a parent.
+        """
 
-    def _validate_child(self, node):
+        node = super().clone()
+        node.__children = []
+        node.extend(c.clone() for c in self.__children)
+        return node
+
+    def _validate_child(self, node: Node) -> Node:
         if not isinstance(node, self.child_types):
             raise RuntimeError(f"{node.__class__.__name__} is not allowed to be a child of {self.__class__.__name__}.")
 
         if node.parent:
             raise RuntimeError(f"{self.__class__.__name__} already has a parent. Either .detach() it first, or use .clone() if you want a new copy.")
 
-        node._Node__parent = self
+        node._set_parent(self)
         return node
 
-    def append(self, node):
+    def append(self, node: Node) -> None:
         """
         Adds a new child node to this container. The node type must be one of the allowed types, and it must not already have a parent.
         """
 
         self.__children.append(self._validate_child(node))
 
-    def insert(self, index: int, node):
+    def insert(self, index: int, node: Node) -> None:
         """
         Inserts a new child node to this container.
         """
 
         self.__children.insert(index, self._validate_child(node))
 
-    def remove(self, node):
+    def remove(self, node: Node) -> None:
         """
         Removes a child node from this container, detaching it.
         """
 
         self.__children.remove(node)
-        node._Node__parent = None
+        node._set_parent(None)
 
-    def extend(self, nodes):
+    def extend(self, nodes: list[Node]) -> None:
         """
         Adds multiple child nodes to this container. See append().
         """
         for n in nodes:
             self.append(n)
 
-    def find_one(self, child_type: type, predicate: Callable[[Node], bool] = None) -> Optional[Node]:
+    def find_one(self, child_type: type[Node], predicate: Optional[Callable[[Node], bool]] = None) -> Optional[Node]:
         """
         Finds the first child node of this node matching the type and optionally also a predicate. Returns None if not found.
         """
 
         return next(self.find_all(child_type, predicate), None)
 
-    def find_all(self, child_type: type, predicate: Callable[[Node], bool] = None) -> list[Node]:
+    def find_all(self, child_type: type[Node], predicate: Optional[Callable[[Node], bool]] = None) -> Iterator[Node]:
         """
         Finds all child nodes of this node matching the type and optionally also a predicate.
         """
 
         return (c for c in self if isinstance(c, child_type) and (not predicate or predicate(c)))
 
-    def __iter__(self) -> Iterable[Node]:
+    def __iter__(self) -> Iterator[Node]:
         return iter(self.__children)
 
     def __len__(self) -> int:
@@ -373,14 +389,22 @@ class ContainerNode(Node):
     def __getitem__(self, key: int) -> Node:
         return self.__children[key]
 
-    def __setitem__(self, key: int, value: Node):
+    def __setitem__(self, key: int, value: Node) -> None:
         old_node = self.__children[key]
         self.__children[key] = self._validate_child(value)
-        old_node._Node__parent = None
+        old_node._set_parent(None)
+
+    def to_sexpr(self) -> list[list[sexpr.SExpr]]:
+        r = super().to_sexpr()[0]
+
+        for child in sorted(self.__children, key=lambda c: self.child_types.index(type(c))):
+            r += child.to_sexpr()
+
+        return [r]
 
     @classmethod
     def from_sexpr(cls, expr: sexpr.SExpr) -> Self:
-        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == sexpr.Sym(cls.node_name)):
+        if not isinstance(expr, list):
             raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression")
 
         children = []
@@ -401,11 +425,3 @@ class ContainerNode(Node):
         node = super().from_sexpr([expr[0], *non_children])
         node.extend(children)
         return node
-
-    def to_sexpr(self):
-        r = super().to_sexpr()[0]
-
-        for child in sorted(self.__children, key=lambda c: self.child_types.index(type(c))):
-            r += child.to_sexpr()
-
-        return [r]
