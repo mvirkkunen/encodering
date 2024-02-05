@@ -51,6 +51,8 @@ class Vec2:
 
     @classmethod
     def from_sexpr(cls, e: sexpr.SExpr) -> "Vec2":
+        assert isinstance(e, list)
+
         return Vec2(*e)
 
     def rotate(self, angle: float) -> "Vec2":
@@ -100,7 +102,7 @@ class Pos2:
         elif len(args) == 1 and isinstance(args[0], (list, tuple)):
             # Pos2((1, 2, 3?))
             # Pos2([1, 2, 3?])
-            self.__init(*args[0][:2])
+            self.__init(*args[0][:3])
         elif len(args) == 2 and isinstance(args[0], (list, tuple)):
             # Pos2((1, 2), 3)
             # Pos2([1, 2], 3)
@@ -125,6 +127,8 @@ class Pos2:
 
     @classmethod
     def from_sexpr(cls, e: sexpr.SExpr) -> "Pos2":
+        assert isinstance(e, list)
+
         return Pos2(*e)
 
     def rotate(self, angle: float) -> "Pos2":
@@ -139,10 +143,31 @@ class Pos2:
     def flip_y(self) -> "Pos2":
         return Pos2(self.x, -self.y, self.r)
 
-    def __add__(self, other: "Pos2") -> "Pos2":
-        other = Pos2(other).rotate(self.r)
+    def __add__(self, other: "ToPos2") -> "Pos2":
+        v = Pos2(other).rotate(self.r)
 
-        return Pos2(self.x + other.x, self.y + other.y, other.r)
+        return Pos2(self.x + v.x, self.y + v.y, v.r)
+
+    def __sub__(self, other: "ToPos2") -> "Pos2":
+        return self + (-other)
+
+    def __neg__(self) -> "Pos2":
+        return Pos2(-self.x, -self.y, -self.r)
+
+@dataclass(frozen=True)
+class Vec3:
+    x: float
+    y: float
+    z: float
+
+    def to_sexpr(self) -> sexpr.SExpr:
+        return [self.x, self.y, self.z]
+
+    @classmethod
+    def from_sexpr(cls, e: sexpr.SExpr) -> "Vec3":
+        assert isinstance(e, list)
+
+        return Vec3(*e)
 
 @dataclass(frozen=True)
 class Rgba:
@@ -161,13 +186,19 @@ class Rgba:
     def __init__(self, rgba: "Rgba | tuple[float, float, float, float] | list[float]", /) -> None: ...
 
     def __init__(self, *args: Any) -> None:
-        if len(args) == 0:
+        if not args:
+            # Rgba()
+            # Rgba(())
             self.__init(0, 0, 0, 0)
         elif len(args) == 1 and isinstance(args[0], Rgba):
+            # Rgba(rgba)
             self.__init(args[0].r, args[0].g, args[0].b, args[0].a)
         elif len(args) == 1 and isinstance(args[0], (tuple, list)):
+            # Rgba((1, 2, 3, 4))
+            # Rgba([1, 2, 3, 4])
             self.__init(*args[0])
         elif len(args) == 4:
+            # Rgba(1, 2, 3, 4)
             self.__init(*args)
         else:
             raise ValueError("Invalid arguments for Rgba()")
