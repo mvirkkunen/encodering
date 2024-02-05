@@ -4,16 +4,16 @@ from kigen.values import *
 import kigen.footprint as fp
 import kigen.symbol as sym
 import kigen.schematic as sch
-import kigen.board as pcb
+from kigen import pcb
 
-f = fp.Footprint("spöörsh", path="", layer=Layer.FCu, at=(2, 2))
+f = fp.Footprint("spöörsh", path="", layer=pcb.Layer.FCu, at=(2, 2))
 #f.properties["vaca"] = "pollo"
 #f.properties["perro"] = "cocodrilo"
 
 f.append(fp.Line(
     start=(0, 0),
     end=(5, 10),
-    layer=Layer.FCu,
+    layer=pcb.Layer.FCu,
     width=1,
 ))
 
@@ -22,7 +22,7 @@ xf = fp.Transform(at=Pos2(0, 0, 1), parent=f)
 xf.append(fp.Line(
     start=(5, 10),
     end=(10, 10),
-    layer=Layer.FCu,
+    layer=pcb.Layer.FCu,
     width=2,
 ))
 

@@ -1,8 +1,10 @@
-from typing import ClassVar, Sequence
+from typing import Annotated, ClassVar, Optional
 
-from .common import *
+from ..node import Attr, ContainerNode, Node, NEW_INSTANCE
+from ..common import Generator, Layer, PageSettings, PaperSize, KIGEN_GENERATOR, KIGEN_VERSION
+from ..values import SymbolEnum, Uuid, Vec2
 
-class BoardGeneralSettings(Node):
+class GeneralSettings(Node):
     node_name = "general"
 
     thickness: float
@@ -20,7 +22,7 @@ class LayerType(SymbolEnum):
     Signal = "signal"
     User = "user"
 
-class BoardLayer(Node):
+class PcbLayer(Node):
     ordinal: Annotated[int, Attr.Positional]
     canonical_name: Annotated[str, Attr.Positional]
     type: Annotated[LayerType, Attr.Positional]
@@ -35,73 +37,73 @@ class BoardLayer(Node):
     ) -> None:
         super().__init__(locals())
 
-class BoardLayers(ContainerNode):
+class PcbLayers(ContainerNode):
     node_name = "layers"
-    child_types = (BoardLayer,)
+    child_types = (PcbLayer,)
 
     default_non_signal_layers: ClassVar[list[tuple[str, LayerType, Optional[str]]]] = [
-        ("B.Adhes", LayerType.User, "B.Adhesive"),
-        ("F.Adhes", LayerType.User, "F.Adhesive"),
-        ("B.Paste", LayerType.User, None),
-        ("F.Paste", LayerType.User, None),
-        ("B.SilkS", LayerType.User, "B.Silkscreen"),
-        ("F.SilkS", LayerType.User, "F.Silkscreen"),
-        ("B.Mask", LayerType.User, None),
-        ("F.Mask", LayerType.User, None),
-        ("Dwgs.User", LayerType.User, "User.Drawings"),
-        ("Cmts.User", LayerType.User, "User.Comments"),
-        ("Eco1.User", LayerType.User, "User.Eco1"),
-        ("Eco2.User", LayerType.User, "User.Eco2"),
-        ("Edge.Cuts", LayerType.User, None),
-        ("Margin", LayerType.User, None),
-        ("B.CrtYd", LayerType.User, "B.Courtyard"),
-        ("F.CrtYd", LayerType.User, "F.Courtyard"),
-        ("B.Fab", LayerType.User, None),
-        ("F.Fab", LayerType.User, None),
-        ("User.1", LayerType.User, None),
-        ("User.2", LayerType.User, None),
-        ("User.3", LayerType.User, None),
-        ("User.4", LayerType.User, None),
-        ("User.5", LayerType.User, None),
-        ("User.6", LayerType.User, None),
-        ("User.7", LayerType.User, None),
-        ("User.8", LayerType.User, None),
-        ("User.9", LayerType.User, None),
+        (Layer.BAdhes, LayerType.User, "B.Adhesive"),
+        (Layer.FAdhes, LayerType.User, "F.Adhesive"),
+        (Layer.BPaste, LayerType.User, None),
+        (Layer.FPaste, LayerType.User, None),
+        (Layer.BSilkS, LayerType.User, "B.Silkscreen"),
+        (Layer.FSilkS, LayerType.User, "F.Silkscreen"),
+        (Layer.BMask, LayerType.User, None),
+        (Layer.FMask, LayerType.User, None),
+        (Layer.DwgsUser, LayerType.User, "User.Drawings"),
+        (Layer.CmtsUser, LayerType.User, "User.Comments"),
+        (Layer.Eco1User, LayerType.User, "User.Eco1"),
+        (Layer.Eco2User, LayerType.User, "User.Eco2"),
+        (Layer.EdgeCuts, LayerType.User, None),
+        (Layer.Margin, LayerType.User, None),
+        (Layer.BCrtYd, LayerType.User, "B.Courtyard"),
+        (Layer.FCrtYd, LayerType.User, "F.Courtyard"),
+        (Layer.BFab, LayerType.User, None),
+        (Layer.FFab, LayerType.User, None),
+        (Layer.User1, LayerType.User, None),
+        (Layer.User2, LayerType.User, None),
+        (Layer.User3, LayerType.User, None),
+        (Layer.User4, LayerType.User, None),
+        (Layer.User5, LayerType.User, None),
+        (Layer.User6, LayerType.User, None),
+        (Layer.User7, LayerType.User, None),
+        (Layer.User8, LayerType.User, None),
+        (Layer.User9, LayerType.User, None),
     ]
 
     def __init__(
             self,
-            children: Sequence[BoardLayer]
+            children: list[PcbLayer]
     ) -> None:
         super().__init__(locals())
 
     @staticmethod
-    def generate_layers(num_signal_layers: int) -> "BoardLayers":
+    def generate_layers(num_signal_layers: int) -> "PcbLayers":
         r = []
 
         ordinal = 0
         if num_signal_layers > 0:
-            r.append(BoardLayer(ordinal, "F.Cu", LayerType.Signal))
+            r.append(PcbLayer(ordinal, Layer.FCu, LayerType.Signal))
             ordinal += 1
 
         if num_signal_layers > 2:
             for i in range(1, num_signal_layers - 1):
-                r.append(BoardLayer(ordinal, f"In{i}.Cu", LayerType.Signal))
+                r.append(PcbLayer(ordinal, f"In{i}.Cu", LayerType.Signal))
                 ordinal += 1
 
         ordinal = max(ordinal, 31)
 
         if num_signal_layers > 1:
-            r.append(BoardLayer(ordinal, "B.Cu", LayerType.Signal))
+            r.append(PcbLayer(ordinal, Layer.BCu, LayerType.Signal))
             ordinal += 1
 
-        for attrs in BoardLayers.default_non_signal_layers:
-            r.append(BoardLayer(ordinal, *attrs))
+        for attrs in PcbLayers.default_non_signal_layers:
+            r.append(PcbLayer(ordinal, *attrs))
             ordinal += 1
 
-        return BoardLayers(r)
+        return PcbLayers(r)
 
-class BoardSetup(Node):
+class Setup(Node):
     node_name = "setup"
 
     pad_to_mask_clearance: float
@@ -122,7 +124,7 @@ class BoardSetup(Node):
     ) -> None:
         super().__init__(locals())
 
-class BoardNet(Node):
+class Net(Node):
     node_name = "net"
 
     ordinal: int
@@ -141,7 +143,7 @@ class BoardNet(Node):
         """
         super().__init__(locals())
 
-class TrackSegment(Node):
+class Track(Node):
     node_name = "segment"
 
     start: Annotated[Vec2, Attr.Transform]
@@ -162,33 +164,33 @@ class TrackSegment(Node):
     ) -> None:
         super().__init__(locals())
 
-class BoardFile(ContainerNode):
+class PcbFile(ContainerNode):
     node_name = "kicad_pcb"
     order_attrs = ("version", "generator")
 
-    version: int
-    generator: Generator
-    general: BoardGeneralSettings
+    version: Annotated[int, Attr.Positional]
+    generator: Annotated[Generator, Attr.Positional]
+    general: GeneralSettings
     page: PageSettings
-    layers: BoardLayers
-    setup: BoardSetup
+    layers: PcbLayers
+    setup: Setup
 
     def __init__(
         self,
-        layers: BoardLayers | list[BoardLayer] | int,
+        layers: PcbLayers | list[PcbLayer] | int,
         thickness: float,
         page: Optional[PageSettings] = None,
-        setup: Optional[BoardSetup] = NEW_INSTANCE,
+        setup: Optional[Setup] = NEW_INSTANCE,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
     ) -> None:
         if isinstance(layers, list):
-            layers = BoardLayers(layers)
+            layers = PcbLayers(layers)
 
-        if not isinstance(layers, BoardLayers):
-            layers = BoardLayers.generate_layers(layers)
+        if not isinstance(layers, PcbLayers):
+            layers = PcbLayers.generate_layers(layers)
 
-        general = BoardGeneralSettings(thickness=thickness)
+        general = GeneralSettings(thickness=thickness)
         page = page or PageSettings(PaperSize.A4)
 
         super().__init__(locals())
