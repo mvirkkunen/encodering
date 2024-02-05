@@ -1,13 +1,16 @@
 import copy
+import enum
 
 from abc import ABC
 from collections.abc import Iterable
 from functools import cache
-from typing import get_type_hints, Callable, ClassVar, Annotated, Optional, _UnionGenericAlias
+from typing import get_type_hints, Callable, ClassVar, Annotated, Optional, TypeAlias, Self, _UnionGenericAlias
 
-from .sexpr import sexpr_parse, sexpr_serialize, SExpr, Sym, UnknownSExpr
-from .values import *
+import sexpr
+import values
 from . import util
+
+__all__ = ["Attr", "Node", "ContainerNode"]
 
 class Attr:
     """
@@ -24,7 +27,7 @@ class Attr:
         Type annotation. Positional attributes have no name and are de/serialized by position.
         """
 
-    class Bool(Enum):
+    class Bool(enum.Enum):
         """
         Type annotation. Specify how a boolean attribute is serialized.
         """
@@ -103,7 +106,7 @@ class Node(ABC):
     __parent: "Annotated[Optional[ContainerNode], Attr.Ignore]"
 
     # Unknown S-expression data that was encountered while deserializing. Will be retained when serializing.
-    unknown: Annotated[Optional[list[SExpr]], Attr.Ignore]
+    unknown: Annotated[Optional[list[sexpr.SExpr]], Attr.Ignore]
 
     def __init__(self, attrs=None):
         if not attrs:
@@ -154,7 +157,7 @@ class Node(ABC):
         Creates a recursive clone of this node. The new node will not have a parent.
         """
 
-        node = copy.copy(self)
+        node = copy.deepcopy(self)
         node.__parent = None
         return node
 
@@ -177,7 +180,7 @@ class Node(ABC):
 
         node_name = getattr(self, "node_name", None)
         if node_name:
-            r.append(Sym(node_name))
+            r.append(sexpr.Sym(node_name))
 
         for a in Attr.get_class_attributes(self.__class__):
             val = getattr(self, a.name, None)
@@ -191,25 +194,25 @@ class Node(ABC):
                 bool_ser: Attr.Bool = a.get_meta(Attr.Bool) or Attr.Bool.Symbol
                 if bool_ser == Attr.Bool.Symbol:
                     if val:
-                        r.append(Sym(a.name))
+                        r.append(sexpr.Sym(a.name))
                 elif bool_ser == Attr.Bool.SymbolInList:
                     if val:
-                        r.append([Sym(a.name)])
+                        r.append([sexpr.Sym(a.name)])
                 elif bool_ser == Attr.Bool.YesNo:
-                    r.append([Sym(a.name), Sym("yes" if val else "no")])
+                    r.append([sexpr.Sym(a.name), sexpr.Sym("yes" if val else "no")])
             elif a.get_meta(Attr.Positional) or isinstance(val, Node):
                 r.append(val)
             else:
-                r.append([Sym(a.name), val])
+                r.append([sexpr.Sym(a.name), val])
 
         if self.unknown:
-            r.extend(map(UnknownSExpr, self.unknown))
+            r.extend(map(sexpr.UnknownSExpr, self.unknown))
 
         return [r]
 
     @classmethod
     def from_sexpr(cls, expr) -> Self:
-        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == Sym(cls.node_name)):
+        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == sexpr.Sym(cls.node_name)):
             raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression")
 
         expr = list(expr[1:])
@@ -229,16 +232,16 @@ class Node(ABC):
             elif a.type == bool:
                 bool_ser: Attr.Bool = a.get_meta(Attr.Bool) or Attr.Bool.Symbol
                 if bool_ser == Attr.Bool.Symbol:
-                    v = util.remove_where(expr, lambda e: e == Sym(a.name))
+                    v = util.remove_where(expr, lambda e: e == sexpr.Sym(a.name))
                     attrs[a.name] = (len(v) > 0)
                 elif bool_ser == Attr.Bool.SymbolInList:
-                    v = util.remove_where(expr, lambda e: e == [Sym(a.name)])
+                    v = util.remove_where(expr, lambda e: e == [sexpr.Sym(a.name)])
                     attrs[a.name] = (len(v) > 0)
                 elif bool_ser == Attr.Bool.YesNo:
-                    v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) == 2 and e[0] == Sym(a.name))
-                    attrs[a.name] = (len(v) > 0 and v[0][1] == Sym("yes"))
+                    v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) == 2 and e[0] == sexpr.Sym(a.name))
+                    attrs[a.name] = (len(v) > 0 and v[0][1] == sexpr.Sym("yes"))
             else:
-                v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == Sym(a.name))
+                v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == sexpr.Sym(a.name))
                 if len(v) >= 1:
                     if issubclass(a.type, Node):
                         attrs[a.name] = a.type.from_sexpr(v[0])
@@ -254,14 +257,14 @@ class Node(ABC):
         return node
 
     def serialize(self, show_unknown=False):
-        return sexpr_serialize(self.to_sexpr()[0], show_unknown=show_unknown)
+        return sexpr.sexpr_serialize(self.to_sexpr()[0], show_unknown=show_unknown)
 
     def validate(self):
         """
         Can be overridden in a child class to validate node attributes before serialization.
         """
 
-    def transform(self, pos: ToPos2) -> Pos2:
+    def transform(self, pos: values.ToPos2) -> values.Pos2:
         """
         Can be overridden in a child class to transform geometric node attributes marked with Attr.Transform before serialization.
         """
@@ -269,11 +272,11 @@ class Node(ABC):
         if self.__parent:
             return self.__parent.transform(pos)
         else:
-            return Pos2(pos)
+            return values.Pos2(pos)
 
     @classmethod
     def parse(cls, s):
-        return cls.from_sexpr(sexpr_parse(s))
+        return cls.from_sexpr(sexpr.sexpr_parse(s))
 
 class ContainerNode(Node):
     """
@@ -298,15 +301,15 @@ class ContainerNode(Node):
             for child in children:
                 self.append(child)
 
-    def clone(self):
-        """
-        Creates a recursive clone of this node. The new node will not have a parent.
-        """
-
-        node = super().clone()
-        node.__children = []
-        node.extend(c.clone() for c in self.__children)
-        return node
+#    def clone(self):
+#        """
+#        Creates a recursive clone of this node. The new node will not have a parent.
+#        """
+#
+#        node = super().clone()
+#        node.__children = []
+#        node.extend(c.clone() for c in self.__children)
+#        return node
 
     def _validate_child(self, node):
         if not isinstance(node, self.child_types):
@@ -376,15 +379,15 @@ class ContainerNode(Node):
         old_node._Node__parent = None
 
     @classmethod
-    def from_sexpr(cls, expr: SExpr) -> Self:
-        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == Sym(cls.node_name)):
+    def from_sexpr(cls, expr: sexpr.SExpr) -> Self:
+        if (not isinstance(expr, list) and len(expr) > 1 and expr[0] == sexpr.Sym(cls.node_name)):
             raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression")
 
         children = []
         non_children = []
 
         for e in expr[1:]:
-            if not isinstance(e, list) or not isinstance(e[0], Sym):
+            if not isinstance(e, list) or not isinstance(e[0], sexpr.Sym):
                 non_children.append(e)
                 continue
 

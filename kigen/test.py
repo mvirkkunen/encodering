@@ -56,4 +56,5 @@ for pin in conn.pins:
 
 schematic.save("../testproject/testproject/testproject.kicad_sch")
 
-import kigen
+import kigen.node
+import enum

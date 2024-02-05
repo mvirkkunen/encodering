@@ -1,6 +1,7 @@
 from enum import Flag, auto
-from typing import Iterable, Self
+from typing import Annotated, Iterable, Optional, Self
 
+import sexpr
 from .node import *
 from .values import *
 
@@ -27,7 +28,7 @@ class BaseTransform(ContainerNode, TransformMixin):
     def __init__(
             self,
             at: Pos2,
-            children: [Node] = None,
+            children: list[Node] = None,
             parent: Node = None):
         super().__init__(locals())
 
@@ -45,7 +46,7 @@ class BaseRotate(ContainerNode):
     def __init__(
             self,
             angle: float,
-            children: [Node] = None,
+            children: list[Node] = None,
             parent: Node = None):
         super().__init__(locals())
 
@@ -102,7 +103,7 @@ class Properties(dict[str, str], Node):
 
     def to_sexpr(self):
         return [
-            [Sym("property"), k, v]
+            [sexpr.Sym("property"), k, v]
             for k, v
             in self.items()
         ]
@@ -139,17 +140,17 @@ class TextJustify(Flag):
         r = []
 
         if TextJustify.Left in self:
-            r.append(Sym("left"))
+            r.append(sexpr.Sym("left"))
         elif TextJustify.Right in self:
-            r.append(Sym("right"))
+            r.append(sexpr.Sym("right"))
 
         if TextJustify.Top in self:
-            r.append(Sym("top"))
+            r.append(sexpr.Sym("top"))
         elif TextJustify.Bottom in self:
-            r.append(Sym("bottom"))
+            r.append(sexpr.Sym("bottom"))
 
         if TextJustify.Mirror in self:
-            r.append(Sym("mirror"))
+            r.append(sexpr.Sym("mirror"))
 
         return r
 
