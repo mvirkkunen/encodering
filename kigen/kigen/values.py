@@ -24,7 +24,7 @@ class Vec2:
     def __init__(self, xy: ToVec2): ...
 
     def __init__(self, *args):
-        if len(args) == 0:
+        if len(args) == 0 or (isinstance(args[0], Iterable) and len(args[0]) == 0):
             self.__init(0, 0)
         elif len(args) == 1:
             if isinstance(args[0], Iterable):
@@ -34,7 +34,7 @@ class Vec2:
         elif len(args) == 2:
             self.__init(*args)
         else:
-            raise ValueError("Invalid arguments for Vec2()")
+            raise ValueError(f"Invalid arguments for Vec2(): {args}")
 
     def __init(self, x: float, y: float):
         object.__setattr__(self, "x", x)
@@ -47,7 +47,7 @@ class Vec2:
     def from_sexpr(cls, e) -> Self:
         return Vec2(*e)
 
-    def rotate(self, angle):
+    def rotate(self, angle) -> Self:
         if angle == 0:
             return self
 
@@ -59,11 +59,11 @@ class Vec2:
             s * self.x + c * self.y,
         )
 
-    def __add__(self, other):
+    def __add__(self, other) -> Self:
         other = Vec2(other)
         return Vec2(self.x + other.x, self.y + other.y)
 
-    def __mul__(self, other):
+    def __mul__(self, other) -> Self:
         return Vec2(self.x * other, self.y * other)
 
 ToPos2: TypeAlias = "Pos2 | ToVec2"
@@ -84,7 +84,9 @@ class Pos2(Vec2):
     def __init__(self, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], Pos2):
             self.__init(args[0], args[0].r)
-        elif len(args) == 1 and isinstance(args[0], (Vec2, tuple, list)):
+        elif len(args) == 1 and isinstance(args[0], Vec2):
+            self.__init(args[0], 0)
+        elif len(args) == 1 and isinstance(args[0], (tuple, list)):
             self.__init(args[0], args[0][2] if len(args[0]) >= 3 else kwargs.get("r", 0))
         elif len(args) == 2 and isinstance(args[0], (Vec2, tuple, list)):
             self.__init(args[0], args[1] if len(args) == 2 else kwargs.get("r", 0))
@@ -93,31 +95,35 @@ class Pos2(Vec2):
         elif len(args) == 3:
             self.__init(args[:2], args[2])
         else:
-            raise ValueError("Invalid arguments for Pos2()")
+            raise ValueError(f"Invalid arguments for Pos2(): {args}")
 
     def __init(self, super_init: ToVec2 = (), r: float = 0):
         super().__init__(super_init)
         object.__setattr__(self, "r", r)
 
     def to_sexpr(self):
-        if self.r != 0:
-            return [self.x, self.y, self.r]
-        else:
-            return [self.x, self.y]
+        return [self.x, self.y, self.r]
 
     @classmethod
     def from_sexpr(cls, e) -> Self:
         return Pos2(*e)
 
-    def rotate(self, angle):
+    def rotate(self, angle) -> Self:
         if angle == 0:
             return self
 
         return Pos2(Vec2(self).rotate(angle), self.r + angle)
 
-    def __add__(self, other):
-        other = Pos2(other)
-        return Pos2(self.x + other.x, self.y + other.y, self.r + other.y)
+    def set_rotation(self, r: float) -> Self:
+        return Pos2(self.x, self.y, r)
+
+    def flip_y(self) -> Self:
+        return Pos2(self.x, -self.y, self.r)
+
+    def __add__(self, other: Self) -> Self:
+        other = Pos2(other).rotate(self.r)
+
+        return Pos2(self.x + other.x, self.y + other.y, other.r)
 
 @dataclass(frozen=True)
 class Rgba:

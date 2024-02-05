@@ -22,37 +22,37 @@ class Sym:
         object.__setattr__(self, "name", name)
 
 @dataclass(frozen=True)
-class UnknownExpr:
-    value: "SExpr"
+class UnknownSExpr:
+    expr: "SExpr"
 
 FlatSExpr: TypeAlias = str | list[str]
 
 SExpr: TypeAlias = "str | float | int | Sym | list[SExpr]"
 
-def length(expr: FlatSExpr):
+def sexpr_length(expr: FlatSExpr):
     """Calculates length of flattened s-expr element."""
     if isinstance(expr, str):
         return len(expr)
-    if isinstance(expr, UnknownExpr):
-        return length(expr.value) + 1
+    if isinstance(expr, UnknownSExpr):
+        return sexpr_length(expr.expr) + 1
     elif len(expr) == 0:
         return 2
     else:
-        return sum(length(child) for child in expr) + len(expr) - 1
+        return sum(sexpr_length(child) for child in expr) + len(expr) - 1
 
-def collect(r: list[str], expr: FlatSExpr, indent: int, width: int):
+def sexpr_collect(r: list[str], expr: FlatSExpr, indent: int, width: int):
     if isinstance(expr, str):
         r.append(expr)
-    elif isinstance(expr, UnknownExpr):
+    elif isinstance(expr, UnknownSExpr):
         r.append("?")
-        collect(r, expr.value, indent, max(0, width - 1))
-    elif len(expr) == 0 or length(expr) <= width:
+        sexpr_collect(r, expr.expr, indent, max(0, width - 1))
+    elif len(expr) == 0 or sexpr_length(expr) <= width:
         r.append("(")
         for i, child in enumerate(expr):
             if i > 0:
                 r.append(" ")
 
-            collect(r, child, 0, width)
+            sexpr_collect(r, child, 0, width)
         r.append(")")
     else:
         r.append("(")
@@ -60,35 +60,38 @@ def collect(r: list[str], expr: FlatSExpr, indent: int, width: int):
             if i > 0:
                 r.append("\n")
                 r.append(" " * (indent + 2))
-            collect(r, child, indent + 2, max(0, width - 2))
+            sexpr_collect(r, child, indent + 2, max(0, width - 2))
         r.append("\n")
         r.append(" " * indent)
         r.append(")")
 
 def sexpr_format(expr: FlatSExpr, width: int = 120) -> str:
     r = []
-    collect(r, expr, 0, width)
+    sexpr_collect(r, expr, 0, width)
     return "".join(r)
 
-def sexpr_serialize(obj: Any, width: int = 120, show_unknown: bool = False) -> str:
-    def flatten(o):
-        """Flattens an object to an s-expr tree with only lists and strings."""
-        if hasattr(o, "to_sexpr"):
-            return [flatten(c)[0] for c in o.to_sexpr()]
-        elif isinstance(o, Sym):
-            return [o.name]
-        elif isinstance(o, str):
-            return [f"\"{repr(o)[1:-1]}\""]
-        elif isinstance(o, int):
-            return [str(o)]
-        elif isinstance(o, float):
-            return [str(round(o * 1e6) / 1e6)]
-        elif isinstance(o, UnknownExpr):
-            return [UnknownExpr(flatten(o.value)[0])]
+def sexpr_flatten(o, show_unknown: bool):
+    """Flattens an object to an s-expr tree with only lists and strings."""
+    if hasattr(o, "to_sexpr"):
+        return [sexpr_flatten(c, show_unknown)[0] for c in o.to_sexpr()]
+    elif isinstance(o, Sym):
+        return [o.name]
+    elif isinstance(o, str):
+        return [f"\"{repr(o)[1:-1]}\""]
+    elif isinstance(o, int):
+        return [str(o)]
+    elif isinstance(o, float):
+        return [str(round(o * 1e6) / 1e6)]
+    elif isinstance(o, UnknownSExpr):
+        if show_unknown:
+            return [UnknownSExpr(sexpr_flatten(o.expr, show_unknown)[0])]
         else:
-            return [flatten_list(flatten(c) for c in o)]
+            return sexpr_flatten(o.expr, show_unknown)
+    else:
+        return [flatten_list(sexpr_flatten(c, show_unknown) for c in o)]
 
-    return sexpr_format(flatten(obj)[0], width)
+def sexpr_serialize(obj: Any, width: int = 120, show_unknown: bool = False) -> str:
+    return sexpr_format(sexpr_flatten(obj, show_unknown)[0], width)
 
 numeric = "-0123456789."
 symbol = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"

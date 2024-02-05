@@ -1,18 +1,28 @@
 from enum import Flag, auto
-from typing import Self
+from typing import Iterable, Self
 
 from .node import *
 from .values import *
 
 class Generator(SymbolEnum):
-    Kigen = "kigen"
+    PcbNew = "pbcnew"
+    EeSchema = "eeschema"
     KicadSymbolEditor = "kicad_symbol_editor"
+    Kigen = "kigen"
 
-KIGEN_VERSION = 20211014
+KIGEN_VERSION = 20230121
 KIGEN_GENERATOR = Generator.Kigen
 
-class BaseTransform(ContainerNode):
+class TransformMixin:
     at: Pos2
+
+    def transform(self, pos: Pos2) -> Pos2:
+        pos = Pos2(pos)
+        at = super().transform(self.at)
+        return at + pos.rotate(at.r)
+
+class BaseTransform(ContainerNode, TransformMixin):
+    node_name = None
 
     def __init__(
             self,
@@ -23,14 +33,30 @@ class BaseTransform(ContainerNode):
 
     def to_sexpr(self) -> Self:
         r = []
-        for child in self.children:
+        for child in self:
+            r += child.to_sexpr()
+        return r
+
+class BaseRotate(ContainerNode):
+    node_name = None
+
+    angle: float
+
+    def __init__(
+            self,
+            angle: float,
+            children: [Node] = None,
+            parent: Node = None):
+        super().__init__(locals())
+
+    def to_sexpr(self) -> Self:
+        r = []
+        for child in self:
             r += child.to_sexpr()
         return r
 
     def transform(self, pos: Pos2) -> Pos2:
-        pos = Pos2(pos)
-        at = super().transform(self.at)
-        return at + pos.rotate(at.r)
+        return pos.rotate(self.angle)
 
 class PaperSize(SymbolEnum):
     A0 = "A0"
@@ -48,9 +74,9 @@ class PaperSize(SymbolEnum):
 class PageSettings(Node):
     node_name = "paper"
 
-    width: Annotated[Optional[float], PositionalMeta]
-    height: Annotated[Optional[float], PositionalMeta]
-    paper_size: Annotated[Optional[PaperSize], PositionalMeta]
+    width: Annotated[Optional[float], AttrPositional]
+    height: Annotated[Optional[float], AttrPositional]
+    paper_size: Annotated[Optional[PaperSize], AttrPositional]
 
     def __init__(
             self,
@@ -132,7 +158,7 @@ class TextJustify(Flag):
         return TextJustify.Left # TODO
 
 class TextEffects(Node):
-    node_name = "text_effects"
+    node_name = "effects"
 
     font: Font
     justify: Optional[TextJustify]
@@ -144,4 +170,76 @@ class TextEffects(Node):
             justify: Optional[TextJustify] = None,
             hide: bool = False,
     ):
+        super().__init__(locals())
+
+class StrokeType(SymbolEnum):
+    Default = "default"
+    Dash = "dash"
+    DashDot = "dash_dot"
+    DashDotDot = "dash_dot_dot"
+    Dot = "dot"
+    Solid = "solid"
+
+class StrokeDefinition(Node):
+    node_name = "stroke"
+
+    width: float
+    type: StrokeType
+    color: Rgba
+
+    def __init__(
+            self,
+            width: float = 0,
+            type: StrokeType = StrokeType.Default,
+            color: Rgba = (),
+    ):
+        super().__init__(locals())
+
+class FillType(SymbolEnum):
+    None_ = "none"
+    Outline = "outline"
+    Background = "background"
+
+class FillDefinition(Node):
+    node_name = "fill"
+
+    type: FillType
+
+    def __init__(
+            self,
+            type: FillType = FillType.None_,
+    ):
+        super().__init__(locals())
+
+class CoordinatePoint(Node):
+    node_name = "xy"
+
+    x: Annotated[float, AttrPositional]
+    y: Annotated[float, AttrPositional]
+
+    def __init__(
+            self,
+            x: float,
+            y: float,
+    ):
+        super().__init__(locals())
+
+class CoordinatePointList(ContainerNode):
+    child_types = (CoordinatePoint,)
+    node_name = "pts"
+
+    def __init__(
+            self,
+            children: "Iterable[ToVec2 | CoordinatePoint]" = None,
+    ):
+        if children:
+            new_children = []
+            for c in children:
+                if isinstance(c, CoordinatePoint):
+                    new_children.append(c)
+                else:
+                    vec = Vec2(c)
+                    new_children.append(CoordinatePoint(vec.x, vec.y))
+            children = new_children
+
         super().__init__(locals())

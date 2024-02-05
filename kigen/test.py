@@ -29,115 +29,27 @@ xf.append(fp.Line(
 
 #print(fp.serialize())
 
-library = sym.SymbolLibFile.parse("""(kicad_symbol_lib (version 20220914) (generator kicad_symbol_editor)
-  (symbol "4P2C" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
-    (property "Reference" "J" (at -5.08 8.89 0)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Value" "4P2C" (at 2.54 8.89 0)
-      (effects (font (size 1.27 1.27)) (justify left))
-    )
-    (property "Footprint" "" (at 0 1.27 90)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "~" (at 0 1.27 90)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "ki_keywords" "4P2C RJ socket connector" (at 0 0 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "ki_description" "RJ connector, 4P2C (4 positions 2 connected)" (at 0 0 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "ki_fp_filters" "4P2C*" (at 0 0 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (symbol "4P2C_0_1"
-      (polyline
-        (pts
-          (xy -6.35 -0.635)
-          (xy -5.08 -0.635)
-          (xy -5.08 -0.635)
-        )
-        (stroke (width 0) (type default))
-        (fill (type none))
-      )
-      (polyline
-        (pts
-          (xy -6.35 0.635)
-          (xy -5.08 0.635)
-          (xy -5.08 0.635)
-        )
-        (stroke (width 0) (type default))
-        (fill (type none))
-      )
-      (polyline
-        (pts
-          (xy -6.35 1.905)
-          (xy -5.08 1.905)
-          (xy -5.08 1.905)
-        )
-        (stroke (width 0) (type default))
-        (fill (type none))
-      )
-      (polyline
-        (pts
-          (xy -6.35 3.175)
-          (xy -5.08 3.175)
-          (xy -5.08 3.175)
-        )
-        (stroke (width 0) (type default))
-        (fill (type none))
-      )
-      (polyline
-        (pts
-          (xy -6.35 -3.175)
-          (xy -6.35 5.715)
-          (xy -1.27 5.715)
-          (xy 3.81 5.715)
-          (xy 3.81 4.445)
-          (xy 5.08 4.445)
-          (xy 5.08 3.175)
-          (xy 6.35 3.175)
-          (xy 6.35 -0.635)
-          (xy 5.08 -0.635)
-          (xy 5.08 -1.905)
-          (xy 3.81 -1.905)
-          (xy 3.81 -3.175)
-          (xy -6.35 -3.175)
-          (xy -6.35 -3.175)
-        )
-        (stroke (width 0) (type default))
-        (fill (type none))
-      )
-      (rectangle (start 7.62 7.62) (end -7.62 -5.08)
-        (stroke (width 0.254) (type default))
-        (fill (type background))
-      )
-    )
-    (symbol "4P2C_1_1"
-      (pin passive line (at 10.16 0 180) (length 2.54)
-        (name "~" (effects (font (size 1.27 1.27))))
-        (number "1" (effects (font (size 1.27 1.27))))
-      )
-      (pin passive line (at 10.16 2.54 180) (length 2.54)
-        (name "~" (effects (font (size 1.27 1.27))))
-        (number "2" (effects (font (size 1.27 1.27))))
-      )
-    )
-  )
-)""")
 
-print(library.serialize())
+connectors = sym.SymbolLibrary.load("/usr/share/kicad/symbols/Connector.kicad_sym")
+connector = connectors.get("Conn_01x04_Pin")
 
-connector = library.get("4P2C")
+#print(connectors.serialize())
 
-test = sch.SchematicFile()
-test.place(
+schematic = sch.SchematicFile()
+
+conn = schematic.place_symbol(
     connector,
     "J1",
-    (11, 12, 90),
+    at=(25.4, 25.4, 90),
 )
 
-print(test.serialize())
-print(Pos2((11, 12, 13)))
+for pin in conn.pins:
+    pin_pos = conn.get_pin_position(pin.number)
+    label_pos = pin_pos + Pos2(25.4, 0)
+
+    schematic.append(sch.Wire([pin_pos, label_pos]))
+    schematic.append(sch.GlobalLabel(f"Conn_{pin.number}", at=label_pos, shape=sch.LabelShape.Bidirectional))
+
+#print(schematic.serialize())
+
+schematic.save("../testproject/testproject/testproject.kicad_sch")

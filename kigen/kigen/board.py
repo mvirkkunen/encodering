@@ -1,4 +1,4 @@
-from .common_nodes import *
+from .common import *
 
 class BoardGeneralSettings(Node):
     node_name = "general"
@@ -18,10 +18,10 @@ class LayerType(SymbolEnum):
     User = "user"
 
 class BoardLayer(Node):
-    ordinal: Annotated[int, PositionalMeta]
-    canonical_name: Annotated[str, PositionalMeta]
-    type: Annotated[LayerType, PositionalMeta]
-    user_name: Annotated[Optional[str], PositionalMeta]
+    ordinal: Annotated[int, AttrPositional]
+    canonical_name: Annotated[str, AttrPositional]
+    type: Annotated[LayerType, AttrPositional]
+    user_name: Annotated[Optional[str], AttrPositional]
 
     def __init__(
             self,
@@ -133,8 +133,8 @@ class BoardNet(Node):
 class TrackSegment(Node):
     node_name = "segment"
 
-    start: Annotated[Vec2, TransformMeta]
-    end: Annotated[Vec2, TransformMeta]
+    start: Annotated[Vec2, AttrTransform]
+    end: Annotated[Vec2, AttrTransform]
     width: float
     layer: str
     net: int
@@ -147,7 +147,7 @@ class TrackSegment(Node):
             width: float,
             layer: str,
             net: int,
-            tstamp: Uuid = Uuid()):
+            tstamp: Uuid = ()):
         super().__init__(locals())
 
 

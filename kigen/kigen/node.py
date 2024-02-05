@@ -3,26 +3,26 @@ import copy
 from abc import ABC
 from collections.abc import Iterable
 from functools import cache
-from typing import get_type_hints, ClassVar, Annotated, Optional, _UnionGenericAlias
+from typing import get_type_hints, Callable, ClassVar, Annotated, Optional, _UnionGenericAlias
 
-from .sexpr import sexpr_parse, sexpr_serialize, SExpr, Sym, UnknownExpr
+from .sexpr import sexpr_parse, sexpr_serialize, SExpr, Sym, UnknownSExpr
 from .values import *
 
-class BoolSerializationMeta(Enum):
+class AttrBool(Enum):
     Symbol = 1
     SymbolInList = 2
     YesNo = 3
 
-class PositionalMeta:
+class AttrPositional:
     pass
 
-class TransformMeta:
+class AttrTransform:
     pass
 
-class SpecialMeta:
+class AttrIgnore:
     pass
 
-MetaAttribute: TypeAlias = BoolSerializationMeta | PositionalMeta | TransformMeta
+MetaAttribute: TypeAlias = AttrBool | AttrPositional | AttrTransform
 
 class AttributeMeta:
     name: str
@@ -55,7 +55,7 @@ class AttributeMeta:
                 metadata = hint.__metadata__
                 hint = hint.__origin__
 
-            if any(m for m in metadata if m is SpecialMeta or isinstance(m, SpecialMeta)):
+            if any(m for m in metadata if m is AttrIgnore or isinstance(m, AttrIgnore)):
                 continue
 
             # Uhh.....
@@ -67,7 +67,7 @@ class AttributeMeta:
 
         order = getattr(cls, "order_attrs", [])
 
-        r.sort(key=lambda a: (a.get_meta(PositionalMeta) is None, order.index(a.name) if a.name in order else float("inf")))
+        r.sort(key=lambda a: (a.get_meta(AttrPositional) is None, order.index(a.name) if a.name in order else float("inf")))
 
         return r
 
@@ -92,8 +92,8 @@ class Node(ABC):
     order_attrs: ClassVar[Optional[(str)]]
     transform_attrs: ClassVar[Optional[(str)]]
 
-    parent: "Annotated[Optional[Node], SpecialMeta]"
-    unknown: Annotated[Optional[list[SExpr]], SpecialMeta]
+    parent: "Annotated[Optional[ContainerNode], AttrIgnore]"
+    unknown: Annotated[Optional[list[SExpr]], AttrIgnore]
 
     def __init__(self, attrs=None):
         if not attrs:
@@ -123,12 +123,22 @@ class Node(ABC):
         if parent:
             parent.append(self)
 
-    def clone(self):
+    def clone(self) -> Self:
         node = copy.copy(self)
         node.parent = None
         return node
 
+    def closest(self, node_type: type):
+        if isinstance(self, node_type):
+            return self
+        elif self.parent:
+            return self.parent.closest(node_type)
+        else:
+            return None
+
     def to_sexpr(self):
+        self.validate()
+
         r = []
 
         node_name = getattr(self, "node_name", None)
@@ -140,28 +150,31 @@ class Node(ABC):
             if val is None:
                 continue
 
-            if a.get_meta(TransformMeta):
-                val = a.type(self.transform(val))
+            if a.get_meta(AttrTransform) and self.parent:
+                val = a.type(self.parent.transform(val))
 
             if issubclass(a.type, bool):
-                bool_ser: BoolSerializationMeta = a.get_meta(BoolSerializationMeta) or BoolSerializationMeta.Symbol
-                if bool_ser == BoolSerializationMeta.Symbol:
+                bool_ser: AttrBool = a.get_meta(AttrBool) or AttrBool.Symbol
+                if bool_ser == AttrBool.Symbol:
                     if val:
                         r.append(Sym(a.name))
-                elif bool_ser == BoolSerializationMeta.SymbolInList:
+                elif bool_ser == AttrBool.SymbolInList:
                     if val:
                         r.append([Sym(a.name)])
-                elif bool_ser == BoolSerializationMeta.YesNo:
+                elif bool_ser == AttrBool.YesNo:
                     r.append([Sym(a.name), Sym("yes" if val else "no")])
-            elif a.get_meta(PositionalMeta) or isinstance(val, Node):
+            elif a.get_meta(AttrPositional) or isinstance(val, Node):
                 r.append(val)
             else:
                 r.append([Sym(a.name), val])
 
         if self.unknown:
-            r.extend(map(UnknownExpr, self.unknown))
+            r.extend(map(UnknownSExpr, self.unknown))
 
         return [r]
+
+    def validate(self):
+        pass
 
     @classmethod
     def from_sexpr(cls, expr) -> Self:
@@ -173,7 +186,7 @@ class Node(ABC):
         attrs = {}
 
         for a in AttributeMeta.get(cls):
-            if a.get_meta(PositionalMeta):
+            if a.get_meta(AttrPositional):
                 if len(expr) == 0:
                     raise ValueError(f"Not enough positional arguments in {node_name}")
 
@@ -183,17 +196,16 @@ class Node(ABC):
                     attrs[a.name] = expr[0]
                 del expr[0]
             elif a.type == bool:
-                bool_ser: BoolSerializationMeta = a.get_meta(BoolSerializationMeta) or BoolSerializationMeta.Symbol
-                if bool_ser == BoolSerializationMeta.Symbol:
+                bool_ser: AttrBool = a.get_meta(AttrBool) or AttrBool.Symbol
+                if bool_ser == AttrBool.Symbol:
                     v = remove_where(expr, lambda e: e == Sym(a.name))
                     attrs[a.name] = (len(v) > 0)
-                elif bool_ser == BoolSerializationMeta.SymbolInList:
+                elif bool_ser == AttrBool.SymbolInList:
                     v = remove_where(expr, lambda e: e == [Sym(a.name)])
                     attrs[a.name] = (len(v) > 0)
-                elif bool_ser == BoolSerializationMeta.YesNo:
+                elif bool_ser == AttrBool.YesNo:
                     v = remove_where(expr, lambda e: isinstance(e, list) and len(e) == 2 and e[0] == Sym(a.name))
                     attrs[a.name] = (len(v) > 0 and v[0][1] == Sym("yes"))
-                    print(a, bool_ser, v, attrs[a.name])
             else:
                 v = remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == Sym(a.name))
                 if len(v) >= 1:
@@ -224,16 +236,16 @@ class Node(ABC):
             return Pos2(pos)
 
 class ContainerNode(Node):
-    children: Annotated[list[Node], SpecialMeta]
+    __children: Annotated[list[Node], AttrIgnore]
 
     def __init__(self, attrs=None):
+        self.__children = []
+
         if not attrs:
             attrs = {}
 
         children = attrs.pop("children", None)
         super().__init__(attrs)
-
-        self.children = []
 
         if children:
             if not isinstance(children, Iterable):
@@ -244,26 +256,41 @@ class ContainerNode(Node):
 
     def clone(self):
         node = super().clone()
-        node.children = []
-        node.extend(c.clone() for c in self.children)
+        node.__children = []
+        node.extend(c.clone() for c in self.__children)
         return node
 
     def append(self, node):
         if not node:
             return
 
-        if not isinstance(node, self.__class__.child_types):
+        if not isinstance(node, self.child_types):
             raise RuntimeError(f"{node.__class__.__name__} is not allowed to be a child of {self.__class__.__name__}")
 
         if node.parent:
             raise RuntimeError(f"{self.__class__.__name__} already has a parent")
 
         node.parent = self
-        self.children.append(node)
+        self.__children.append(node)
 
     def extend(self, nodes):
         for n in nodes:
             self.append(n)
+
+    def find_one(self, child_type: type, predicate: Callable[[Node], bool] = None):
+        return next(self.find_all(child_type, predicate), None)
+
+    def find_all(self, child_type: type, predicate: Callable[[Node], bool] = None):
+        return (c for c in self if isinstance(c, child_type) and (not predicate or predicate(c)))
+
+    def __len__(self) -> int:
+        return len(self.__children)
+
+    def __iter__(self) -> Iterable[Node]:
+        return iter(self.__children)
+
+    def __getitem__(self, key: int) -> Node:
+        return self.__children[key]
 
     @classmethod
     def from_sexpr(cls, expr: SExpr) -> Self:
@@ -291,6 +318,8 @@ class ContainerNode(Node):
 
     def to_sexpr(self):
         r = super().to_sexpr()[0]
-        for child in self.children:
+
+        for child in sorted(self.__children, key=lambda c: self.child_types.index(type(c))):
             r += child.to_sexpr()
+
         return [r]
