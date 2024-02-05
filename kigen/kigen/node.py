@@ -211,9 +211,9 @@ class Node(ABC):
                 elif bool_ser == Attr.Bool.YesNo:
                     r.append([sexpr.Sym(a.name), sexpr.Sym("yes" if val else "no")])
             elif a.get_meta(Attr.Positional) or isinstance(val, Node):
-                r.append(val)
+                r.append(sexpr.to_sexpr(val))
             else:
-                r.append([sexpr.Sym(a.name), val])
+                r.append([sexpr.Sym(a.name), sexpr.to_sexpr(val)])
 
         if self.unknown:
             r.extend(map(sexpr.UnknownSExpr, self.unknown))

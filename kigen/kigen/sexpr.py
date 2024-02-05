@@ -36,6 +36,16 @@ class UnknownSExpr:
 
 SExpr: TypeAlias = "str | float | int | sexpr.Sym | list[sexpr.SExpr] | sexpr.UnknownSExpr"
 
+def to_sexpr(obj: Any) -> SExpr:
+    if isinstance(obj, (str, int, float, Sym)):
+        return obj
+    elif isinstance(obj, UnknownSExpr):
+        return UnknownSExpr(to_sexpr(obj.expr))
+    elif isinstance(obj, list):
+        return [to_sexpr(item) for item in obj]
+    elif hasattr(obj, "to_sexpr"):
+        return obj.to_sexpr()
+
 def sexpr_length(expr: FlatSExpr) -> int:
     """Calculates length of flattened s-expr element."""
     if isinstance(expr, str):
@@ -77,25 +87,25 @@ def sexpr_format(expr: FlatSExpr, width: int = 120) -> str:
     sexpr_collect(r, expr, 0, width)
     return "".join(r)
 
-def sexpr_flatten(o: Any, show_unknown: bool) -> list[FlatSExpr]:
+def sexpr_flatten(obj: Any, show_unknown: bool) -> list[FlatSExpr]:
     """Flattens an object to an s-expr tree with only lists and strings."""
-    if hasattr(o, "to_sexpr"):
-        return [sexpr_flatten(c, show_unknown)[0] for c in o.to_sexpr()]
-    elif isinstance(o, Sym):
-        return [o.name]
-    elif isinstance(o, str):
-        return [f"\"{repr(o)[1:-1]}\""]
-    elif isinstance(o, int):
-        return [str(o)]
-    elif isinstance(o, float):
-        return [str(round(o * 1e6) / 1e6)]
-    elif isinstance(o, UnknownSExpr):
+    if isinstance(obj, Sym):
+        return [obj.name]
+    elif isinstance(obj, str):
+        return [f"\"{repr(obj)[1:-1]}\""]
+    elif isinstance(obj, int):
+        return [str(obj)]
+    elif isinstance(obj, float):
+        return [str(round(obj * 1e6) / 1e6)]
+    elif isinstance(obj, UnknownSExpr):
         if show_unknown:
-            return [UnknownFlatSExpr(sexpr_flatten(o.expr, show_unknown)[0])]
+            return [UnknownFlatSExpr(sexpr_flatten(obj.expr, show_unknown)[0])]
         else:
-            return sexpr_flatten(o.expr, show_unknown)
+            return sexpr_flatten(obj.expr, show_unknown)
+    elif isinstance(obj, list):
+        return [flatten_list(sexpr_flatten(c, show_unknown) for c in obj)]
     else:
-        return [flatten_list(sexpr_flatten(c, show_unknown) for c in o)]
+        raise ValueError(f"Cannot flatten type {type(obj)}")
 
 def sexpr_serialize(obj: Any, width: int = 120, show_unknown: bool = False) -> str:
     return sexpr_format(sexpr_flatten(obj, show_unknown)[0], width)
