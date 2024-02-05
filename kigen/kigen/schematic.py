@@ -210,11 +210,14 @@ class SchematicFile(ContainerNode):
     def __init__(
         self,
         uuid: Uuid = NEW_INSTANCE,
-        page: PageSettings = NEW_INSTANCE,
+        page: PageSettings = None,
         lib_symbols: SchematicLibrarySymbols = NEW_INSTANCE,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
     ):
+        if not page:
+            page = PageSettings(PaperSize.A4)
+
         super().__init__(locals())
 
     def import_symbol(
@@ -228,6 +231,9 @@ class SchematicFile(ContainerNode):
         lib_file = sym.closest(symbol.SymbolLibrary)
         if not lib_file:
             raise RuntimeError("Only LibSymbols that are part of a SymbolLibFile can be imported")
+
+        if not lib_file.filename:
+            raise RuntimeError("The parent SymbolLibFile does not have a filename")
 
         lib_id = f"{lib_file.filename}:{sym.name}"
         if not self.lib_symbols.find_one(symbol.Symbol, lambda s: s.lib_id == lib_id):

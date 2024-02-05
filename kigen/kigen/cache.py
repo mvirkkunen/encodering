@@ -4,11 +4,11 @@ import os
 import pickle
 import re
 import warnings
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 CACHE_VERSION = 1
 
-def get_cache_path(path: str) -> str:
+def get_cache_path(path: str) -> Optional[str]:
     cache_dir = os.environ.get("XDG_CACHE_HOME", None)
     if not cache_dir:
         cache_dir = os.environ.get("HOME", None)
@@ -41,12 +41,12 @@ def load(path: str, loader: Callable[[str], Any]) -> Any:
 
     try:
         with open(cache_path, "rb") as f:
-            p = pickle.Unpickler(f)
-            if p.load() != header:
+            up = pickle.Unpickler(f)
+            if up.load() != header:
                 raise FileNotFoundError()
 
             gc.disable()
-            obj = p.load()
+            obj = up.load()
 
             return obj
     except (FileNotFoundError, PermissionError):

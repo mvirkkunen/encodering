@@ -3,15 +3,13 @@ from typing import Optional
 from .common import *
 from .values import *
 
-class GraphicsItem(Node):
-    pass
-
 class Transform(BaseTransform):
     pass
 
-Transform.child_types = (GraphicsItem, Transform)
+class Rotate(BaseTransform):
+    pass
 
-class BaseLine(GraphicsItem):
+class BaseLine(Node):
     start: Annotated[Vec2, Attr.Transform]
     end: Annotated[Vec2, Attr.Transform]
     layer: str
@@ -28,8 +26,7 @@ class Line(BaseLine):
             layer: str,
             width: float,
             locked: bool = False,
-            parent: Node = None
-        ):
+    ) -> None:
         super().__init__(locals())
 
 class RectFill(SymbolEnum):
@@ -46,10 +43,9 @@ class Rect(BaseLine):
             end: ToVec2,
             layer: Layer,
             width: float,
-            fill: RectFill = None,
+            fill: Optional[RectFill] = None,
             locked: bool = False,
-            parent: Node = None
-        ):
+    ) -> None:
         super().__init__(locals())
 
 class FootprintType(SymbolEnum):
@@ -69,21 +65,23 @@ class FootprintAttributes(Node):
             type: FootprintType,
             board_only: bool = False,
             exclude_from_pos_files: bool = False,
-            exclude_from_bom: bool = False):
+            exclude_from_bom: bool = False
+    ) -> None:
         super().__init__(locals())
+
+GraphicsItemTypes = (Line, Rect, Transform, Rotate)
+Transform.child_types = GraphicsItemTypes
+Rotate.child_types = GraphicsItemTypes
 
 class BaseFootprint(ContainerNode):
     node_name = "footprint"
-    child_types = (GraphicsItem, Transform)
+    child_types = GraphicsItemTypes
 
     layer: str
     descr: Optional[str]
     tags: Optional[str]
     properties: Properties
     attr: Optional[FootprintAttributes]
-
-    def __init__(self, attrs):
-        super().__init__(attrs)
 
 class Footprint(BaseFootprint):
     library_link: Annotated[Optional[str], Attr.Positional]
@@ -97,12 +95,12 @@ class Footprint(BaseFootprint):
         layer: Layer,
         at: Pos2,
         path: str,
-        descr: str = None,
-        tags: str = None,
+        descr: Optional[str] = None,
+        tags: Optional[str] = None,
         properties: ToProperties = {},
-        attr: FootprintAttributes = None,
+        attr: Optional[FootprintAttributes] = None,
         tstamp: Uuid = NEW_INSTANCE,
-    ):
+    ) -> None:
         super().__init__(locals())
 
 class FootprintFile(BaseFootprint):
@@ -116,12 +114,11 @@ class FootprintFile(BaseFootprint):
         self,
         name: str,
         layer: str,
-        descr: str = None,
-        tags: str = None,
-        properties: ToProperties = {},
-        attr: FootprintAttributes = None,
+        descr: Optional[str] = None,
+        tags: Optional[str] = None,
+        properties: ToProperties = NEW_INSTANCE,
+        attr: Optional[FootprintAttributes] = None,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
-    ):
+    ) -> None:
         super().__init__(locals())
-

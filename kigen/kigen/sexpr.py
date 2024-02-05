@@ -21,7 +21,7 @@ class Sym:
 
         object.__setattr__(self, "name", name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Symbol({self.name})"
 
 @dataclass(frozen=True)
@@ -36,15 +36,17 @@ class UnknownSExpr:
 
 SExpr: TypeAlias = "str | float | int | sexpr.Sym | list[sexpr.SExpr] | sexpr.UnknownSExpr"
 
-def to_sexpr(obj: Any) -> SExpr:
+def to_sexpr(obj: Any) -> list[SExpr]:
     if isinstance(obj, (str, int, float, Sym)):
-        return obj
+        return [obj]
     elif isinstance(obj, UnknownSExpr):
-        return UnknownSExpr(to_sexpr(obj.expr))
+        return [UnknownSExpr(to_sexpr(obj.expr))]
     elif isinstance(obj, list):
         return [to_sexpr(item) for item in obj]
     elif hasattr(obj, "to_sexpr"):
         return obj.to_sexpr()
+    else:
+        raise ValueError(f"Cannot convert type {type(obj)} to SExpr")
 
 def sexpr_length(expr: FlatSExpr) -> int:
     """Calculates length of flattened s-expr element."""

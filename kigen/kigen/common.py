@@ -83,10 +83,10 @@ class PageSettings(Node):
             paper_size: Optional[PaperSize] = None,
             width: Optional[float] = None,
             height: Optional[float] = None
-    ):
+    ) -> None:
         super().__init__(locals())
 
-    def validate(self):
+    def validate(self) -> None:
         if not (
                 (self.width is not None and self.height is not None and self.paper_size is None)
                 or (self.width is None and self.height is None and self.paper_size is not None)):
@@ -134,7 +134,7 @@ class Font(Node):
             bold: bool = False,
             italic: bool = False,
             line_spacing: Optional[float] = None,
-    ):
+    ) -> None:
         super().__init__(locals())
 
 class TextJustify(Flag):
@@ -178,7 +178,7 @@ class TextEffects(Node):
             font: Font = NEW_INSTANCE,
             justify: Optional[TextJustify] = None,
             hide: bool = False,
-    ):
+    ) -> None:
         super().__init__(locals())
 
 class StrokeType(SymbolEnum):
@@ -201,7 +201,7 @@ class StrokeDefinition(Node):
             width: float = 0,
             type: StrokeType = StrokeType.Default,
             color: Rgba = NEW_INSTANCE,
-    ):
+    ) -> None:
         super().__init__(locals())
 
 class FillType(SymbolEnum):
@@ -217,7 +217,7 @@ class FillDefinition(Node):
     def __init__(
             self,
             type: FillType = FillType.None_,
-    ):
+    ) -> None:
         super().__init__(locals())
 
 class CoordinatePoint(Node):
@@ -230,7 +230,7 @@ class CoordinatePoint(Node):
             self,
             x: float,
             y: float,
-    ):
+    ) -> None:
         super().__init__(locals())
 
 class CoordinatePointList(ContainerNode):
@@ -240,7 +240,7 @@ class CoordinatePointList(ContainerNode):
     def __init__(
             self,
             children: "Optional[Iterable[ToVec2 | CoordinatePoint]]" = None,
-    ):
+    ) -> None:
         if children:
             new_children = []
             for c in children:

@@ -5,7 +5,7 @@ from abc import ABC
 from collections.abc import Iterable, Iterator
 from functools import cache
 import typing
-from typing import Any, Callable, ClassVar, Annotated, Optional, TypeAlias, Union, Self
+from typing import Any, Callable, ClassVar, Annotated, Optional, Self, TypeAlias, TypeVar, Union
 
 from . import sexpr, util, values
 
@@ -101,9 +101,7 @@ class Node(ABC):
     """
 
     node_name: ClassVar[Optional[str]]
-    positional_attrs: ClassVar[Optional[(str)]]
-    order_attrs: ClassVar[Optional[(str)]]
-    transform_attrs: ClassVar[Optional[(str)]]
+    order_attrs: ClassVar[Optional[tuple[str, ...]]]
 
     # Parent node.
     __parent: "Annotated[Optional[ContainerNode], Attr.Ignore]"
@@ -112,6 +110,9 @@ class Node(ABC):
     unknown: Annotated[Optional[list[sexpr.SExpr]], Attr.Ignore]
 
     def __init__(self, attrs: Optional[dict[str, Any]] = None) -> None:
+        self._init(attrs)
+
+    def _init(self, attrs: Optional[dict[str, Any]] = None) -> None:
         if not attrs:
             attrs = {}
 
@@ -211,9 +212,9 @@ class Node(ABC):
                 elif bool_ser == Attr.Bool.YesNo:
                     r.append([sexpr.Sym(a.name), sexpr.Sym("yes" if val else "no")])
             elif a.get_meta(Attr.Positional) or isinstance(val, Node):
-                r.append(sexpr.to_sexpr(val))
+                r.extend(sexpr.to_sexpr(val))
             else:
-                r.append([sexpr.Sym(a.name), sexpr.to_sexpr(val)])
+                r.append([sexpr.Sym(a.name), *sexpr.to_sexpr(val)])
 
         if self.unknown:
             r.extend(map(sexpr.UnknownSExpr, self.unknown))
@@ -265,7 +266,8 @@ class Node(ABC):
 
                     expr += v[1:]
 
-        node: Self = cls(**attrs)
+        node: Self = cls.__new__(cls)
+        node._init(attrs)
         node.unknown = expr
         return node
 
@@ -296,11 +298,11 @@ class ContainerNode(Node):
     Base class for KiCad data nodes that contain children.
     """
 
-    child_types: ClassVar[tuple[type[Node]]]
+    child_types: ClassVar[tuple[type[Node], ...]]
 
     __children: Annotated[list[Node], Attr.Ignore]
 
-    def __init__(self, attrs: Optional[dict[str, Any]] = None) -> None:
+    def _init(self, attrs: Optional[dict[str, Any]] = None) -> None:
         self.__children = []
 
         if not attrs:
@@ -308,7 +310,7 @@ class ContainerNode(Node):
 
         children = attrs.pop("children", None)
 
-        super().__init__(attrs)
+        super()._init(attrs)
 
         if children:
             if not isinstance(children, Iterable):
@@ -317,7 +319,7 @@ class ContainerNode(Node):
             for child in children:
                 self.append(child)
 
-    def clone(self):
+    def clone(self) -> Self:
         """
         Creates a recursive clone of this node. The new node will not have a parent.
         """
@@ -359,21 +361,22 @@ class ContainerNode(Node):
         self.__children.remove(node)
         node._set_parent(None)
 
-    def extend(self, nodes: list[Node]) -> None:
+    def extend(self, nodes: Iterable[Node]) -> None:
         """
         Adds multiple child nodes to this container. See append().
         """
         for n in nodes:
             self.append(n)
 
-    def find_one(self, child_type: type[Node], predicate: Optional[Callable[[Node], bool]] = None) -> Optional[Node]:
+    _T = TypeVar("_T", bound=Node)
+    def find_one(self, child_type: type[_T], predicate: Optional[Callable[[_T], bool]] = None) -> Optional[_T]:
         """
         Finds the first child node of this node matching the type and optionally also a predicate. Returns None if not found.
         """
 
         return next(self.find_all(child_type, predicate), None)
 
-    def find_all(self, child_type: type[Node], predicate: Optional[Callable[[Node], bool]] = None) -> Iterator[Node]:
+    def find_all(self, child_type: type[_T], predicate: Optional[Callable[[_T], bool]] = None) -> Iterator[_T]:
         """
         Finds all child nodes of this node matching the type and optionally also a predicate.
         """

@@ -17,7 +17,7 @@ class Property(Node):
             value: str,
             at: Pos2,
             effects: TextEffects = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param name: The name of the property. Must be unique within symbol.
         :param value: The value of the property.
@@ -56,7 +56,7 @@ class Arc(Node):
             end: Vec2,
             stroke: StrokeDefinition = NEW_INSTANCE,
             fill: FillDefinition = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param start: Start point of the arc.
         :param mid: Mid point of the arc.
@@ -80,7 +80,7 @@ class Circle(Node):
             radius: float,
             stroke: StrokeDefinition = NEW_INSTANCE,
             fill: FillDefinition = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param center: Center point of the circle.
         :param radius: Radius of the circle.
@@ -102,7 +102,7 @@ class Bezier(Node):
             pts: CoordinatePointList = NEW_INSTANCE,
             stroke: StrokeDefinition = NEW_INSTANCE,
             fill: FillDefinition = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param pts: Points that define the cubic bezier curve. Exactly 4 must be defined before serialization.
         :param stroke: Stroke (outline) style.
@@ -111,7 +111,7 @@ class Bezier(Node):
 
         super().__init__(locals())
 
-    def validate(self):
+    def validate(self) -> None:
         super().validate()
 
         if len(self.pts) != 4:
@@ -129,7 +129,7 @@ class PolyLine(Node):
             pts: CoordinatePointList = NEW_INSTANCE,
             stroke: StrokeDefinition = NEW_INSTANCE,
             fill: FillDefinition = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param pts: Points that define the polyline. At least 2 must be defined before serialization.
         :param stroke: Stroke (outline) style.
@@ -138,7 +138,7 @@ class PolyLine(Node):
 
         super().__init__(locals())
 
-    def validate(self):
+    def validate(self) -> None:
         super().validate()
 
         if len(self.pts) < 2:
@@ -158,7 +158,7 @@ class Rectangle(Node):
             end: Vec2,
             stroke: StrokeDefinition = NEW_INSTANCE,
             fill: FillDefinition = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param start: Start (e.g. top left) point of the rectangle.
         :param end: End (e.g. bottom right) point of the rectangle.
@@ -180,7 +180,7 @@ class Text(Node):
             text: str,
             at: Vec2,
             effects: TextEffects = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param text: Text to display.
         :param at: Position and rotation angle of the text.
@@ -199,7 +199,7 @@ class PinName(Node):
             self,
             name: str,
             effects: TextEffects = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param name: Name of the pin.
         :param effects: Text display effects.
@@ -217,7 +217,7 @@ class PinNumber(Node):
             self,
             number: str,
             effects: TextEffects = NEW_INSTANCE,
-    ):
+    ) -> None:
         """
         :param number: Number of the pin.
         :param effects: Text display effects.
@@ -268,7 +268,7 @@ class Pin(Node):
             length: float,
             name: PinName | str,
             number: PinNumber | str,
-    ):
+    ) -> None:
         """
         :param electrical_type: Electrical type of the pin.
         :param graphical_type: Graphical type of the pin.
@@ -305,7 +305,7 @@ class ChildSymbol(BaseSymbol):
             self,
             name: str,
             unit_name: Optional[str] = None,
-    ):
+    ) -> None:
         """
         :param name: Name of the child symbol.
         :param unit_name: If defined, this child symbol is a separate unit of the main symbol with the defined name.
@@ -320,8 +320,8 @@ class PinNumbers(Node):
 
     def __init__(
             self,
-            hide = False
-    ):
+            hide: bool = False
+    ) -> None:
         """
         :param hide: True to hide the pin numbers of the symbol.
         """
@@ -337,8 +337,8 @@ class PinNames(Node):
     def __init__(
             self,
             offset: Optional[float] = None,
-            hide = False
-    ):
+            hide: bool = False
+    ) -> None:
         """
         :param offset: Pin name offset for all pins. If not defined, the pin name offset is 0.508mm (0.020").
         :param hide: True to hide the pin names of the symbol.
@@ -361,8 +361,8 @@ class Symbol(BaseSymbol):
             extends: Optional[str] = None,
             pin_numbers: Optional[PinNumbers] = None,
             pin_names: Optional[PinNames] = None,
-            in_bom: Attr.Bool.YesNo = None,
-            on_board: Attr.Bool.YesNo = None,
+            in_bom: bool = True,
+            on_board: bool = True,
     ):
         """
         :param name: Name of the symbol.
@@ -380,46 +380,33 @@ class SymbolLibrary(ContainerNode):
     child_types = (Symbol,)
     order_attrs = ("version", "generator")
 
-    __filename: Annotated[str, Attr.Ignore]
+    filename: Annotated[str, Attr.Ignore]
     version: int
     generator: Generator
 
     def __init__(
         self,
-        filename: str = None,
+        filename: str,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
     ):
-        """
-        :param filename: Filename of the library. Must be set before library is used. Automatically ste by load().
-        """
-        self.__filename = filename
+        self.filename = filename
 
         super().__init__(locals())
 
-    @property
-    def filename(self):
-        """
-        The filename of the library. Will throw an exception if the filename is not defined.
-        """
-        if not self.__filename:
-            raise RuntimeError("Invalid symbol library: no filename defined")
-
-        return self.__filename
-
-    def get(self, name) -> Optional[Symbol]:
+    def get(self, name: str) -> Optional[Symbol]:
         """
         Gets a symbol by name.
         """
         return self.find_one(Symbol, lambda c: c.name == name)
 
     @staticmethod
-    def _load(path) -> "SymbolLibrary":
+    def _load(path: str) -> "SymbolLibrary":
         with open(path, "r") as f:
             data = f.read()
 
         lib = SymbolLibrary.from_sexpr(sexpr.sexpr_parse(data))
-        lib.__filename = Path(path).stem
+        lib.filename = Path(path).stem
         return lib
 
     @staticmethod

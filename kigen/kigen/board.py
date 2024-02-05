@@ -1,3 +1,5 @@
+from typing import ClassVar, Sequence
+
 from .common import *
 
 class BoardGeneralSettings(Node):
@@ -7,7 +9,8 @@ class BoardGeneralSettings(Node):
 
     def __init__(
             self,
-            thickness: float):
+            thickness: float
+    ) -> None:
         super().__init__(locals())
 
 class LayerType(SymbolEnum):
@@ -28,69 +31,75 @@ class BoardLayer(Node):
             ordinal: int,
             canonical_name: str,
             type: LayerType,
-            user_name: str = None):
+            user_name: Optional[str] = None
+    ) -> None:
         super().__init__(locals())
-
-    @staticmethod
-    def generate_layers(signal_layers):
-        r = []
-
-        ordinal = 0
-        if signal_layers > 0:
-            r.append(BoardLayer(ordinal, "F.Cu", LayerType.Signal))
-            ordinal += 1
-
-        if signal_layers > 2:
-            for i in range(1, signal_layers - 1):
-                r.append(BoardLayer(ordinal, f"In{i}.Cu", LayerType.Signal))
-                ordinal += 1
-
-        ordinal = max(ordinal, 31)
-
-        if signal_layers > 1:
-            r.append(BoardLayer(ordinal, "B.Cu", LayerType.Signal))
-            ordinal += 1
-
-        for attrs in [
-            ("B.Adhes", LayerType.User, "B.Adhesive"),
-            ("F.Adhes", LayerType.User, "F.Adhesive"),
-            ("B.Paste", LayerType.User),
-            ("F.Paste", LayerType.User),
-            ("B.SilkS", LayerType.User, "B.Silkscreen"),
-            ("F.SilkS", LayerType.User, "F.Silkscreen"),
-            ("B.Mask", LayerType.User),
-            ("F.Mask", LayerType.User),
-            ("Dwgs.User", LayerType.User, "User.Drawings"),
-            ("Cmts.User", LayerType.User, "User.Comments"),
-            ("Eco1.User", LayerType.User, "User.Eco1"),
-            ("Eco2.User", LayerType.User, "User.Eco2"),
-            ("Edge.Cuts", LayerType.User),
-            ("Margin", LayerType.User),
-            ("B.CrtYd", LayerType.User, "B.Courtyard"),
-            ("F.CrtYd", LayerType.User, "F.Courtyard"),
-            ("B.Fab", LayerType.User),
-            ("F.Fab", LayerType.User),
-            ("User.1", LayerType.User),
-            ("User.2", LayerType.User),
-            ("User.3", LayerType.User),
-            ("User.4", LayerType.User),
-            ("User.5", LayerType.User),
-            ("User.6", LayerType.User),
-            ("User.7", LayerType.User),
-            ("User.8", LayerType.User),
-            ("User.9", LayerType.User),
-        ]:
-            r.append(BoardLayer(ordinal, *attrs))
-            ordinal += 1
-
-        return r
 
 class BoardLayers(ContainerNode):
     node_name = "layers"
     child_types = (BoardLayer,)
 
-    def __init__(self, children):
+    default_non_signal_layers: ClassVar[list[tuple[str, LayerType, Optional[str]]]] = [
+        ("B.Adhes", LayerType.User, "B.Adhesive"),
+        ("F.Adhes", LayerType.User, "F.Adhesive"),
+        ("B.Paste", LayerType.User, None),
+        ("F.Paste", LayerType.User, None),
+        ("B.SilkS", LayerType.User, "B.Silkscreen"),
+        ("F.SilkS", LayerType.User, "F.Silkscreen"),
+        ("B.Mask", LayerType.User, None),
+        ("F.Mask", LayerType.User, None),
+        ("Dwgs.User", LayerType.User, "User.Drawings"),
+        ("Cmts.User", LayerType.User, "User.Comments"),
+        ("Eco1.User", LayerType.User, "User.Eco1"),
+        ("Eco2.User", LayerType.User, "User.Eco2"),
+        ("Edge.Cuts", LayerType.User, None),
+        ("Margin", LayerType.User, None),
+        ("B.CrtYd", LayerType.User, "B.Courtyard"),
+        ("F.CrtYd", LayerType.User, "F.Courtyard"),
+        ("B.Fab", LayerType.User, None),
+        ("F.Fab", LayerType.User, None),
+        ("User.1", LayerType.User, None),
+        ("User.2", LayerType.User, None),
+        ("User.3", LayerType.User, None),
+        ("User.4", LayerType.User, None),
+        ("User.5", LayerType.User, None),
+        ("User.6", LayerType.User, None),
+        ("User.7", LayerType.User, None),
+        ("User.8", LayerType.User, None),
+        ("User.9", LayerType.User, None),
+    ]
+
+    def __init__(
+            self,
+            children: Sequence[BoardLayer]
+    ) -> None:
         super().__init__(locals())
+
+    @staticmethod
+    def generate_layers(num_signal_layers: int) -> "BoardLayers":
+        r = []
+
+        ordinal = 0
+        if num_signal_layers > 0:
+            r.append(BoardLayer(ordinal, "F.Cu", LayerType.Signal))
+            ordinal += 1
+
+        if num_signal_layers > 2:
+            for i in range(1, num_signal_layers - 1):
+                r.append(BoardLayer(ordinal, f"In{i}.Cu", LayerType.Signal))
+                ordinal += 1
+
+        ordinal = max(ordinal, 31)
+
+        if num_signal_layers > 1:
+            r.append(BoardLayer(ordinal, "B.Cu", LayerType.Signal))
+            ordinal += 1
+
+        for attrs in BoardLayers.default_non_signal_layers:
+            r.append(BoardLayer(ordinal, *attrs))
+            ordinal += 1
+
+        return BoardLayers(r)
 
 class BoardSetup(Node):
     node_name = "setup"
@@ -105,11 +114,12 @@ class BoardSetup(Node):
     def __init__(
             self,
             pad_to_mask_clearance: float = 0,
-            solder_mask_min_width: float = None,
-            pad_to_paste_clearance: float = None,
-            pad_to_paste_clearance_ratio: float = None,
-            aux_axis_origin: Vec2 = Vec2(),
-            grid_origin: Vec2 = Vec2()):
+            solder_mask_min_width: Optional[float] = None,
+            pad_to_paste_clearance: Optional[float] = None,
+            pad_to_paste_clearance_ratio: Optional[float] = None,
+            aux_axis_origin: Vec2 = NEW_INSTANCE,
+            grid_origin: Vec2 = NEW_INSTANCE,
+    ) -> None:
         super().__init__(locals())
 
 class BoardNet(Node):
@@ -121,7 +131,8 @@ class BoardNet(Node):
     def __init__(
             self,
             ordinal: int,
-            name: str):
+            name: str
+    ) -> None:
         """
         Defines a net for the board.
 
@@ -148,9 +159,8 @@ class TrackSegment(Node):
             layer: str,
             net: int,
             tstamp: Uuid = NEW_INSTANCE
-    ):
+    ) -> None:
         super().__init__(locals())
-
 
 class BoardFile(ContainerNode):
     node_name = "kicad_pcb"
@@ -165,35 +175,21 @@ class BoardFile(ContainerNode):
 
     def __init__(
         self,
-        layers: list[BoardLayer],
-        general: BoardGeneralSettings,
-        page: PageSettings,
-        setup: BoardSetup,
-        version: int = KIGEN_VERSION,
-        generator: Generator = KIGEN_GENERATOR,
-    ):
-        if not isinstance(layers, list):
-            layers = BoardLayer.generate_layers(layers)
-
-        layers = BoardLayers(layers)
-
-        super().__init__(locals())
-
-    @staticmethod
-    def create(
-        layers: int | list[BoardLayer] = 2,
-        general: Optional[BoardGeneralSettings] = None,
+        layers: BoardLayers | list[BoardLayer] | int,
+        thickness: float,
         page: Optional[PageSettings] = None,
         setup: Optional[BoardSetup] = None,
-    ):
-        if not isinstance(layers, list):
-            layers = BoardLayer.generate_layers(layers)
+        version: int = KIGEN_VERSION,
+        generator: Generator = KIGEN_GENERATOR,
+    ) -> None:
+        if isinstance(layers, list):
+            layers = BoardLayers(layers)
 
-        layers = BoardLayers(layers)
+        if not isinstance(layers, BoardLayers):
+            layers = BoardLayers.generate_layers(layers)
 
-        return BoardFile(
-            layers=BoardLayers(layers),
-            general=general or BoardGeneralSettings(),
-            page=page or PageSettings(PaperSize.A4),
-            setup=setup or BoardSetup()
-        )
+        general = BoardGeneralSettings(thickness=thickness)
+        page = page or PageSettings(PaperSize.A4)
+        setup = setup or BoardSetup()
+
+        super().__init__(locals())
