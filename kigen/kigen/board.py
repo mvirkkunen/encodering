@@ -178,7 +178,7 @@ class BoardFile(ContainerNode):
         layers: BoardLayers | list[BoardLayer] | int,
         thickness: float,
         page: Optional[PageSettings] = None,
-        setup: Optional[BoardSetup] = None,
+        setup: Optional[BoardSetup] = NEW_INSTANCE,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
     ) -> None:
@@ -190,6 +190,5 @@ class BoardFile(ContainerNode):
 
         general = BoardGeneralSettings(thickness=thickness)
         page = page or PageSettings(PaperSize.A4)
-        setup = setup or BoardSetup()
 
         super().__init__(locals())

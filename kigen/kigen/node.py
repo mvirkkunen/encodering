@@ -276,7 +276,10 @@ class Node(ABC):
 
         node: Self = cls.__new__(cls)
         node._init(attrs)
-        node.unknown = expr
+
+        if expr:
+            node.unknown = expr
+
         return node
 
     def serialize(self, show_unknown: bool=False) -> str:
