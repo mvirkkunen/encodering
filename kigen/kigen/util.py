@@ -9,3 +9,15 @@ def reorder_dict(dict: dict, keys: (str)) -> dict:
         **{k: v for k, v in dict.items() if k in keys},
         **{k: v for k, v in dict.items() if k not in keys},
     }
+
+def remove_where(l: list, pred):
+    i = 0
+    r = []
+    while i < len(l):
+        if pred(l[i]):
+            r.append(l[i])
+            del l[i]
+        else:
+            i += 1
+
+    return r

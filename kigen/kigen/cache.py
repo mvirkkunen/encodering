@@ -6,6 +6,8 @@ import re
 import warnings
 from typing import Any, Callable
 
+CACHE_VERSION = 1
+
 def get_cache_path(path: str) -> str:
     cache_dir = os.environ.get("XDG_CACHE_HOME", None)
     if not cache_dir:
@@ -30,11 +32,15 @@ def get_cache_path(path: str) -> str:
     return os.path.join(cache_dir, filename)
 
 def load(path: str, loader: Callable[[str], Any]) -> Any:
+    cache_path = get_cache_path(path)
+    if not cache_path:
+        return loader(path)
+
     mtime = os.path.getmtime(path)
-    header = ("kigen_cache", 1, mtime)
+    header = ("kigen_cache", CACHE_VERSION, mtime)
 
     try:
-        with open(get_cache_path(path), "rb") as f:
+        with open(cache_path, "rb") as f:
             p = pickle.Unpickler(f)
             if p.load() != header:
                 raise FileNotFoundError()
@@ -49,7 +55,7 @@ def load(path: str, loader: Callable[[str], Any]) -> Any:
         gc.enable()
 
     obj = loader(path)
-    with open(get_cache_path(path), "wb") as f:
+    with open(cache_path, "wb") as f:
         p = pickle.Pickler(f)
         p.dump(header)
         p.dump(obj)

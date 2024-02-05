@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from kigen.values import *
 import kigen.footprint as fp
 import kigen.symbol as sym
@@ -53,3 +55,5 @@ for pin in conn.pins:
 #print(schematic.serialize())
 
 schematic.save("../testproject/testproject/testproject.kicad_sch")
+
+import kigen

@@ -7,6 +7,7 @@ from typing import get_type_hints, Callable, ClassVar, Annotated, Optional, _Uni
 
 from .sexpr import sexpr_parse, sexpr_serialize, SExpr, Sym, UnknownSExpr
 from .values import *
+from . import util
 
 class AttrBool(Enum):
     Symbol = 1
@@ -22,9 +23,9 @@ class AttrTransform:
 class AttrIgnore:
     pass
 
-MetaAttribute: TypeAlias = AttrBool | AttrPositional | AttrTransform
-
 class AttributeMeta:
+    MetaAttribute: TypeAlias = AttrBool | AttrPositional | AttrTransform
+
     name: str
     type: type
     optional: bool
@@ -73,18 +74,6 @@ class AttributeMeta:
 
     def __repr__(self):
         return f"AttributeMeta('{self.name}', {self.type}, {self.optional}, {self.metadata})"
-
-def remove_where(l: list, pred):
-    i = 0
-    r = []
-    while i < len(l):
-        if pred(l[i]):
-            r.append(l[i])
-            del l[i]
-        else:
-            i += 1
-
-    return r
 
 class Node(ABC):
     node_name: ClassVar[Optional[str]]
@@ -198,16 +187,16 @@ class Node(ABC):
             elif a.type == bool:
                 bool_ser: AttrBool = a.get_meta(AttrBool) or AttrBool.Symbol
                 if bool_ser == AttrBool.Symbol:
-                    v = remove_where(expr, lambda e: e == Sym(a.name))
+                    v = util.remove_where(expr, lambda e: e == Sym(a.name))
                     attrs[a.name] = (len(v) > 0)
                 elif bool_ser == AttrBool.SymbolInList:
-                    v = remove_where(expr, lambda e: e == [Sym(a.name)])
+                    v = util.remove_where(expr, lambda e: e == [Sym(a.name)])
                     attrs[a.name] = (len(v) > 0)
                 elif bool_ser == AttrBool.YesNo:
-                    v = remove_where(expr, lambda e: isinstance(e, list) and len(e) == 2 and e[0] == Sym(a.name))
+                    v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) == 2 and e[0] == Sym(a.name))
                     attrs[a.name] = (len(v) > 0 and v[0][1] == Sym("yes"))
             else:
-                v = remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == Sym(a.name))
+                v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == Sym(a.name))
                 if len(v) >= 1:
                     if issubclass(a.type, Node):
                         attrs[a.name] = a.type.from_sexpr(v[0])

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import overload, Iterable, Self, TypeAlias
 
-from .sexpr import Sym
+from . import sexpr
 
 ToVec2: TypeAlias = "list[float] | (float, float) | () | Vec2 | Pos2"
 
@@ -105,10 +105,10 @@ class Pos2(Vec2):
         return [self.x, self.y, self.r]
 
     @classmethod
-    def from_sexpr(cls, e) -> Self:
+    def from_sexpr(cls, e: sexpr.SExpr) -> Self:
         return Pos2(*e)
 
-    def rotate(self, angle) -> Self:
+    def rotate(self, angle: float) -> Self:
         if angle == 0:
             return self
 
@@ -182,7 +182,7 @@ class Uuid():
         return self.__value
 
     def to_sexpr(self):
-        return [Sym(self.value)]
+        return [sexpr.Sym(self.value)]
 
     @classmethod
     def from_sexpr(cls, e) -> Self:
@@ -190,7 +190,7 @@ class Uuid():
 
 class SymbolEnum(Enum):
     def to_sexpr(self):
-        return [Sym(self.value)]
+        return [sexpr.Sym(self.value)]
 
     @classmethod
     def from_sexpr(cls, e) -> Self:
@@ -205,7 +205,7 @@ class SymbolEnumUnknownValue:
     value: str
 
     def to_sexpr(self):
-        return [Sym(self.value)]
+        return [sexpr.Sym(self.value)]
 
 class Layer:
     FCu = "F.Cu"
