@@ -199,7 +199,7 @@ class Node(ABC):
                 continue
 
             if a.get_meta(Attr.Transform) and self.__parent:
-                val = a.value_type(self.__parent.transform(val))
+                val = a.value_type(self.__parent.transform_pos(val))
 
             if issubclass(a.value_type, bool):
                 bool_ser: Attr.Bool = typing.cast(Attr.Bool, a.get_meta(Attr.Bool) or Attr.Bool.Symbol)
@@ -279,13 +279,13 @@ class Node(ABC):
         Can be overridden in a child class to validate node attributes before serialization.
         """
 
-    def transform(self, pos: values.ToPos2) -> values.Pos2:
+    def transform_pos(self, pos: values.ToPos2) -> values.Pos2:
         """
-        Can be overridden in a child class to transform geometric node attributes marked with Attr.Transform before serialization.
+        Can be overridden in a child class to transform positioning attributes marked with Attr.Transform before serialization.
         """
 
         if self.__parent:
-            return self.__parent.transform(pos)
+            return self.__parent.transform_pos(pos)
         else:
             return values.Pos2(pos)
 
@@ -401,7 +401,9 @@ class ContainerNode(Node):
     def to_sexpr(self) -> list[list[sexpr.SExpr]]:
         r = super().to_sexpr()[0]
 
-        for child in sorted(self.__children, key=lambda c: self.child_types.index(type(c))):
+        #for child in sorted(self.__children, key=lambda c: self.child_types.index(type(c))):
+        #    r += child.to_sexpr()
+        for child in self.__children:
             r += child.to_sexpr()
 
         return [r]

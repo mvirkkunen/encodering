@@ -26,9 +26,9 @@ class BaseTransform(ContainerNode):
             parent: Optional[Node] = None):
         super().__init__(locals())
 
-    def transform(self, pos: ToPos2) -> Pos2:
+    def transform_pos(self, pos: ToPos2) -> Pos2:
         pos = Pos2(pos)
-        at = super().transform(self.at)
+        at = super().transform_pos(self.at)
         return at + pos.rotate(at.r)
 
     def to_sexpr(self) -> list[list[sexpr.SExpr]]:
@@ -49,7 +49,7 @@ class BaseRotate(ContainerNode):
             parent: Optional[Node] = None):
         super().__init__(locals())
 
-    def transform(self, pos: ToPos2) -> Pos2:
+    def transform_pos(self, pos: ToPos2) -> Pos2:
         return Pos2(pos).rotate(self.angle)
 
     def to_sexpr(self) -> list[list[sexpr.SExpr]]:
