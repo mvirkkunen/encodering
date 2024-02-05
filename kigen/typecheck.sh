@@ -1,1 +1,1 @@
-mypy --disallow-untyped-defs --disallow-incomplete-defs $@
+mypy --disallow-untyped-defs --disallow-incomplete-defs kigen

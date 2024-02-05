@@ -88,7 +88,7 @@ class Pos2:
     @overload
     def __init__(self, xy: ToVec2, r: float = 0, /) -> None: ...
 
-    def __init__(self, *args: Any, r: float = 0) -> None:
+    def __init__(self, *args: Any) -> None:
         if not args:
             # Pos2()
             # Pos2(())
@@ -164,10 +164,10 @@ class Vec3:
         return [self.x, self.y, self.z]
 
     @classmethod
-    def from_sexpr(cls, e: sexpr.SExpr) -> "Vec3":
-        assert isinstance(e, list)
+    def from_sexpr(cls, expr: sexpr.SExpr) -> "Vec3":
+        assert isinstance(expr, list) and isinstance(expr[0], (float, int)) and isinstance(expr[1], (float, int)) and isinstance(expr[2], (float, int))
 
-        return Vec3(*e)
+        return Vec3(expr[0], expr[1], expr[2])
 
 @dataclass(frozen=True)
 class Rgba:

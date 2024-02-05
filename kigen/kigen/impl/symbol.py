@@ -1,11 +1,9 @@
-from pathlib import Path
 from typing import overload, Annotated, Optional
 
 from ..values import Pos2, SymbolEnum, Vec2, ToVec2
 from ..common import BaseRotate, BaseTransform, CoordinatePoint, CoordinatePointList, FillDefinition, Generator, StrokeDefinition, TextEffects, KIGEN_VERSION, KIGEN_GENERATOR
 from ..sexpr import sexpr_parse
-from ..node import Attr, ContainerNode, Node, NEW_INSTANCE
-from .. import cache
+from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 
 class Property(Node):
     node_name = "property"
@@ -448,7 +446,7 @@ class Symbol(BaseSymbol):
 
         super().__init__(locals())
 
-class SymbolLibrary(ContainerNode):
+class SymbolLibrary(ContainerNode, NodeLoadSaveMixin):
     node_name = "kicad_symbol_lib"
     child_types = (Symbol,)
     order_attrs = ("version", "generator")
@@ -472,19 +470,3 @@ class SymbolLibrary(ContainerNode):
         Gets a symbol by name.
         """
         return self.find_one(Symbol, lambda c: c.name == name)
-
-    @staticmethod
-    def _load(path: str) -> "SymbolLibrary":
-        with open(path, "r") as f:
-            data = f.read()
-
-        lib = SymbolLibrary.from_sexpr(sexpr_parse(data))
-        lib.filename = Path(path).stem
-        return lib
-
-    @staticmethod
-    def load(path: str) -> "SymbolLibrary":
-        """
-        Loads a symbol library from disk.
-        """
-        return cache.load(path, SymbolLibrary._load)

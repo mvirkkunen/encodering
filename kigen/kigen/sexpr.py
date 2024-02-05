@@ -1,9 +1,8 @@
+import itertools
 import re
 
 from dataclasses import dataclass
-from typing import Any, TypeAlias
-
-from .util import flatten_list
+from typing import Protocol, Self, TypeAlias, TYPE_CHECKING
 
 @dataclass(frozen=True)
 class Sym:
@@ -34,9 +33,21 @@ FlatSExpr: TypeAlias = str | list[str] | UnknownFlatSExpr
 class UnknownSExpr:
     expr: "SExpr"
 
-SExpr: TypeAlias = "str | float | int | sexpr.Sym | list[sexpr.SExpr] | sexpr.UnknownSExpr"
+SExprAtom: TypeAlias = str | int | float | Sym
 
-def to_sexpr(obj: Any) -> list[SExpr]:
+# Absolutely no idea by Python and Mypy disagree on how this should be defined.
+if TYPE_CHECKING:
+    SExpr: TypeAlias = "SExprAtom | UnknownSExpr | list[SExpr]"
+else:
+    SExpr: TypeAlias = "sexpr.SExprAtom | sexpr.UnknownSExpr | list[sexpr.SExpr]"
+
+class SExprConvert(Protocol):
+    def to_sexpr(self) -> list[SExpr]: ...
+
+    @classmethod
+    def from_sexpr(cls, sexpr: SExpr) -> Self: ...
+
+def to_sexpr(obj: "SExpr | SExprConvert") -> list[SExpr]:
     if isinstance(obj, (str, int, float, Sym)):
         return [obj]
     elif isinstance(obj, UnknownSExpr):
@@ -89,8 +100,9 @@ def sexpr_format(expr: FlatSExpr, width: int = 120) -> str:
     sexpr_collect(r, expr, 0, width)
     return "".join(r)
 
-def sexpr_flatten(obj: Any, show_unknown: bool) -> list[FlatSExpr]:
+def sexpr_flatten(obj: SExpr, show_unknown: bool) -> list[FlatSExpr]:
     """Flattens an object to an s-expr tree with only lists and strings."""
+
     if isinstance(obj, Sym):
         return [obj.name]
     elif isinstance(obj, str):
@@ -106,11 +118,11 @@ def sexpr_flatten(obj: Any, show_unknown: bool) -> list[FlatSExpr]:
         else:
             return sexpr_flatten(obj.expr, show_unknown)
     elif isinstance(obj, list):
-        return [flatten_list(sexpr_flatten(c, show_unknown) for c in obj)]
+        return [list(itertools.chain.from_iterable(sexpr_flatten(e, show_unknown) for e in obj))] # type: ignore
     else:
         raise ValueError(f"Cannot flatten type {type(obj)}")
 
-def sexpr_serialize(obj: Any, width: int = 120, show_unknown: bool = False) -> str:
+def sexpr_serialize(obj: SExpr, width: int = 120, show_unknown: bool = False) -> str:
     return sexpr_format(sexpr_flatten(obj, show_unknown)[0], width)
 
 sexpr_re = re.compile(r"(\()|(\))|(-?[0-9]*\.[0-9]+)|(-?[0-9]+)|([a-z_][a-z0-9_]*)|\"((?:[^\\\"]*|\\.)*)\"|(\s+)", re.I)

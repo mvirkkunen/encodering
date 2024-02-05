@@ -2,7 +2,7 @@ import copy
 from typing import Annotated, Iterable, Optional
 
 from ..values import Pos2, Rgba, ToVec2, SymbolEnum, Uuid, Vec2
-from ..node import Attr, ContainerNode, Node, NEW_INSTANCE
+from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 from ..common import BaseRotate, BaseTransform, CoordinatePoint, CoordinatePointList, Generator, PageSettings, PaperSize, Properties, StrokeDefinition, TextEffects, ToProperties, KIGEN_GENERATOR, KIGEN_VERSION
 from . import symbol
 
@@ -152,6 +152,7 @@ class SchematicSymbol(ContainerNode):
     in_bom: Annotated[bool, Attr.Bool.YesNo]
     on_board: Annotated[bool, Attr.Bool.YesNo]
     dnp: Annotated[bool, Attr.Bool.YesNo]
+    fields_autoplaced: Annotated[bool, Attr.Bool.SymbolInList]
     uuid: Uuid
     instances: SchematicSymbolInstances
 
@@ -163,6 +164,7 @@ class SchematicSymbol(ContainerNode):
             in_bom: bool = True,
             on_board: bool = True,
             dnp: bool = False,
+            fields_autoplaced: bool = True,
             uuid: Uuid = NEW_INSTANCE,
             instances: SchematicSymbolInstances = NEW_INSTANCE,
             children: Optional[list[symbol.Property | SchematicSymbolPin]] = None,
@@ -179,7 +181,7 @@ class SchematicSymbol(ContainerNode):
             raise ValueError("SchematicSymbol Properties can only be rotated in increments of 90 degrees")
 
     def get_pin_position(self, number: str) -> Pos2:
-        schematic_file = self.closest(SchematicFile)
+        schematic_file = self.closest(SchematicFile) # type: ignore
         if not schematic_file:
             raise RuntimeError("Cannot get pin position because there is no parent schematic")
 
@@ -210,7 +212,7 @@ class SchematicLibSymbols(ContainerNode):
         """
         return self.find_one(symbol.Symbol, lambda c: c.name == name)
 
-class SchematicFile(ContainerNode):
+class SchematicFile(ContainerNode, NodeLoadSaveMixin):
     node_name = "kicad_sch"
     child_types = (Junction, NoConnect, Wire, Bus, GlobalLabel, SchematicSymbol, Transform, Rotate)
     order_attrs = ("version", "generator")
@@ -308,7 +310,3 @@ class SchematicFile(ContainerNode):
 
         return ssym
 
-    def save(self, path: str) -> None:
-        data = self.serialize()
-        with open(path, "w") as f:
-            f.write(data)

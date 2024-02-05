@@ -1,6 +1,6 @@
 from typing import Annotated, ClassVar, Optional
 
-from ..node import Attr, ContainerNode, Node, NEW_INSTANCE
+from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 from ..common import Generator, Layer, PageSettings, PaperSize, KIGEN_GENERATOR, KIGEN_VERSION
 from ..values import SymbolEnum, Uuid, Vec2
 
@@ -164,7 +164,7 @@ class Track(Node):
     ) -> None:
         super().__init__(locals())
 
-class PcbFile(ContainerNode):
+class PcbFile(ContainerNode, NodeLoadSaveMixin):
     node_name = "kicad_pcb"
     order_attrs = ("version", "generator")
 

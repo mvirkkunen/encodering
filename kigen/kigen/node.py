@@ -1,18 +1,15 @@
 import copy
 import enum
+from pathlib import Path
 
-from abc import ABC
 from collections.abc import Iterable, Iterator
 from functools import cache
 import typing
-from typing import Any, Callable, ClassVar, Annotated, Optional, Self, TypeAlias, TypeVar, Union
+from typing import Any, Callable, ClassVar, Annotated, Optional, Protocol, Self, TypeAlias, TypeVar, Union
 
-from . import sexpr, util, values
-
-__all__ = ["NEW_INSTANCE", "Attr", "Node", "ContainerNode"]
+from . import pickle_cache, sexpr, util, values
 
 class NewInstance: pass
-
 NEW_INSTANCE: Any = NewInstance()
 
 class Attr:
@@ -62,7 +59,7 @@ class Attr:
 
     @staticmethod
     @cache
-    def get_class_attributes(cls: type) -> "list[Attr]":
+    def _get_class_attributes(cls: type) -> "list[Attr]":
         r = []
 
         for name, hint in typing.get_type_hints(cls, include_extras=True).items():
@@ -100,10 +97,14 @@ class Attr:
 
         return r
 
+    @staticmethod
+    def get_class_attributes(cls: type) -> "list[Attr]":
+        return Attr._get_class_attributes(cls)
+
     def __repr__(self) -> str:
         return f"Attr('{self.name}', {self.value_type}, {self.optional}, {self.meta})"
 
-class Node(ABC):
+class Node:
     """
     Base class for KiCad data nodes.
     """
@@ -117,10 +118,10 @@ class Node(ABC):
     # Unknown S-expression data that was encountered while deserializing. Will be retained when serializing.
     unknown: Annotated[Optional[list[sexpr.SExpr]], Attr.Ignore]
 
-    def __init__(self, attrs: Optional[dict[str, Any]] = None) -> None:
+    def __init__(self, attrs: Optional[dict[str, sexpr.SExprConvert]] = None) -> None:
         self._init(attrs)
 
-    def _init(self, attrs: Optional[dict[str, Any]] = None) -> None:
+    def _init(self, attrs: Optional[dict[str, sexpr.SExprConvert]] = None) -> None:
         if not attrs:
             attrs = {}
 
@@ -128,6 +129,7 @@ class Node(ABC):
         self.unknown = None
 
         parent = attrs.pop("parent", None)
+        assert parent is None or isinstance(parent, ContainerNode)
 
         for a in Attr.get_class_attributes(self.__class__):
             value = attrs.get(a.name, None)
@@ -182,7 +184,7 @@ class Node(ABC):
 
     _T = TypeVar("_T", bound="Node")
 
-    def closest(self, node_type: "type[_T]") -> "Optional[_T]":
+    def closest(self, node_type: type[_T]) -> Optional[_T]:
         """
         Finds the closest parent of the specified type up the node tree, or the node itself if the node itself is the specified type.
         """
@@ -263,16 +265,18 @@ class Node(ABC):
                     attrs[a.name] = (len(v) > 0)
                 elif bool_ser == Attr.Bool.YesNo:
                     v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) == 2 and e[0] == sexpr.Sym(a.name))
-                    attrs[a.name] = (len(v) > 0 and v[0][1] == sexpr.Sym("yes"))
+                    attrs[a.name] = (len(v) > 0 and isinstance(v[0], list) and v[0][1] == sexpr.Sym("yes"))
             else:
                 v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == sexpr.Sym(a.name))
                 if len(v) >= 1:
                     if issubclass(a.value_type, Node):
                         attrs[a.name] = a.value_type.from_sexpr(v[0])
-                    elif hasattr(a.value_type, "from_sexpr"):
+                    elif hasattr(a.value_type, "from_sexpr") and isinstance(v[0], list):
                         attrs[a.name] = a.value_type.from_sexpr(v[0][1:])
-                    else:
+                    elif isinstance(v[0], list):
                         attrs[a.name] = v[0][1]
+                    else:
+                        expr.append(v)
 
                     expr += v[1:]
 
@@ -306,6 +310,44 @@ class Node(ABC):
     def parse(cls, s: str) -> Self:
         return cls.from_sexpr(sexpr.sexpr_parse(s))
 
+class NodeLoadSaveProtocol(Protocol):
+    filename: Optional[str]
+
+    @classmethod
+    def from_sexpr(cls, expr: sexpr.SExpr) -> Any: ...
+
+    def serialize(self) -> str: ...
+
+class NodeLoadSaveMixin(NodeLoadSaveProtocol):
+    def save(self, path: str) -> None:
+        """
+        Saves a node into a file.
+        """
+
+        data = self.serialize()
+        with open(path, "w") as f:
+            f.write(data)
+
+    @classmethod
+    def _load(cls, path: str) -> Self:
+        with open(path, "r") as f:
+            data = f.read()
+
+        node = cls.from_sexpr(sexpr.sexpr_parse(data))
+
+        if hasattr(node, "filename"):
+            node.filename = Path(path).stem
+
+        return node
+
+    @classmethod
+    def load(cls, path: str) -> Self:
+        """
+        Loads a node from a file.
+        """
+
+        return pickle_cache.load(path, cls._load)
+
 class ContainerNode(Node):
     """
     Base class for KiCad data nodes that contain children.
@@ -315,7 +357,7 @@ class ContainerNode(Node):
 
     __children: Annotated[list[Node], Attr.Ignore]
 
-    def _init(self, attrs: Optional[dict[str, Any]] = None) -> None:
+    def _init(self, attrs: Optional[dict[str, sexpr.SExprConvert]] = None) -> None:
         self.__children = []
 
         if not attrs:
@@ -326,9 +368,7 @@ class ContainerNode(Node):
         super()._init(attrs)
 
         if children:
-            if not isinstance(children, Iterable):
-                children = [children]
-
+            assert isinstance(children, list)
             for child in children:
                 self.append(child)
 

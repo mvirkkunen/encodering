@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 
 from ..common import BaseTransform, BaseRotate, Generator, ToProperties, Properties, Uuid, KIGEN_GENERATOR, KIGEN_VERSION
-from ..node import Attr, ContainerNode, Node, NEW_INSTANCE
+from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 from ..values import SymbolEnum, Pos2, ToVec2, Vec2
 
 class Transform(BaseTransform):
@@ -104,7 +104,7 @@ class Footprint(BaseFootprint):
     ) -> None:
         super().__init__(locals())
 
-class FootprintFile(BaseFootprint):
+class FootprintFile(BaseFootprint, NodeLoadSaveMixin):
     order_attrs = ("version", "generator")
 
     name: Annotated[str, Attr.Positional]
