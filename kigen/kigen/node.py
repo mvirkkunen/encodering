@@ -49,7 +49,7 @@ class Attr:
     name: str
     value_type: type
     optional: bool
-    metadata: list[Meta | type[Meta]]
+    metadata: dict[type[Meta], Meta | type[Meta]]
 
     def __init__(self, name: str, value_type: type, optional: bool, metadata: list[Meta | type[Meta]]) -> None:
         self.name = name
@@ -58,7 +58,7 @@ class Attr:
         self.metadata = metadata
 
     def get_meta(self, type: type[Meta]) -> Optional[Meta | type[Meta]]:
-        return next((m for m in self.metadata if m is type or isinstance(m, type)), None)
+        return self.metadata.get(type, None)
 
     @staticmethod
     @cache
@@ -70,12 +70,20 @@ class Attr:
                 continue
 
             optional = False
-            metadata = []
 
             if typing.get_origin(hint) is Annotated:
-                hint, *metadata = typing.get_args(hint)
+                hint, meta = typing.get_args(hint)
 
-            if any(m for m in metadata if m is Attr.Ignore or isinstance(m, Attr.Ignore)):
+                if type(meta) == tuple:
+                    meta = { type(m): m for m in meta }
+                elif type(meta) == type:
+                    meta = { meta: meta }
+                else:
+                    meta = { type(meta): meta }
+            else:
+                meta = {}
+
+            if Attr.Ignore in meta:
                 continue
 
             if typing.get_origin(hint) is Union:
@@ -84,7 +92,7 @@ class Attr:
                     optional = True
                     hint = args[0]
 
-            r.append(Attr(name, hint, optional, metadata))
+            r.append(Attr(name, hint, optional, meta))
 
         order = getattr(cls, "order_attrs", [])
 
