@@ -6,9 +6,9 @@ from . import cache, sexpr
 class Property(Node):
     node_name = "property"
 
-    name: Annotated[str, AttrPositional]
-    value: Annotated[str, AttrPositional]
-    at: Annotated[Pos2, AttrTransform]
+    name: Annotated[str, Attr.Positional]
+    value: Annotated[str, Attr.Positional]
+    at: Annotated[Pos2, Attr.Transform]
     effects: TextEffects
 
     def __init__(
@@ -43,9 +43,9 @@ class Rotate(BaseRotate):
 class Arc(Node):
     node_name = "arc"
 
-    start: Annotated[Vec2, AttrTransform]
-    mid: Annotated[Vec2, AttrTransform]
-    end: Annotated[Vec2, AttrTransform]
+    start: Annotated[Vec2, Attr.Transform]
+    mid: Annotated[Vec2, Attr.Transform]
+    end: Annotated[Vec2, Attr.Transform]
     stroke: StrokeDefinition
     fill: FillDefinition
 
@@ -69,7 +69,7 @@ class Arc(Node):
 class Circle(Node):
     node_name = "circle"
 
-    center: Annotated[Vec2, AttrTransform]
+    center: Annotated[Vec2, Attr.Transform]
     radius: float
     stroke: StrokeDefinition
     fill: FillDefinition
@@ -147,8 +147,8 @@ class PolyLine(Node):
 class Rectangle(Node):
     node_name = "rectangle"
 
-    start: Annotated[Vec2, AttrTransform]
-    end: Annotated[Vec2, AttrTransform]
+    start: Annotated[Vec2, Attr.Transform]
+    end: Annotated[Vec2, Attr.Transform]
     stroke: StrokeDefinition
     fill: FillDefinition
 
@@ -171,8 +171,8 @@ class Rectangle(Node):
 class Text(Node):
     node_name = "text"
 
-    text: Annotated[str, AttrPositional]
-    at: Annotated[Pos2, AttrTransform]
+    text: Annotated[str, Attr.Positional]
+    at: Annotated[Pos2, Attr.Transform]
     effects: TextEffects
 
     def __init__(
@@ -192,7 +192,7 @@ class Text(Node):
 class PinName(Node):
     node_name = "name"
 
-    name: Annotated[str, AttrPositional]
+    name: Annotated[str, Attr.Positional]
     effects: TextEffects
 
     def __init__(
@@ -210,7 +210,7 @@ class PinName(Node):
 class PinNumber(Node):
     node_name = "number"
 
-    number: Annotated[str, AttrPositional]
+    number: Annotated[str, Attr.Positional]
     effects: TextEffects
 
     def __init__(
@@ -253,9 +253,9 @@ class PinGraphicalType(SymbolEnum):
 class Pin(Node):
     node_name = "pin"
 
-    electrical_type: Annotated[PinElectricalType, AttrPositional]
-    graphical_type: Annotated[PinGraphicalType, AttrPositional]
-    at: Annotated[Pos2, AttrTransform]
+    electrical_type: Annotated[PinElectricalType, Attr.Positional]
+    graphical_type: Annotated[PinGraphicalType, Attr.Positional]
+    at: Annotated[Pos2, Attr.Transform]
     length: float
     name: PinName
     number: PinNumber
@@ -283,7 +283,7 @@ class Pin(Node):
 class BaseSymbol(ContainerNode):
     node_name = "symbol"
 
-    name: Annotated[str, AttrPositional]
+    name: Annotated[str, Attr.Positional]
 
     def all_pins(self) -> list[Pin]:
         r = []
@@ -352,8 +352,8 @@ class Symbol(BaseSymbol):
     extends: Optional[str]
     pin_numbers: Optional[PinNumbers]
     pin_names: Optional[PinNames]
-    in_bom: Annotated[bool, AttrBool.YesNo]
-    on_board: Annotated[bool, AttrBool.YesNo]
+    in_bom: Annotated[bool, Attr.Bool.YesNo]
+    on_board: Annotated[bool, Attr.Bool.YesNo]
 
     def __init__(
             self,
@@ -361,8 +361,8 @@ class Symbol(BaseSymbol):
             extends: Optional[str] = None,
             pin_numbers: Optional[PinNumbers] = None,
             pin_names: Optional[PinNames] = None,
-            in_bom: AttrBool.YesNo = None,
-            on_board: AttrBool.YesNo = None,
+            in_bom: Attr.Bool.YesNo = None,
+            on_board: Attr.Bool.YesNo = None,
         ):
         """
         :param name: Name of the symbol.
@@ -380,7 +380,7 @@ class SymbolLibrary(ContainerNode):
     child_types = (Symbol,)
     order_attrs = ("version", "generator")
 
-    __filename: Annotated[str, AttrIgnore]
+    __filename: Annotated[str, Attr.Ignore]
     version: int
     generator: Generator
 

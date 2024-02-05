@@ -12,8 +12,8 @@ class Transform(BaseTransform):
 Transform.child_types = (GraphicsItem, Transform)
 
 class BaseLine(GraphicsItem):
-    start: Annotated[Vec2, AttrTransform]
-    end: Annotated[Vec2, AttrTransform]
+    start: Annotated[Vec2, Attr.Transform]
+    end: Annotated[Vec2, Attr.Transform]
     layer: str
     width: float
     locked: bool
@@ -59,7 +59,7 @@ class FootprintType(SymbolEnum):
 class FootprintAttributes(Node):
     node_name = "attr"
 
-    type: Annotated[FootprintType, AttrPositional]
+    type: Annotated[FootprintType, Attr.Positional]
     board_only: bool
     exclude_from_pos_files: bool
     exclude_from_bom: bool
@@ -86,9 +86,9 @@ class BaseFootprint(ContainerNode):
         super().__init__(attrs)
 
 class Footprint(BaseFootprint):
-    library_link: Annotated[Optional[str], AttrPositional]
+    library_link: Annotated[Optional[str], Attr.Positional]
     tstamp: Optional[Uuid]
-    at: Annotated[Pos2, AttrTransform]
+    at: Annotated[Pos2, Attr.Transform]
     path: str
 
     def __init__(
@@ -108,7 +108,7 @@ class Footprint(BaseFootprint):
 class FootprintFile(BaseFootprint):
     order_attrs = ("version", "generator")
 
-    name: Annotated[str, AttrPositional]
+    name: Annotated[str, Attr.Positional]
     version: int
     generator: Generator
 

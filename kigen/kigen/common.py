@@ -74,9 +74,9 @@ class PaperSize(SymbolEnum):
 class PageSettings(Node):
     node_name = "paper"
 
-    width: Annotated[Optional[float], AttrPositional]
-    height: Annotated[Optional[float], AttrPositional]
-    paper_size: Annotated[Optional[PaperSize], AttrPositional]
+    width: Annotated[Optional[float], Attr.Positional]
+    height: Annotated[Optional[float], Attr.Positional]
+    paper_size: Annotated[Optional[PaperSize], Attr.Positional]
 
     def __init__(
             self,
@@ -214,8 +214,8 @@ class FillDefinition(Node):
 class CoordinatePoint(Node):
     node_name = "xy"
 
-    x: Annotated[float, AttrPositional]
-    y: Annotated[float, AttrPositional]
+    x: Annotated[float, Attr.Positional]
+    y: Annotated[float, Attr.Positional]
 
     def __init__(
             self,

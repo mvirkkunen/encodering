@@ -39,9 +39,9 @@ class LabelShape(SymbolEnum):
 class GlobalLabel(Node):
     node_name = "global_label"
 
-    name: Annotated[str, AttrPositional]
+    name: Annotated[str, Attr.Positional]
     shape: LabelShape
-    fields_autoplaced: Annotated[bool, AttrBool.SymbolInList]
+    fields_autoplaced: Annotated[bool, Attr.Bool.SymbolInList]
     effects: TextEffects
     at: Pos2
     uuid: Uuid
@@ -81,7 +81,7 @@ class Bus(BaseWire):
 class SchematicSymbolPin(Node):
     node_name = "pin"
 
-    number: Annotated[str, AttrPositional]
+    number: Annotated[str, Attr.Positional]
     uuid: Uuid
 
     def __init__(
@@ -94,7 +94,7 @@ class SchematicSymbolPin(Node):
 class SchematicSymbolInstancePath(Node):
     node_name = "path"
 
-    path: Annotated[str, AttrPositional]
+    path: Annotated[str, Attr.Positional]
     reference: str
     unit: int
 
@@ -109,7 +109,7 @@ class SchematicSymbolInstancePath(Node):
 class SchematicSymbolInstanceProject(Node):
     node_name = "project"
 
-    name: Annotated[str, AttrPositional]
+    name: Annotated[str, Attr.Positional]
     path: SchematicSymbolInstancePath
 
     def __init__(
@@ -140,11 +140,11 @@ class SchematicSymbol(TransformMixin, ContainerNode):
     node_name = "symbol"
 
     lib_id: str
-    at: Annotated[Pos2, AttrTransform]
+    at: Annotated[Pos2, Attr.Transform]
     unit: int
-    in_bom: Annotated[bool, AttrBool.YesNo]
-    on_board: Annotated[bool, AttrBool.YesNo]
-    dnp: Annotated[bool, AttrBool.YesNo]
+    in_bom: Annotated[bool, Attr.Bool.YesNo]
+    on_board: Annotated[bool, Attr.Bool.YesNo]
+    dnp: Annotated[bool, Attr.Bool.YesNo]
     uuid: Uuid
     instances: SchematicSymbolInstances
 

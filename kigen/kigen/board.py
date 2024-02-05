@@ -18,10 +18,10 @@ class LayerType(SymbolEnum):
     User = "user"
 
 class BoardLayer(Node):
-    ordinal: Annotated[int, AttrPositional]
-    canonical_name: Annotated[str, AttrPositional]
-    type: Annotated[LayerType, AttrPositional]
-    user_name: Annotated[Optional[str], AttrPositional]
+    ordinal: Annotated[int, Attr.Positional]
+    canonical_name: Annotated[str, Attr.Positional]
+    type: Annotated[LayerType, Attr.Positional]
+    user_name: Annotated[Optional[str], Attr.Positional]
 
     def __init__(
             self,
@@ -133,8 +133,8 @@ class BoardNet(Node):
 class TrackSegment(Node):
     node_name = "segment"
 
-    start: Annotated[Vec2, AttrTransform]
-    end: Annotated[Vec2, AttrTransform]
+    start: Annotated[Vec2, Attr.Transform]
+    end: Annotated[Vec2, Attr.Transform]
     width: float
     layer: str
     net: int
