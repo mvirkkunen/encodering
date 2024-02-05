@@ -4,10 +4,10 @@ from kigen.values import *
 import kigen.footprint as fp
 import kigen.symbol as sym
 import kigen.schematic as sch
-from kigen import pcb
+import kigen.pcb as pcb
 
 f = fp.Footprint("spöörsh", path="", layer=pcb.Layer.FCu, at=(2, 2))
-#f.properties["vaca"] = "pollo"
+f.properties["vaca"] = "pollo"
 #f.properties["perro"] = "cocodrilo"
 
 f.append(fp.Line(
@@ -39,15 +39,15 @@ connector = connectors.get("Conn_01x04_Pin")
 
 schematic = sch.SchematicFile(page=sch.PageSettings(paper_size=sch.PaperSize.A4))
 
-conn = schematic.place_symbol(
+conn = schematic.place(
     connector,
     "J1",
-    at=(25.4, 25.4, 90),
+    at=(25.4, 25.4),
 )
 
 for pin in conn.pins:
     pin_pos = conn.get_pin_position(pin.number)
-    label_pos = pin_pos + Pos2(25.4, 0)
+    label_pos = pin_pos.add_rotation(180) + Pos2(25.4, 0)
 
     schematic.append(sch.Wire([pin_pos, label_pos]))
     schematic.append(sch.GlobalLabel(f"Conn_{pin.number}", at=label_pos, shape=sch.LabelShape.Bidirectional))

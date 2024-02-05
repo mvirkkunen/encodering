@@ -1,4 +1,4 @@
-from typing import overload, Annotated, Optional
+from typing import overload, ClassVar, Annotated, Optional
 
 from ..values import Pos2, SymbolEnum, Vec2, ToVec2
 from ..common import BaseRotate, BaseTransform, CoordinatePoint, CoordinatePointList, FillDefinition, Generator, StrokeDefinition, TextEffects, KIGEN_VERSION, KIGEN_GENERATOR
@@ -7,6 +7,11 @@ from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 
 class Property(Node):
     node_name = "property"
+
+    Reference: ClassVar[str] = "Reference"
+    Value: ClassVar[str] = "Value"
+    Footprint: ClassVar[str] = "Footprint"
+    Datasheet: ClassVar[str] = "Datasheet"
 
     name: Annotated[str, Attr.Positional]
     value: Annotated[str, Attr.Positional]

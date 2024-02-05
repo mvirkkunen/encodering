@@ -311,12 +311,12 @@ class Node:
         return cls.from_sexpr(sexpr.sexpr_parse(s))
 
 class NodeLoadSaveProtocol(Protocol):
-    filename: Optional[str]
-
     @classmethod
     def from_sexpr(cls, expr: sexpr.SExpr) -> Any: ...
 
     def serialize(self) -> str: ...
+
+    def _set_path(self, path: Path) -> None: ...
 
 class NodeLoadSaveMixin(NodeLoadSaveProtocol):
     def save(self, path: str) -> None:
@@ -335,8 +335,8 @@ class NodeLoadSaveMixin(NodeLoadSaveProtocol):
 
         node = cls.from_sexpr(sexpr.sexpr_parse(data))
 
-        if hasattr(node, "filename"):
-            node.filename = Path(path).stem
+        if hasattr(node, "_set_path"):
+            node._set_path = Path(path).stem
 
         return node
 

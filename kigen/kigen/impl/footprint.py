@@ -88,31 +88,34 @@ class Footprint(BaseFootprint):
     library_link: Annotated[Optional[str], Attr.Positional]
     tstamp: Optional[Uuid]
     at: Annotated[Pos2, Attr.Transform]
-    path: str
+    path: Optional[str]
 
     def __init__(
         self,
         library_link: str,
         layer: str,
         at: Pos2,
-        path: str,
+        path: Optional[str] = None,
         descr: Optional[str] = None,
         tags: Optional[str] = None,
         properties: ToProperties = {},
         attr: Optional[FootprintAttributes] = None,
         tstamp: Uuid = NEW_INSTANCE,
+        children: Optional[list] = None,
     ) -> None:
         super().__init__(locals())
 
 class FootprintFile(BaseFootprint, NodeLoadSaveMixin):
     order_attrs = ("version", "generator")
 
+    library_name: Annotated[str, Attr.Ignore]
     name: Annotated[str, Attr.Positional]
     version: int
     generator: Generator
 
     def __init__(
         self,
+        library_name: str,
         name: str,
         layer: str,
         descr: Optional[str] = None,
@@ -122,4 +125,6 @@ class FootprintFile(BaseFootprint, NodeLoadSaveMixin):
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
     ) -> None:
+        self.library_name = library_name
+
         super().__init__(locals())

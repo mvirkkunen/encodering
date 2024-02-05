@@ -2,7 +2,9 @@ from typing import Annotated, ClassVar, Optional
 
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 from ..common import Generator, Layer, PageSettings, PaperSize, KIGEN_GENERATOR, KIGEN_VERSION
-from ..values import SymbolEnum, Uuid, Vec2
+from ..values import SymbolEnum, Pos2, Uuid, Vec2
+from .footprint import Footprint, FootprintFile
+from .schematic import SchematicSymbol
 
 class GeneralSettings(Node):
     node_name = "general"
@@ -194,3 +196,47 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
         page = page or PageSettings(PaperSize.A4)
 
         super().__init__(locals())
+
+    def place(
+            self,
+            footprint: Footprint | FootprintFile,
+            layer: str,
+            at: Pos2,
+            path: Optional[str | SchematicSymbol] = None,
+            library_link: Optional[str] = None,
+    ) -> Footprint:
+        """
+        Places a footprint symbol onto the PCB.
+
+        :param footprint: The footprint to place
+        :param at: Position and rotation angle for the symbol.
+        :returns: a SchematicSymbol instance
+        """
+
+        if not library_link:
+            if isinstance(footprint, Footprint) and footprint.library_link is not None:
+                library_link = footprint.library_link
+            elif isinstance(footprint, FootprintFile):
+                library_link = f"{footprint.library_name}:{footprint.name}"
+
+        if not library_link:
+            raise ValueError("library_link is required if footprint does not provide one")
+
+        if isinstance(path, SchematicSymbol):
+            path = f"/{path.uuid}"
+
+        fp = Footprint(
+            library_link=library_link,
+            layer=layer,
+            at=at,
+            path=path,
+            descr=footprint.descr,
+            tags=footprint.tags,
+            properties=footprint.properties.clone(),
+            children=[c.clone() for c in footprint],
+            attr=footprint.attr.clone() if footprint.attr else None
+        )
+
+        self.append(fp)
+
+        return fp

@@ -4,6 +4,7 @@ from typing import Annotated, Iterable, Optional
 from ..values import Pos2, Rgba, ToVec2, SymbolEnum, Uuid, Vec2
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 from ..common import BaseRotate, BaseTransform, CoordinatePoint, CoordinatePointList, Generator, PageSettings, PaperSize, Properties, StrokeDefinition, TextEffects, ToProperties, KIGEN_GENERATOR, KIGEN_VERSION
+from .footprint import FootprintFile
 from . import symbol
 
 class Junction(Node):
@@ -244,12 +245,9 @@ class SchematicFile(ContainerNode, NodeLoadSaveMixin):
         Imports a symbol into lib_symbols and returns the lib_id. If the symbol has already been imported, this does nothing.
         """
 
-        lib_file = sym.closest(symbol.SymbolLibrary)
+        lib_file = sym.closest(symbol.SymbolLibrary) # type: ignore
         if not lib_file:
             raise RuntimeError("Only LibSymbols that are part of a SymbolLibFile can be imported")
-
-        if not lib_file.filename:
-            raise RuntimeError("The parent SymbolLibFile does not have a filename")
 
         lib_id = f"{lib_file.filename}:{sym.name}"
         if not self.lib_symbols.find_one(symbol.Symbol, lambda s: s.name == lib_id):
@@ -259,11 +257,12 @@ class SchematicFile(ContainerNode, NodeLoadSaveMixin):
 
         return lib_id
 
-    def place_symbol(
+    def place(
             self,
             sym: symbol.Symbol,
             reference: str,
             at: Pos2,
+            footprint: Optional[str | FootprintFile] = None,
             in_bom: Optional[bool] = None,
             on_board: Optional[bool] = None,
             dnp: bool = False
@@ -303,6 +302,12 @@ class SchematicFile(ContainerNode, NodeLoadSaveMixin):
 
         for prop in sym.find_all(symbol.Property):
             sprop = prop.clone()
+            if sprop.name == symbol.Property.Footprint:
+                if isinstance(footprint, str):
+                    sprop.value = footprint
+                elif isinstance(footprint, FootprintFile):
+                    sprop.value = f"{footprint.library_name}:{footprint.name}"
+
             sprop.at = Pos2(at) + sprop.at.flip_y()
             ssym.append(sprop)
 

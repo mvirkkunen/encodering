@@ -140,6 +140,9 @@ class Pos2:
     def set_rotation(self, r: float) -> "Pos2":
         return Pos2(self.x, self.y, r)
 
+    def add_rotation(self, r: float) -> "Pos2":
+        return Pos2(self.x, self.y, self.r + r)
+
     def flip_y(self) -> "Pos2":
         return Pos2(self.x, -self.y, self.r)
 
