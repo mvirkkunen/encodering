@@ -3,11 +3,11 @@ import uuid
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import overload, Any, Iterable, Optional, Tuple, TypeAlias
+from typing import overload, Any, Optional, Tuple, TypeAlias
 
 from . import sexpr
 
-ToVec2: TypeAlias = "list[float] | Tuple[float, float] | Tuple[()] | Vec2 | Pos2"
+ToVec2: TypeAlias = "Vec2 | Pos2 | list[float] | Tuple[float, ...] | Tuple[()]"
 
 @dataclass(frozen=True)
 class Vec2:
@@ -18,10 +18,10 @@ class Vec2:
     def __init__(self) -> None: ...
 
     @overload
-    def __init__(self, x: float, y: float) -> None: ...
+    def __init__(self, x: float, y: float, /) -> None: ...
 
     @overload
-    def __init__(self, xy: ToVec2) -> None: ...
+    def __init__(self, xy: ToVec2, /) -> None: ...
 
     def __init__(self, *arg: Any) -> None:
         if len(arg) == 0 or (isinstance(arg[0], (list, tuple)) and len(arg[0]) == 0):
@@ -63,7 +63,7 @@ class Vec2:
         other = Vec2(other)
         return Vec2(self.x + other.x, self.y + other.y)
 
-ToPos2: TypeAlias = "Pos2 | ToVec2"
+ToPos2: TypeAlias = "ToVec2 | Tuple[float, ...]"
 
 @dataclass(frozen=True)
 class Pos2(Vec2):
@@ -73,20 +73,20 @@ class Pos2(Vec2):
     def __init__(self) -> None:...
 
     @overload
-    def __init__(self, x: float, y: float, r: float = 0) -> None: ...
+    def __init__(self, x: float, y: float, /, r: float = 0) -> None: ...
 
     @overload
-    def __init__(self, xy: ToVec2, r: float = 0) -> None: ...
+    def __init__(self, xy: ToVec2, /, r: float = 0) -> None: ...
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, r: float = 0) -> None:
         if len(args) == 1 and isinstance(args[0], Pos2):
             self.__init(args[0], args[0].r)
         elif len(args) == 1 and isinstance(args[0], Vec2):
             self.__init(args[0], 0)
         elif len(args) == 1 and isinstance(args[0], (tuple, list)):
-            self.__init(args[0], args[0][2] if len(args[0]) >= 3 else kwargs.get("r", 0))
+            self.__init(args[0], args[0][2] if len(args[0]) >= 3 else r)
         elif len(args) == 2 and isinstance(args[0], (Vec2, tuple, list)):
-            self.__init(args[0], args[1] if len(args) == 2 else kwargs.get("r", 0))
+            self.__init(args[0], args[1] if len(args) == 2 else r)
         elif len(args) == 0 or len(args) == 2:
             self.__init(args)
         elif len(args) == 3:
@@ -133,10 +133,10 @@ class Rgba:
     def __init__(self) -> None: ...
 
     @overload
-    def __init__(self, r: float, g: float, b: float, a: float) -> None: ...
+    def __init__(self, r: float, g: float, b: float, a: float, /) -> None: ...
 
     @overload
-    def __init__(self, rgba: ToVec2) -> None: ...
+    def __init__(self, rgba: "Rgba | tuple[float, float, float, float] | list[float]", /) -> None: ...
 
     def __init__(self, *args: Any) -> None:
         if len(args) == 0:

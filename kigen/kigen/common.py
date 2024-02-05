@@ -194,13 +194,13 @@ class StrokeDefinition(Node):
 
     width: float
     type: StrokeType
-    color: Rgba
+    color: Optional[Rgba]
 
     def __init__(
             self,
             width: float = 0,
             type: StrokeType = StrokeType.Default,
-            color: Rgba = NEW_INSTANCE,
+            color: Optional[Rgba] = None,
     ) -> None:
         super().__init__(locals())
 

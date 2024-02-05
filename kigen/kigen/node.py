@@ -369,6 +369,7 @@ class ContainerNode(Node):
             self.append(n)
 
     _T = TypeVar("_T", bound=Node)
+
     def find_one(self, child_type: type[_T], predicate: Optional[Callable[[_T], bool]] = None) -> Optional[_T]:
         """
         Finds the first child node of this node matching the type and optionally also a predicate. Returns None if not found.

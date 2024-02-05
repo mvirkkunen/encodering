@@ -49,21 +49,90 @@ class Arc(Node):
     stroke: StrokeDefinition
     fill: FillDefinition
 
+    @overload
     def __init__(
             self,
+            *,
             start: Vec2,
             mid: Vec2,
             end: Vec2,
-            stroke: StrokeDefinition = NEW_INSTANCE,
-            fill: FillDefinition = NEW_INSTANCE,
+            stroke: Optional[StrokeDefinition] = None,
+            fill: Optional[FillDefinition] = None,
     ) -> None:
-        """
+        """"
         :param start: Start point of the arc.
         :param mid: Mid point of the arc.
         :param end: End point of the arc.
+        :param stroke: Stroke style.
+        :param fill: Fill style.
+        """
+        ...
+
+    @overload
+    def __init__(
+            self,
+            *,
+            center: ToVec2,
+            radius: float,
+            start_angle: float,
+            end_angle: float,
+            stroke: Optional[StrokeDefinition] = None,
+            fill: Optional[FillDefinition] = None,
+    ) -> None:
+        """"
+        :param center: Center point of the circle that defines the arc.
+        :param radius: Radius of the arg.
+        :param start: Start angle of the arg.
+        :param end: End angle of the arg.
+        :param stroke: Stroke style.
+        :param fill: Fill style.
+        """
+        ...
+
+    def __init__(
+            self,
+            *,
+            start: Optional[Vec2] = None,
+            mid: Optional[ToVec2] = None,
+            end: Optional[ToVec2] = None,
+            center: Optional[ToVec2] = None,
+            radius: Optional[float] = None,
+            start_angle: Optional[float] = None,
+            end_angle: Optional[float] = None,
+            stroke: Optional[StrokeDefinition] = None,
+            fill: Optional[FillDefinition] = None,
+    ) -> None:
+        """
+        To create a new arc, define either (start, mid, end) or (center, radius, start_angle, end_angle).
+
+        :param start: Start point of the arc.
+        :param mid: Mid point of the arc.
+        :param end: End point of the arc.
+        :param center: Center point of the circle that defines the arc.
+        :param radius: Radius of the arg.
+        :param start: Start angle of the arg.
+        :param end: End angle of the arg.
         :param stroke: Stroke (outline) style.
         :param fill: Fill style.
         """
+
+        if (start is not None and mid is not None and end is not None and center is None and radius is None and start_angle is None and end_angle is None):
+            pass
+        elif (start is None and mid is None and end is None and center is not None and radius is not None and start_angle is not None and end_angle is not None):
+            c = Vec2(center)
+            r = Vec2(radius, 0)
+            start = c + r.rotate(start_angle)
+            mid = c + r.rotate((end_angle - start_angle) * 0.5)
+            end = c + r.rotate(end_angle)
+        else:
+            raise ValueError("Invalid initialization arguments for Arc. Specify either (start, mid, end) or (center, radius, start_angle, end_angle).")
+
+        if stroke is None:
+            stroke = StrokeDefinition()
+
+        if fill is None:
+            fill = FillDefinition()
+
         super().__init__(locals())
 
 class Circle(Node):
