@@ -127,7 +127,7 @@ class SchematicSymbolInstances(ContainerNode):
 
     def __init__(
             self,
-            children: list[SchematicSymbolInstanceProject],
+            children: list[SchematicSymbolInstanceProject] = None,
         ):
         super().__init__(locals())
 
@@ -164,6 +164,15 @@ class SchematicSymbol(ContainerNode):
         ):
         super().__init__(locals())
 
+    def validate(self) -> None:
+        super().validate()
+
+        if self.at.r % 90 != 0:
+            raise ValueError("SchematicSymbols can only be rotated in increments of 90 degrees")
+
+        if any(p for p in self.find_all(symbol.Property) if p.at.r % 90 != 0):
+            raise ValueError("SchematicSymbol Properties can only be rotated in increments of 90 degrees")
+
     def get_pin_position(self, number: str) -> Pos2:
         schematic_file = self.closest(SchematicFile)
         if not schematic_file:
@@ -177,7 +186,7 @@ class SchematicSymbol(ContainerNode):
         if not pin:
             raise RuntimeError(f"Symbol does not have a pin with number '{number}'")
 
-        return self.transform(Transform(self.at).transform(pin.at.flip_y()))
+        return self.transform_pos(self.at) + self.transform_pos(pin.at.flip_y())
 
     @property
     def pins(self) -> Iterable[SchematicSymbolPin]:
@@ -287,7 +296,7 @@ class SchematicFile(ContainerNode):
 
         for prop in sym.find_all(symbol.Property):
             sprop = prop.clone()
-            sprop.at = Transform(at).transform(sprop.at.flip_y())
+            sprop.at = Pos2(at) + sprop.at.flip_y()
             ssym.append(sprop)
 
         self.append(ssym)

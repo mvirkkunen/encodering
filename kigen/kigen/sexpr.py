@@ -94,7 +94,8 @@ def sexpr_flatten(obj: Any, show_unknown: bool) -> list[FlatSExpr]:
     if isinstance(obj, Sym):
         return [obj.name]
     elif isinstance(obj, str):
-        return [f"\"{repr(obj)[1:-1]}\""]
+        s = obj.encode("unicode_escape").decode("utf-8")
+        return [f"\"{s}\""]
     elif isinstance(obj, int):
         return [str(obj)]
     elif isinstance(obj, float):
@@ -112,8 +113,7 @@ def sexpr_flatten(obj: Any, show_unknown: bool) -> list[FlatSExpr]:
 def sexpr_serialize(obj: Any, width: int = 120, show_unknown: bool = False) -> str:
     return sexpr_format(sexpr_flatten(obj, show_unknown)[0], width)
 
-numeric = "-0123456789."
-symbol = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+sexpr_re = re.compile(r"(\()|(\))|(-?[0-9]*\.[0-9]+)|(-?[0-9]+)|([a-z_][a-z0-9_]*)|\"((?:[^\\\"]*|\\.)*)\"|(\s+)", re.I)
 
 def sexpr_parse(s: str) -> SExpr:
     root: list[SExpr] = []
@@ -121,39 +121,27 @@ def sexpr_parse(s: str) -> SExpr:
 
     i = 0
     while i < len(s):
-        c = s[i]
-        if c == "(":
+        m = sexpr_re.match(s, i)
+        if not m:
+            raise ValueError(f"S-expression syntax error at offset {i}")
+
+        i = m.end(0)
+        index = m.lastindex
+
+        if index == 1:
             l: list[SExpr] = []
             stack[-1].append(l)
             stack.append(l)
-            i += 1
-        elif c == ")":
+        elif index == 2:
             stack.pop()
-            i += 1
-        elif c == "\"":
-            i += 1
-            ss = ""
-            while s[i] != "\"":
-                ss += s[i]
-                i += 1
-
-            stack[-1].append(ss)
-            i += 1
-        elif c in numeric:
-            ss = ""
-            while s[i] in numeric:
-                ss += s[i]
-                i += 1
-
-            stack[-1].append(float(ss) if "." in ss else int(ss))
-        elif c in symbol:
-            ss = ""
-            while s[i] in symbol:
-                ss += s[i]
-                i += 1
-
-            stack[-1].append(Sym(ss))
-        else:
-            i += 1
+        elif index == 3:
+            stack[-1].append(float(m.group(3)))
+        elif index == 4:
+            stack[-1].append(int(m.group(4)))
+        elif index == 5:
+            stack[-1].append(Sym(m.group(5)))
+        elif index == 6:
+            stack[-1].append(m.group(6).encode("utf-8").decode("unicode_escape"))
 
     return root[0]
+
