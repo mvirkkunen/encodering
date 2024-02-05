@@ -23,18 +23,24 @@ class Vec2:
     @overload
     def __init__(self, xy: ToVec2, /) -> None: ...
 
-    def __init__(self, *arg: Any) -> None:
-        if len(arg) == 0 or (isinstance(arg[0], (list, tuple)) and len(arg[0]) == 0):
+    def __init__(self, *args: Any) -> None:
+        if not args:
+            # Vec2()
+            # Vec2(())
             self.__init(0, 0)
-        elif len(arg) == 1:
-            if isinstance(arg[0], (list, tuple)):
-                self.__init(*arg[0][:2])
-            else:
-                self.__init(arg[0].x, arg[0].y)
-        elif len(arg) == 2:
-            self.__init(*arg)
+        elif len(args) == 1 and isinstance(args[0], (Vec2, Pos2)):
+            # Vec2(vec2)
+            # Vec2(pos2)
+            self.__init(args[0].x, args[0].y)
+        elif len(args) == 1 and isinstance(args[0], (list, tuple)):
+            # Vec2((1, 2))
+            # Vec2([1, 2])
+            self.__init(*args[0][:2])
+        elif len(args) == 2:
+            # Vec2(1, 2)
+            self.__init(*args)
         else:
-            raise ValueError(f"Invalid arguments for Vec2(): {arg}")
+            raise ValueError(f"Invalid initializer for Vec2(): {args}")
 
     def __init(self, x: float, y: float) -> None:
         object.__setattr__(self, "x", x)
@@ -66,36 +72,52 @@ class Vec2:
 ToPos2: TypeAlias = "ToVec2 | Tuple[float, ...]"
 
 @dataclass(frozen=True)
-class Pos2(Vec2):
+class Pos2:
+    x: float
+    y: float
     r: float
 
     @overload
     def __init__(self) -> None:...
 
     @overload
-    def __init__(self, x: float, y: float, /, r: float = 0) -> None: ...
+    def __init__(self, x: float, y: float, r: float = 0, /) -> None: ...
 
     @overload
-    def __init__(self, xy: ToVec2, /, r: float = 0) -> None: ...
+    def __init__(self, xy: ToVec2, r: float = 0, /) -> None: ...
 
     def __init__(self, *args: Any, r: float = 0) -> None:
-        if len(args) == 1 and isinstance(args[0], Pos2):
-            self.__init(args[0], args[0].r)
+        if not args:
+            # Pos2()
+            # Pos2(())
+            self.__init(0, 0, 0)
+        elif len(args) == 1 and isinstance(args[0], Pos2):
+            # Pos2(pos2)
+            self.__init(args[0].x, args[0].y, args[0].r)
         elif len(args) == 1 and isinstance(args[0], Vec2):
-            self.__init(args[0], 0)
-        elif len(args) == 1 and isinstance(args[0], (tuple, list)):
-            self.__init(args[0], args[0][2] if len(args[0]) >= 3 else r)
-        elif len(args) == 2 and isinstance(args[0], (Vec2, tuple, list)):
-            self.__init(args[0], args[1] if len(args) == 2 else r)
-        elif len(args) == 0 or len(args) == 2:
-            self.__init(args)
-        elif len(args) == 3:
-            self.__init(args[:2], args[2])
+            # Pos2(vec2)
+            self.__init(args[0].x, args[0].y)
+        elif len(args) == 1 and isinstance(args[0], (list, tuple)):
+            # Pos2((1, 2, 3?))
+            # Pos2([1, 2, 3?])
+            self.__init(*args[0][:2])
+        elif len(args) == 2 and isinstance(args[0], (list, tuple)):
+            # Pos2((1, 2), 3)
+            # Pos2([1, 2], 3)
+            self.__init(args[0][0], args[0][1], args[1])
+        elif len(args) == 2 and isinstance(args[0], (Pos2, Vec2)):
+            # Pos2(pos2, 3)
+            # Pos2(vec2, 3)
+            self.__init(args[0].x, args[0].y, args[1])
+        elif len(args) == 2 or len(args) == 3:
+            # Pos2(1, 2, 3?)
+            self.__init(*args[:3])
         else:
-            raise ValueError(f"Invalid arguments for Pos2(): {args}")
+            raise ValueError(f"Invalid initializer for Vec2(): {args}")
 
-    def __init(self, super_init: ToVec2 = (), r: float = 0) -> None:
-        super().__init__(super_init)
+    def __init(self, x: float, y: float, r: float = 0) -> None:
+        object.__setattr__(self, "x", x)
+        object.__setattr__(self, "y", y)
         object.__setattr__(self, "r", r)
 
     def to_sexpr(self) -> sexpr.SExpr:
