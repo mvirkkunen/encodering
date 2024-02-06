@@ -4,21 +4,37 @@ import re
 from dataclasses import dataclass
 from typing import Protocol, Self, TypeAlias, TYPE_CHECKING
 
-@dataclass(frozen=True)
+SYM_RE = r"[a-zA-Z0-9_*.-]+"
+sym_re = re.compile("^" + SYM_RE + "$")
+sym_name_to_id: dict[str, int] = {}
+sym_id_to_name: dict[int, str] = {}
+
 class Sym:
-    name: str
+    __slots__ = ["sym_id"]
+
+    sym_id: int
 
     def __init__(self, name: "str | Sym"):
         if isinstance(name, Sym):
-            self.__init(name.name)
+            self.sym_id = name.sym_id
         else:
-            self.__init(name)
+            sym_id = sym_name_to_id.get(name, None)
+            if not sym_id:
+                if not sym_re.match(name):
+                    raise ValueError(f"Invalid symbol: '{name}'")
 
-    def __init(self, name: str) -> None:
-        if not re.match(r"^[a-zA-Z0-9_.-]+$", name):
-            raise ValueError(f"Invalid symbol: '{name}'")
+                sym_id = len(sym_name_to_id) + 1
+                sym_name_to_id[name] = sym_id
+                sym_id_to_name[sym_id] = name
 
-        object.__setattr__(self, "name", name)
+            self.sym_id = sym_id
+
+    @property
+    def name(self):
+        return sym_id_to_name[self.sym_id]
+
+    def __eq__(self, other: "Sym") -> bool:
+        return isinstance(other, Sym) and self.sym_id == other.sym_id
 
     def __repr__(self) -> str:
         return f"Symbol({self.name})"
@@ -125,7 +141,7 @@ def sexpr_flatten(obj: SExpr, show_unknown: bool) -> list[FlatSExpr]:
 def sexpr_serialize(obj: SExpr, width: int = 120, show_unknown: bool = False) -> str:
     return sexpr_format(sexpr_flatten(obj, show_unknown)[0], width)
 
-sexpr_re = re.compile(r"(\()|(\))|(-?[0-9]*\.[0-9]+)|(-?[0-9]+)|([a-z_][a-z0-9_]*)|\"((?:[^\\\"]*|\\.)*)\"|(\s+)", re.I)
+sexpr_re = re.compile(r"(\()|(\))|(-?[0-9]*\.[0-9]+\b)|(-?[0-9]+\b)|(" + SYM_RE + r")|\"((?:[^\\\"]*|\\.)*)\"|(\s+)", re.I)
 
 def sexpr_parse(s: str) -> SExpr:
     root: list[SExpr] = []
@@ -135,7 +151,7 @@ def sexpr_parse(s: str) -> SExpr:
     while i < len(s):
         m = sexpr_re.match(s, i)
         if not m:
-            raise ValueError(f"S-expression syntax error at offset {i}")
+            raise ValueError(f"S-expression syntax error at offset {i}, near: {repr(s[i:i+32])}...")
 
         i = m.end(0)
         index = m.lastindex
