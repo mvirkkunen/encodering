@@ -59,13 +59,16 @@ class Vec2:
         if angle == 0:
             return self
 
-        s = math.sin(angle / 180 * math.pi)
-        c = math.cos(angle / 180 * math.pi)
+        s = math.sin(-angle / 180 * math.pi)
+        c = math.cos(-angle / 180 * math.pi)
 
         return Vec2(
             c * self.x - s * self.y,
             s * self.x + c * self.y,
         )
+
+    def length(self) -> float:
+        return (self.x**2 + self.y**2)**0.5
 
     def __add__(self, other: "Vec2") -> "Vec2":
         other = Vec2(other)
@@ -145,6 +148,9 @@ class Pos2:
 
     def flip_y(self) -> "Pos2":
         return Pos2(self.x, -self.y, self.r)
+
+    def length(self) -> float:
+        return (self.x**2 + self.y**2)**0.5
 
     def __add__(self, other: "ToPos2") -> "Pos2":
         v = Pos2(other).rotate(self.r)

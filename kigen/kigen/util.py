@@ -1,5 +1,6 @@
 from collections.abc import Iterable
-from typing import Callable, TypeVar
+from typing import Any, Callable, TypeVar
+from .values import Vec2
 
 _T = TypeVar("_T")
 
@@ -23,3 +24,33 @@ def remove_where(l: list[_T], pred: Callable[[_T], bool]) -> list[_T]:
             i += 1
 
     return r
+
+def calculate_arc(attrs: dict[str, Any]):
+    start = attrs["start"]
+    mid = attrs["mid"]
+    end = attrs["end"]
+    center = attrs["center"]
+    radius = attrs["radius"]
+    start_angle = attrs["start_angle"]
+    end_angle = attrs["end_angle"]
+
+    if (start is not None and mid is not None and end is not None and center is None and radius is None and start_angle is None and end_angle is None):
+        return start, mid, end
+    elif (start is None and mid is None and end is None and center is not None and radius is not None and start_angle is not None and end_angle is not None):
+        c = Vec2(center)
+        r = Vec2(radius, 0)
+        return (
+            c + r.rotate(start_angle),
+            c + r.rotate((end_angle + start_angle) * 0.5),
+            c + r.rotate(end_angle),
+        )
+    elif (start is not None and mid is None and end is None and center is not None and radius is None and start_angle is None and end_angle is not None):
+        c = Vec2(center)
+        r = start - center
+        return (
+            start,
+            c + r.rotate(end_angle * 0.5),
+            c + r.rotate(end_angle),
+        )
+    else:
+        raise ValueError("Invalid initialization arguments for Arc. Specify either (start, mid, end) or (center, radius, start_angle, end_angle).")

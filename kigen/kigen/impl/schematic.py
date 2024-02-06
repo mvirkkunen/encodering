@@ -3,8 +3,8 @@ from typing import Annotated, Iterable, Optional
 
 from ..values import Pos2, Rgba, ToVec2, SymbolEnum, Uuid, Vec2
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
-from ..common import BaseRotate, BaseTransform, CoordinatePoint, CoordinatePointList, Generator, PageSettings, PaperSize, Properties, StrokeDefinition, TextEffects, ToProperties, KIGEN_GENERATOR, KIGEN_VERSION
-from .footprint import FootprintFile
+from ..common import BaseRotate, BaseTransform, CoordinatePoint, CoordinatePointList, Generator, PageSettings, PaperSize, Property, StrokeDefinition, TextEffects, KIGEN_GENERATOR, KIGEN_VERSION
+from .footprint import LibraryFootprint
 from . import symbol
 
 class Junction(Node):
@@ -44,7 +44,8 @@ class LabelShape(SymbolEnum):
     TriState = "tri_state"
     Passive = "passive"
 
-class GlobalLabel(Node):
+class GlobalLabel(ContainerNode):
+    child_types = (Property,)
     node_name = "global_label"
 
     name: Annotated[str, Attr.Positional]
@@ -53,7 +54,6 @@ class GlobalLabel(Node):
     effects: TextEffects
     at: Pos2
     uuid: Uuid
-    properties: Properties
 
     def __init__(
             self,
@@ -63,7 +63,6 @@ class GlobalLabel(Node):
             fields_autoplaced: bool = True,
             effects: TextEffects = NEW_INSTANCE,
             uuid: Uuid = NEW_INSTANCE,
-            properties: ToProperties = {},
     ):
         super().__init__(locals())
 
@@ -170,6 +169,7 @@ class SchematicSymbol(ContainerNode):
             instances: SchematicSymbolInstances = NEW_INSTANCE,
             children: Optional[list[symbol.Property | SchematicSymbolPin]] = None,
         ):
+
         super().__init__(locals())
 
     def validate(self) -> None:
@@ -262,7 +262,7 @@ class SchematicFile(ContainerNode, NodeLoadSaveMixin):
             sym: symbol.Symbol,
             reference: str,
             at: Pos2,
-            footprint: Optional[str | FootprintFile] = None,
+            footprint: Optional[str | LibraryFootprint] = None,
             in_bom: Optional[bool] = None,
             on_board: Optional[bool] = None,
             dnp: bool = False
@@ -305,7 +305,7 @@ class SchematicFile(ContainerNode, NodeLoadSaveMixin):
             if sprop.name == symbol.Property.Footprint:
                 if isinstance(footprint, str):
                     sprop.value = footprint
-                elif isinstance(footprint, FootprintFile):
+                elif isinstance(footprint, LibraryFootprint):
                     sprop.value = f"{footprint.library_name}:{footprint.name}"
 
             sprop.at = Pos2(at) + sprop.at.flip_y()

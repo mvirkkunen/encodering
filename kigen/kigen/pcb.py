@@ -5,6 +5,7 @@ from .impl.pcb import (
     GeneralSettings,
     LayerType,
     Net,
+    Rect,
     Setup,
     Track,
 

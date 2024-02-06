@@ -27,6 +27,11 @@ class Attr:
         Type annotation. Positional attributes have no name and are de/serialized by position.
         """
 
+        count: int
+
+        def __init__(self, count: int=1) -> None:
+            self.count = count
+
     class Bool(enum.Enum):
         """
         Type annotation. Specify how a boolean attribute is serialized.
@@ -41,20 +46,27 @@ class Attr:
         Type annotation. Attribute is processed by Node.transform() when serializing.
         """
 
-    Meta: TypeAlias = Ignore | Positional | Bool | Transform
+    class TransformRelativeRotation:
+        """
+        Type annotation. Attribute is processed by Node.transform() but only for rotation when serializing.
+        """
+
+    Meta: TypeAlias = Ignore | Positional | Bool | Transform | TransformRelativeRotation
 
     name: str
     value_type: type
     optional: bool
-    meta: dict[type[Meta], Meta | type[Meta]]
+    meta: dict[type[Meta], Meta]
 
-    def __init__(self, name: str, value_type: type, optional: bool, meta: dict[type[Meta], Meta | type[Meta]]) -> None:
+    def __init__(self, name: str, value_type: type, optional: bool, meta: dict[type[Meta], Meta]) -> None:
         self.name = name
         self.value_type = value_type
         self.optional = optional
         self.meta = meta
 
-    def get_meta(self, type: type[Meta]) -> Optional[Meta | type[Meta]]:
+    _T = TypeVar("_T", bound=Meta)
+
+    def get_meta(self, type: type[_T]) -> Optional[_T]:
         return self.meta.get(type, None)
 
     @staticmethod
@@ -69,14 +81,8 @@ class Attr:
             optional = False
 
             if typing.get_origin(hint) is Annotated:
-                hint, meta = typing.get_args(hint)
-
-                if type(meta) == tuple:
-                    meta = { type(m): m for m in meta }
-                elif type(meta) == type:
-                    meta = { meta: meta }
-                else:
-                    meta = { type(meta): meta }
+                hint, *meta = typing.get_args(hint)
+                meta = dict(((m, m()) if type(m) == type else (type(m), m)) for m in meta)
             else:
                 meta = {}
 
@@ -213,6 +219,9 @@ class Node:
             if a.get_meta(Attr.Transform) and self.__parent:
                 val = a.value_type(self.__parent.transform_pos(val))
 
+            if a.get_meta(Attr.TransformRelativeRotation) and self.__parent:
+                val = a.value_type(val.x, val.y, self.__parent.transform_pos(val).r)
+
             if issubclass(a.value_type, bool):
                 bool_ser: Attr.Bool = typing.cast(Attr.Bool, a.get_meta(Attr.Bool) or Attr.Bool.Symbol)
                 if bool_ser == Attr.Bool.Symbol:
@@ -242,20 +251,12 @@ class Node:
             raise ValueError(f"Cannot deserialize {cls.__name__} from this S-expression because it does not start with {cls.node_name}")
 
         expr = list(expr[1:])
+
         node_name = cls.node_name
         attrs = {}
 
         for a in Attr.get_class_attributes(cls):
-            if a.get_meta(Attr.Positional):
-                if len(expr) == 0:
-                    raise ValueError(f"Not enough positional arguments in {node_name}")
-
-                if hasattr(a.value_type, "from_sexpr"):
-                    attrs[a.name] = a.value_type.from_sexpr([expr[0]])
-                else:
-                    attrs[a.name] = expr[0]
-                del expr[0]
-            elif a.value_type == bool:
+            if issubclass(a.value_type, bool):
                 bool_ser = typing.cast(Attr.Bool, a.get_meta(Attr.Bool) or Attr.Bool.Symbol)
                 if bool_ser == Attr.Bool.Symbol:
                     v = util.remove_where(expr, lambda e: e == sexpr.Sym(a.name))
@@ -267,8 +268,25 @@ class Node:
                     v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) == 2 and e[0] == sexpr.Sym(a.name))
                     attrs[a.name] = (len(v) > 0 and isinstance(v[0], list) and v[0][1] == sexpr.Sym("yes"))
             else:
-                v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == sexpr.Sym(a.name))
-                if len(v) >= 1:
+                pos = a.get_meta(Attr.Positional)
+                if pos:
+                    if a.optional and not (expr and issubclass(expr[0], a.value_type)):
+                        continue
+
+                    if len(expr) == 0:
+                        raise ValueError(f"Not enough positional arguments in {node_name}")
+
+                    if hasattr(a.value_type, "from_sexpr"):
+                        attrs[a.name] = a.value_type.from_sexpr(expr[:pos.count])
+                    else:
+                        attrs[a.name] = expr[0]
+
+                    del expr[:pos.count]
+                else:
+                    v = util.remove_where(expr, lambda e: isinstance(e, list) and len(e) > 0 and e[0] == sexpr.Sym(a.name))
+                    if not v:
+                        continue
+
                     if issubclass(a.value_type, Node):
                         attrs[a.name] = a.value_type.from_sexpr(v[0])
                     elif hasattr(a.value_type, "from_sexpr") and isinstance(v[0], list):
@@ -336,7 +354,7 @@ class NodeLoadSaveMixin(NodeLoadSaveProtocol):
         node = cls.from_sexpr(sexpr.sexpr_parse(data))
 
         if hasattr(node, "_set_path"):
-            node._set_path = Path(path).stem
+            node._set_path(Path(path))
 
         return node
 
@@ -436,6 +454,9 @@ class ContainerNode(Node):
         """
 
         return (c for c in self if isinstance(c, child_type) and (not predicate or predicate(c)))
+
+    def __bool__(self) -> bool:
+        return True
 
     def __iter__(self) -> Iterator[Node]:
         return iter(self.__children)

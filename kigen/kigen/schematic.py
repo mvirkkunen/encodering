@@ -24,7 +24,7 @@ from .impl.schematic import (
     CoordinatePointList,
     PageSettings,
     PaperSize,
-    Properties,
+    Property,
     StrokeDefinition,
     TextEffects,
 )

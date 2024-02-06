@@ -1,9 +1,11 @@
+import copy
 from typing import Annotated, ClassVar, Optional
 
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
-from ..common import Generator, Layer, PageSettings, PaperSize, KIGEN_GENERATOR, KIGEN_VERSION
+from ..common import Generator, Layer, Net, PageSettings, PaperSize, Property, KIGEN_GENERATOR, KIGEN_VERSION
 from ..values import SymbolEnum, Pos2, Uuid, Vec2
-from .footprint import Footprint, FootprintFile
+from .footprint import Footprint, LibraryFootprint
+from .symbol import SymbolEnum, Property as SymbolProperty
 from .schematic import SchematicSymbol
 
 class GeneralSettings(Node):
@@ -126,25 +128,6 @@ class Setup(Node):
     ) -> None:
         super().__init__(locals())
 
-class Net(Node):
-    node_name = "net"
-
-    ordinal: int
-    name: str
-
-    def __init__(
-            self,
-            ordinal: int,
-            name: str
-    ) -> None:
-        """
-        Defines a net for the board.
-
-        ordinal: the net ID, also defines net order
-        name: name of the net
-        """
-        super().__init__(locals())
-
 class Track(Node):
     node_name = "segment"
 
@@ -161,17 +144,40 @@ class Track(Node):
             end: Vec2,
             width: float,
             layer: str,
-            net: int,
+            net: int | Net,
             tstamp: Uuid = NEW_INSTANCE
+    ) -> None:
+        if isinstance(net, Net):
+            net = net.ordinal
+
+        super().__init__(locals())
+
+class Rect(Node):
+    node_name = "gr_rect"
+
+    start: Annotated[Vec2, Attr.Transform]
+    end: Annotated[Vec2, Attr.Transform]
+    width: float
+    layer: str
+    tstamp: Uuid
+
+    def __init__(
+            self,
+            start: Vec2,
+            end: Vec2,
+            width: float,
+            layer: str,
+            tstamp: Uuid = NEW_INSTANCE,
     ) -> None:
         super().__init__(locals())
 
 class PcbFile(ContainerNode, NodeLoadSaveMixin):
+    child_types = (Net, Footprint, Track, Rect)
     node_name = "kicad_pcb"
     order_attrs = ("version", "generator")
 
-    version: Annotated[int, Attr.Positional]
-    generator: Annotated[Generator, Attr.Positional]
+    version: int
+    generator: Generator
     general: GeneralSettings
     page: PageSettings
     layers: PcbLayers
@@ -179,8 +185,8 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
 
     def __init__(
         self,
-        layers: PcbLayers | list[PcbLayer] | int,
-        thickness: float,
+        layers: PcbLayers | list[PcbLayer] | int = 2,
+        thickness: float = 1.6,
         page: Optional[PageSettings] = None,
         setup: Optional[Setup] = NEW_INSTANCE,
         version: int = KIGEN_VERSION,
@@ -197,13 +203,27 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
 
         super().__init__(locals())
 
+        self.append(Net(0, ""))
+
+    def add_net(self, name: str) -> None:
+        if self.get_net(name):
+            raise ValueError(f"Net '{name} already exists")
+
+        net = Net(sum(1 for _ in self.find_all(Net)), name)
+        self.append(net)
+        return net
+
+    def get_net(self, name: str) -> Optional[Net]:
+        return self.find_one(Net, lambda n: n.name == name)
+
     def place(
             self,
-            footprint: Footprint | FootprintFile,
+            footprint: Footprint | LibraryFootprint,
             layer: str,
             at: Pos2,
             path: Optional[str | SchematicSymbol] = None,
             library_link: Optional[str] = None,
+            parent: Optional[ContainerNode] = None,
     ) -> Footprint:
         """
         Places a footprint symbol onto the PCB.
@@ -216,14 +236,21 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
         if not library_link:
             if isinstance(footprint, Footprint) and footprint.library_link is not None:
                 library_link = footprint.library_link
-            elif isinstance(footprint, FootprintFile):
+            elif isinstance(footprint, LibraryFootprint):
                 library_link = f"{footprint.library_name}:{footprint.name}"
 
         if not library_link:
             raise ValueError("library_link is required if footprint does not provide one")
 
+        children = []
+
         if isinstance(path, SchematicSymbol):
-            path = f"/{path.uuid}"
+            for prop in path.find_all(SymbolProperty, lambda p: p.name.startswith("ki_")):
+                children.append(Property(prop.name, prop.value))
+
+            path = f"/{path.uuid.value}"
+
+        children.extend(c.clone() for c in footprint)
 
         fp = Footprint(
             library_link=library_link,
@@ -232,11 +259,12 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
             path=path,
             descr=footprint.descr,
             tags=footprint.tags,
-            properties=footprint.properties.clone(),
-            children=[c.clone() for c in footprint],
+            children=children,
             attr=footprint.attr.clone() if footprint.attr else None
         )
 
-        self.append(fp)
+        fp.unknown = copy.deepcopy(footprint.unknown)
+
+        (parent or self).append(fp)
 
         return fp

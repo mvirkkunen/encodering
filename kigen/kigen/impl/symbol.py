@@ -1,9 +1,10 @@
+from pathlib import Path
 from typing import overload, ClassVar, Annotated, Optional
 
 from ..values import Pos2, SymbolEnum, Vec2, ToVec2
 from ..common import BaseRotate, BaseTransform, CoordinatePoint, CoordinatePointList, FillDefinition, Generator, StrokeDefinition, TextEffects, KIGEN_VERSION, KIGEN_GENERATOR
-from ..sexpr import sexpr_parse
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
+from .. import util
 
 class Property(Node):
     node_name = "property"
@@ -60,9 +61,9 @@ class Arc(Node):
     def __init__(
             self,
             *,
-            start: Vec2,
-            mid: Vec2,
-            end: Vec2,
+            start: ToVec2,
+            mid: ToVec2,
+            end: ToVec2,
             stroke: Optional[StrokeDefinition] = None,
             fill: Optional[FillDefinition] = None,
     ) -> None:
@@ -99,7 +100,7 @@ class Arc(Node):
     def __init__(
             self,
             *,
-            start: Optional[Vec2] = None,
+            start: Optional[ToVec2] = None,
             mid: Optional[ToVec2] = None,
             end: Optional[ToVec2] = None,
             center: Optional[ToVec2] = None,
@@ -123,16 +124,7 @@ class Arc(Node):
         :param fill: Fill style.
         """
 
-        if (start is not None and mid is not None and end is not None and center is None and radius is None and start_angle is None and end_angle is None):
-            pass
-        elif (start is None and mid is None and end is None and center is not None and radius is not None and start_angle is not None and end_angle is not None):
-            c = Vec2(center)
-            r = Vec2(radius, 0)
-            start = c + r.rotate(start_angle)
-            mid = c + r.rotate((end_angle - start_angle) * 0.5)
-            end = c + r.rotate(end_angle)
-        else:
-            raise ValueError("Invalid initialization arguments for Arc. Specify either (start, mid, end) or (center, radius, start_angle, end_angle).")
+        start, mid, end = util.calculate_arc(locals())
 
         if stroke is None:
             stroke = StrokeDefinition()
@@ -469,6 +461,9 @@ class SymbolLibrary(ContainerNode, NodeLoadSaveMixin):
         self.filename = filename
 
         super().__init__(locals())
+
+    def _set_path(self, path: Path) -> None:
+        self.filename = path.stem
 
     def get(self, name: str) -> Optional[Symbol]:
         """

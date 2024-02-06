@@ -6,7 +6,7 @@ from .node import *
 from .values import *
 
 class Generator(SymbolEnum):
-    PcbNew = "pbcnew"
+    PcbNew = "pcbnew"
     EeSchema = "eeschema"
     KicadSymbolEditor = "kicad_symbol_editor"
     Kigen = "kigen"
@@ -75,6 +75,8 @@ class Layer:
     User8 = "User.8"
     User9 = "User.9"
 
+    AllCu = "*.Cu"
+
 class BaseTransform(ContainerNode):
     node_name = None
 
@@ -82,7 +84,7 @@ class BaseTransform(ContainerNode):
 
     def __init__(
             self,
-            at: Pos2,
+            at: ToPos2,
             children: Optional[list[Node]] = None,
             parent: Optional[Node] = None):
         super().__init__(locals())
@@ -90,7 +92,7 @@ class BaseTransform(ContainerNode):
     def transform_pos(self, pos: ToPos2) -> Pos2:
         pos = Pos2(pos)
         at = super().transform_pos(self.at)
-        return at + pos.rotate(at.r)
+        return at + pos
 
     def to_sexpr(self) -> list[list[sexpr.SExpr]]:
         r: list[list[sexpr.SExpr]] = []
@@ -111,7 +113,9 @@ class BaseRotate(ContainerNode):
         super().__init__(locals())
 
     def transform_pos(self, pos: ToPos2) -> Pos2:
-        return Pos2(pos).rotate(self.angle)
+        pos = Pos2(pos)
+        at = super().transform_pos(Pos2(0, 0, self.angle))
+        return at + pos
 
     def to_sexpr(self) -> list[list[sexpr.SExpr]]:
         r: list[list[sexpr.SExpr]] = []
@@ -153,29 +157,18 @@ class PageSettings(Node):
                 or (self.width is None and self.height is None and self.paper_size is not None)):
             raise ValueError("PageSettings must define either width and height, or paper_size, but not both.")
 
-ToProperties: TypeAlias = "Properties | dict[str, str]"
+class Property(Node):
+    node_name = "property"
 
-class Properties(dict[str, str], Node):
-    def __init__(self, init: ToProperties):
-        super().__init__(init)
+    name: Annotated[str, Attr.Positional]
+    value: Annotated[str, Attr.Positional]
 
-    @classmethod
-    def from_sexpr(self, expr: sexpr.SExpr) -> "Properties":
-        assert isinstance(expr, list)
-
-        r: dict[str, str] = {}
-        for e in expr:
-            assert isinstance(e, list) and isinstance(e[0], str) and isinstance(e[1], str)
-            r[e[0]] = e[1]
-
-        return Properties(r)
-
-    def to_sexpr(self) -> list[list[sexpr.SExpr]]:
-        return [
-            [sexpr.Sym("property"), k, v]
-            for k, v
-            in self.items()
-        ]
+    def __init__(
+            self,
+            name: str,
+            value: str,
+    ) -> None:
+        super().__init__(locals())
 
 class Font(Node):
     node_name = "font"
@@ -284,15 +277,15 @@ class FillDefinition(Node):
 class CoordinatePoint(Node):
     node_name = "xy"
 
-    x: Annotated[float, Attr.Positional]
-    y: Annotated[float, Attr.Positional]
+    at: Annotated[Vec2, Attr.Positional(2), Attr.Transform]
 
     def __init__(
             self,
-            x: float,
-            y: float,
+            at: ToVec2,
     ) -> None:
         super().__init__(locals())
+
+ToCoordinatePointList: TypeAlias = "Iterable[ToVec2 | CoordinatePoint]"
 
 class CoordinatePointList(ContainerNode):
     child_types = (CoordinatePoint,)
@@ -300,7 +293,7 @@ class CoordinatePointList(ContainerNode):
 
     def __init__(
             self,
-            children: "Optional[Iterable[ToVec2 | CoordinatePoint]]" = None,
+            children: Optional[ToCoordinatePointList] = None,
     ) -> None:
         if children:
             new_children = []
@@ -308,8 +301,27 @@ class CoordinatePointList(ContainerNode):
                 if isinstance(c, CoordinatePoint):
                     new_children.append(c)
                 else:
-                    vec = Vec2(c)
-                    new_children.append(CoordinatePoint(vec.x, vec.y))
+                    new_children.append(CoordinatePoint(c))
             children = new_children
+
+        super().__init__(locals())
+
+class Net(Node):
+    node_name = "net"
+
+    ordinal: Annotated[int, Attr.Positional]
+    name: Annotated[str, Attr.Positional]
+
+    def __init__(
+            self,
+            ordinal: int,
+            name: str
+    ) -> None:
+        """
+        Defines a net.
+
+        ordinal: The net ID, also defines net order
+        name: Name of the net
+        """
 
         super().__init__(locals())
