@@ -1,11 +1,21 @@
 set -e
 
 mkdir -p build/
-mkdir -p build/Generated.pretty/
+mkdir -p build/led_pcb/
 
 ./led_ring.py
 
-pcbnew build/led_pcb.kicad_pcb
+cat <<EOF >build/led_pcb/fp-lib-table
+(fp_lib_table
+  (version 7)
+  (lib (name "Project")(type "KiCad")(uri "\${KIPRJMOD}/../../Project.pretty")(options "")(descr ""))
+)
+EOF
+
+kicad-cli pcb export step build/led_pcb/led_pcb.kicad_pcb -o build/led_pcb.step
+kicad-cli pcb export step controller_pcb/controller_pcb.kicad_pcb -o build/controller_pcb.step
+
+#pcbnew build/led_pcb/led_pcb.kicad_pcb
 #kicad-cli pcb export svg build/led_pcb.kicad_pcb -l F.Cu,B.Cu,F.SilkS,Edge.Cuts -o build/display.svg
 #echo
 #display -density 1000 build/display.svg

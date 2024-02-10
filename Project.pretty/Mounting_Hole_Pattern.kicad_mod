@@ -1,0 +1,67 @@
+(footprint
+  "Mounting_Hole_Pattern"
+  (version 20230121)
+  (generator kigen)
+  (layer "F.Cu")
+  (descr "Mounting hole pattern for led_pcb")
+  (pad
+    "2"
+    thru_hole
+    circle
+    (at 6.142356 -8.454228 54.0)
+    (size 2 2)
+    (drill 1.0)
+    (layers *.Cu *.Mask)
+    (tstamp 153c7def-7065-49ee-a268-c5e5c03bb559)
+  )
+  (pad
+    "3"
+    thru_hole
+    circle
+    (at 2.172677 -10.221642 78.0)
+    (size 2 2)
+    (drill 1.0)
+    (layers *.Cu *.Mask)
+    (tstamp db1813ad-d121-4cad-baf2-d9a5fef51a3d)
+  )
+  (pad
+    "4"
+    thru_hole
+    circle
+    (at -2.172677 -10.221642 102.0)
+    (size 2 2)
+    (drill 1.0)
+    (layers *.Cu *.Mask)
+    (tstamp df410a9b-75aa-451a-876d-f8006dd735be)
+  )
+  (pad
+    "5"
+    thru_hole
+    circle
+    (at -6.142356 -8.454228 126.0)
+    (size 2 2)
+    (drill 1.0)
+    (layers *.Cu *.Mask)
+    (tstamp a300a534-eee5-4cc9-ad6b-c9adbda4f13b)
+  )
+  (pad
+    "6"
+    thru_hole
+    circle
+    (at -9.049965 -5.225 150.0)
+    (size 2 2)
+    (drill 1.0)
+    (layers *.Cu *.Mask)
+    (tstamp 1add854a-cc3a-44b5-abcf-93887cad7c29)
+  )
+  (pad
+    "1"
+    thru_hole
+    circle
+    (at 9.049965 -5.225 30.0)
+    (size 2 2)
+    (drill 1.0)
+    (layers *.Cu *.Mask)
+    (tstamp 4554c14c-b28e-447d-9211-6783d6088004)
+  )
+)

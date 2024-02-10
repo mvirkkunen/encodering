@@ -1,6 +1,7 @@
 from .impl.footprint import (
     Arc,
     Circle,
+    DrillDefinition,
     Footprint,
     FootprintAttributes,
     FootprintLibrary,

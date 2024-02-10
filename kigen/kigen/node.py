@@ -8,7 +8,7 @@ import typing
 from typing import Any, Callable, ClassVar, Annotated, Optional, Protocol, Self, TypeAlias, TypeVar, Union
 
 from . import pickle_cache, sexpr, util
-from .values import Pos2, ToPos2
+from .values import Pos2, ToPos2, Uuid
 
 class NewInstance: pass
 NEW_INSTANCE: Any = NewInstance()
@@ -181,8 +181,15 @@ class Node:
         Creates a recursive clone of this node. The new node will not have a parent.
         """
 
-        node = copy.copy(self)
+        node = self.__class__.__new__(self.__class__)
         node.__parent = None
+        node.unknown = copy.deepcopy(self.unknown)
+        for a in Attr.get_class_attributes(self.__class__):
+            if a.value_type == Uuid:
+                setattr(node, a.name, Uuid())
+            else:
+                setattr(node, a.name, copy.deepcopy(getattr(self, a.name)))
+
         return node
 
     _T = TypeVar("_T", bound="Node")
@@ -317,6 +324,12 @@ class Node:
             return self.__parent.transform_pos(pos)
         else:
             return Pos2(pos)
+
+    def __repr__(self) -> str:
+        r = []
+        for a in Attr.get_class_attributes(self.__class__):
+            r.append(f"{a.name}={repr(getattr(self, a.name))}")
+        return f"{self.__class__.__name__}({', '.join(r)})"
 
     @classmethod
     def parse(cls, s: str) -> Self:

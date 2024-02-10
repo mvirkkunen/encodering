@@ -251,6 +251,9 @@ class Uuid():
 
         return Uuid(expr[0].name)
 
+    def __repr__(self) -> str:
+        return repr(self.__value)
+
 class SymbolEnum(Enum):
     def to_sexpr(self) -> sexpr.SExpr:
         return [sexpr.Sym(self.value)]
@@ -264,6 +267,9 @@ class SymbolEnum(Enum):
                 return item
 
         return SymbolEnumUnknownValue(expr[0].name)
+
+    def __repr__(self):
+        return repr(self.value)
 
 @dataclass(frozen=True)
 class SymbolEnumUnknownValue:

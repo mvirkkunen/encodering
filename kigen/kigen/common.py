@@ -76,6 +76,15 @@ class Layer:
     User9 = "User.9"
 
     AllCu = "*.Cu"
+    AllMask = "*.Mask"
+
+    def flip(l: str) -> str:
+        if l.startswith("F."):
+            return "B." + l[2:]
+        elif l.startswith("B."):
+            return "F." + l[2:]
+        else:
+            return l
 
 class BaseTransform(ContainerNode):
     node_name = None

@@ -295,7 +295,7 @@ class SchematicFile(ContainerNode, NodeLoadSaveMixin):
                 )
             ]),
         )
-        ssym.unknown = copy.copy(sym.unknown)
+        ssym.unknown = copy.deepcopy(sym.unknown)
 
         for pin in sym.all_pins():
             ssym.append(SchematicSymbolPin(pin.number.number))

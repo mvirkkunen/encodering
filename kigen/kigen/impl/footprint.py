@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import overload, runtime_checkable, Annotated, Optional, Protocol
 
-from ..common import BaseTransform, BaseRotate, CoordinatePointList, Generator, Net, Property, TextEffects, ToCoordinatePointList, Uuid, KIGEN_GENERATOR, KIGEN_VERSION
+from ..common import BaseTransform, BaseRotate, CoordinatePointList, Generator, Net, Property, StrokeDefinition, TextEffects, ToCoordinatePointList, Uuid, KIGEN_GENERATOR, KIGEN_VERSION
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 from ..values import SymbolEnum, Pos2, ToPos2, ToVec2, Vec2
 from .. import sexpr, util
@@ -62,14 +62,14 @@ class Line(Node):
     end: Annotated[Vec2, Attr.Transform]
     angle: Optional[float]
     layer: str
-    width: float
+    stroke: StrokeDefinition
     tstamp: Uuid
 
     def __init__(
             self,
             start: ToVec2,
             end: ToVec2,
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
             angle: Optional[float] = None,
             tstamp: Uuid = NEW_INSTANCE,
@@ -86,7 +86,7 @@ class Rect(Node):
     start: Annotated[Vec2, Attr.Transform]
     end: Annotated[Vec2, Attr.Transform]
     layer: str
-    width: float
+    stroke: StrokeDefinition
     fill: Optional[FillMode]
     tstamp: Uuid
 
@@ -94,7 +94,7 @@ class Rect(Node):
             self,
             start: ToVec2,
             end: ToVec2,
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
             fill: Optional[FillMode] = None,
             tstamp: Uuid = NEW_INSTANCE,
@@ -107,7 +107,7 @@ class Circle(Node):
     center: Annotated[Vec2, Attr.Transform]
     end: Annotated[Vec2, Attr.Transform]
     layer: str
-    width: float
+    stroke: StrokeDefinition
     fill: Optional[FillMode]
     tstamp: Uuid
 
@@ -115,7 +115,7 @@ class Circle(Node):
             self,
             center: ToVec2,
             radius: "float | ToVec2",
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
             fill: Optional[FillMode] = None,
             tstamp: Uuid = NEW_INSTANCE,
@@ -134,7 +134,7 @@ class Arc(Node):
     mid: Annotated[Vec2, Attr.Transform]
     end: Annotated[Vec2, Attr.Transform]
     layer: str
-    width: float
+    stroke: StrokeDefinition
     tstamp: Uuid
 
     @overload
@@ -144,7 +144,7 @@ class Arc(Node):
             start: ToVec2,
             mid: ToVec2,
             end: ToVec2,
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
     ) -> None:
         """
@@ -164,7 +164,7 @@ class Arc(Node):
             radius: float,
             start_angle: float,
             end_angle: float,
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
     ) -> None:
         """
@@ -187,7 +187,7 @@ class Arc(Node):
             radius: Optional[float] = None,
             start_angle: Optional[float] = None,
             end_angle: Optional[float] = None,
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
             tstamp: Uuid = NEW_INSTANCE,
     ) -> None:
@@ -214,14 +214,14 @@ class Polygon(Node):
 
     pts: CoordinatePointList
     layer: str
-    width: float
+    stroke: StrokeDefinition
     fill: Optional[FillMode]
     tstamp: Uuid
 
     def __init__(
             self,
             pts: ToCoordinatePointList,
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
             fill: Optional[FillMode] = None,
             tstamp: Uuid = NEW_INSTANCE,
@@ -233,7 +233,7 @@ class Polygon(Node):
     def rect(
             start: ToVec2,
             end: ToVec2,
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
             fill: Optional[FillMode] = None,
             tstamp: Uuid = NEW_INSTANCE,
@@ -248,7 +248,7 @@ class Polygon(Node):
                 (end.x, end.y),
                 (start.x, end.y),
             ],
-            width=width,
+            stroke=stroke,
             layer=layer,
             fill=fill,
             tstamp=tstamp,
@@ -259,13 +259,13 @@ class Bezier(Node):
 
     pts: CoordinatePointList
     layer: str
-    width: float
+    stroke: StrokeDefinition
     tstamp: Uuid
 
     def __init__(
             self,
             pts: ToCoordinatePointList,
-            width: float,
+            stroke: float | StrokeDefinition,
             layer: str,
             tstamp: Uuid = NEW_INSTANCE,
     ):
@@ -336,17 +336,20 @@ class LayerRef:
             in expr
         ])
 
+    def __repr__(self):
+        return f"LayerRef({repr(self.layers)})"
+
 class DrillDefinition(Node):
     node_name = "drill"
 
     oval: Annotated[bool, Attr.Positional]
-    diameter: Annotated[float, Attr.Positional]
+    diameter: Annotated[Optional[float], Attr.Positional]
     width: Annotated[Optional[float], Attr.Positional]
     offset: Annotated[Optional[Vec2], Attr.Transform]
 
     def __init__(
             self,
-            diameter: float,
+            diameter: Optional[float] = None,
             width: Optional[float] = None,
             oval: bool = False,
             offset: Optional[ToVec2] = None,
@@ -365,6 +368,7 @@ class Pad(ContainerNode):
     size: Vec2
     drill: Optional[DrillDefinition]
     layers: LayerRef
+    roundrect_rratio: Optional[float]
     net: Optional[Net]
     tstamp: Uuid
 
@@ -377,6 +381,7 @@ class Pad(ContainerNode):
             size: "ToVec2 | float | int",
             layers: LayerRef | list[str],
             drill: Optional[DrillDefinition | float | int] = None,
+            roundrect_rratio: Optional[float] = None,
             net: Optional[Net] = None,
             locked: bool = False,
             tstamp: Uuid = NEW_INSTANCE,
@@ -471,7 +476,7 @@ class LibraryFootprint(BaseFootprint, NodeLoadSaveMixin):
 
     library_name: Annotated[str, Attr.Ignore]
     name: Annotated[str, Attr.Positional]
-    tedit: Uuid
+    tedit: Optional[Uuid]
     version: int
     generator: Generator
 
@@ -483,7 +488,7 @@ class LibraryFootprint(BaseFootprint, NodeLoadSaveMixin):
         descr: Optional[str] = None,
         tags: Optional[str] = None,
         attr: Optional[FootprintAttributes] = None,
-        tedit: Uuid = NEW_INSTANCE,
+        tedit: Optional[Uuid] = None,
         version: int = KIGEN_VERSION,
         generator: Generator = KIGEN_GENERATOR,
     ) -> None:
@@ -493,6 +498,10 @@ class LibraryFootprint(BaseFootprint, NodeLoadSaveMixin):
 
     def _set_path(self, path: Path) -> None:
         self.library_name = path.parent.stem
+
+    @property
+    def library_link(self) -> Optional[str]:
+        return f"{self.library_name}:{self.name}"
 
 class FootprintLibrary:
     path: Path

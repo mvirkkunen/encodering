@@ -5,7 +5,7 @@ from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
 from ..common import BaseRotate, BaseTransform, Generator, Layer, Net, PageSettings, PaperSize, Property, KIGEN_GENERATOR, KIGEN_VERSION
 from ..values import SymbolEnum, Pos2, ToPos2, ToVec2, Uuid, Vec2
 from .. import util
-from .footprint import Footprint, LibraryFootprint
+from .footprint import Footprint, LibraryFootprint, Pad
 from .symbol import SymbolEnum, Property as SymbolProperty
 from .schematic import SchematicSymbol
 
@@ -374,8 +374,8 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
     def place(
             self,
             footprint: Footprint | LibraryFootprint,
-            layer: str,
             at: ToPos2,
+            layer: str,
             path: Optional[str | SchematicSymbol] = None,
             library_link: Optional[str] = None,
             parent: Optional[ContainerNode] = None,
@@ -388,11 +388,11 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
         :returns: a SchematicSymbol instance
         """
 
+        if not layer in (Layer.FCu, Layer.BCu):
+            raise ValueError("Footprints can only be placed on layers F.Cu and B.Cu")
+
         if not library_link:
-            if isinstance(footprint, Footprint) and footprint.library_link is not None:
-                library_link = footprint.library_link
-            elif isinstance(footprint, LibraryFootprint):
-                library_link = f"{footprint.library_name}:{footprint.name}"
+            library_link = footprint.library_link
 
         if not library_link:
             raise ValueError("library_link is required if footprint does not provide one")
@@ -407,7 +407,7 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
 
         children.extend(c.clone() for c in footprint)
 
-        fp = Footprint(
+        pcb_fp = Footprint(
             library_link=library_link,
             layer=layer,
             at=at,
@@ -418,8 +418,12 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
             attr=footprint.attr.clone() if footprint.attr else None
         )
 
-        fp.unknown = copy.deepcopy(footprint.unknown)
+        pcb_fp.unknown = copy.deepcopy(footprint.unknown)
 
-        (parent or self).append(fp)
+        if layer == Layer.BCu:
+            for pad in pcb_fp.find_all(Pad):
+                pad.layers.layers = [Layer.flip(l) for l in pad.layers.layers]
 
-        return fp
+        (parent or self).append(pcb_fp)
+
+        return pcb_fp
