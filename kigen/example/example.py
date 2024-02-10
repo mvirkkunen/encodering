@@ -42,8 +42,8 @@ pcb_r1 = board.place(resistor_fp, pcb.Layer.FCu, (50.8, 25.4, -90), path=sch_r1)
 pcb_j1.get_pad("1").net = pcb_r1.get_pad("1").net = p1_net
 pcb_j1.get_pad("2").net = pcb_r1.get_pad("2").net = p2_net
 
-board.append(pcb.Track(start=pcb_j1.get_pad("1").position, end=pcb_r1.get_pad("1").position, width=0.5, layer=pcb.Layer.FCu, net=p1_net))
-board.append(pcb.Track(start=pcb_j1.get_pad("2").position, end=pcb_r1.get_pad("2").position, width=0.5, layer=pcb.Layer.FCu, net=p2_net))
+board.append(pcb.TrackSegment(start=pcb_j1.get_pad("1").position, end=pcb_r1.get_pad("1").position, width=0.5, layer=pcb.Layer.FCu, net=p1_net))
+board.append(pcb.TrackSegment(start=pcb_j1.get_pad("2").position, end=pcb_r1.get_pad("2").position, width=0.5, layer=pcb.Layer.FCu, net=p2_net))
 
 board.append(pcb.Rect(start=(0, 0), end=(76.2, 76.2), width=0.5, layer=pcb.Layer.EdgeCuts))
 

@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable,TypeVar
 from .values import Vec2
 
 _T = TypeVar("_T")
@@ -25,7 +25,7 @@ def remove_where(l: list[_T], pred: Callable[[_T], bool]) -> list[_T]:
 
     return r
 
-def calculate_arc(attrs: dict[str, Any]):
+def calculate_arc(attrs: dict[str, Any]) -> tuple[Vec2, Vec2, Vec2]:
     start = attrs["start"]
     mid = attrs["mid"]
     end = attrs["end"]

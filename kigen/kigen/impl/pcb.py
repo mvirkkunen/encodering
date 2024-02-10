@@ -1,12 +1,17 @@
 import copy
-from typing import Annotated, ClassVar, Optional
+from typing import overload, Annotated, ClassVar, Optional
 
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
-from ..common import Generator, Layer, Net, PageSettings, PaperSize, Property, KIGEN_GENERATOR, KIGEN_VERSION
-from ..values import SymbolEnum, Pos2, Uuid, Vec2
+from ..common import BaseRotate, BaseTransform, Generator, Layer, Net, PageSettings, PaperSize, Property, KIGEN_GENERATOR, KIGEN_VERSION
+from ..values import SymbolEnum, Pos2, ToPos2, ToVec2, Uuid, Vec2
+from .. import util
 from .footprint import Footprint, LibraryFootprint
 from .symbol import SymbolEnum, Property as SymbolProperty
 from .schematic import SchematicSymbol
+
+class Transform(BaseTransform): pass
+
+class Rotate(BaseRotate): pass
 
 class GeneralSettings(Node):
     node_name = "general"
@@ -128,7 +133,93 @@ class Setup(Node):
     ) -> None:
         super().__init__(locals())
 
-class Track(Node):
+class TrackArc(Node):
+    node_name = "arc"
+
+    start: Annotated[Vec2, Attr.Transform]
+    mid: Annotated[Vec2, Attr.Transform]
+    end: Annotated[Vec2, Attr.Transform]
+    width: float
+    layer: str
+    net: int
+    tstamp: Uuid
+
+    @overload
+    def __init__(
+            self,
+            *,
+            start: ToVec2,
+            mid: ToVec2,
+            end: ToVec2,
+            width: float,
+            layer: str,
+            net: int | Net,
+    ) -> None:
+        """
+        :param start: Start point of the arc.
+        :param mid: Mid point of the arc.
+        :param end: End point of the arc.
+        :param stroke: Stroke style.
+        :param fill: Fill style.
+        """
+        ...
+
+    @overload
+    def __init__(
+            self,
+            *,
+            center: ToVec2,
+            radius: float,
+            start_angle: float,
+            end_angle: float,
+            width: float,
+            layer: str,
+            net: int | Net,
+    ) -> None:
+        """
+        :param center: Center point of the circle that defines the arc.
+        :param radius: Radius of the arg.
+        :param start: Start angle of the arg.
+        :param end: End angle of the arg.
+        :param stroke: Stroke style.
+        :param fill: Fill style.
+        """
+        ...
+
+    def __init__(
+            self,
+            *,
+            start: Optional[ToVec2] = None,
+            mid: Optional[ToVec2] = None,
+            end: Optional[ToVec2] = None,
+            center: Optional[ToVec2] = None,
+            radius: Optional[float] = None,
+            start_angle: Optional[float] = None,
+            end_angle: Optional[float] = None,
+            width: float,
+            layer: str,
+            net: int | Net,
+            tstamp: Uuid = NEW_INSTANCE,
+    ) -> None:
+        """
+        To create a new arc, define either (start, mid, end) or (center, radius, start_angle, end_angle).
+
+        :param start: Start point of the arc.
+        :param mid: Mid point of the arc.
+        :param end: End point of the arc.
+        :param center: Center point of the circle that defines the arc.
+        :param radius: Radius of the arg.
+        :param start: Start angle of the arg.
+        :param end: End angle of the arg.
+        :param stroke: Stroke (outline) style.
+        :param fill: Fill style.
+        """
+
+        start, mid, end = util.calculate_arc(locals())
+
+        super().__init__(locals())
+
+class TrackSegment(Node):
     node_name = "segment"
 
     start: Annotated[Vec2, Attr.Transform]
@@ -140,16 +231,55 @@ class Track(Node):
 
     def __init__(
             self,
-            start: Vec2,
-            end: Vec2,
+            start: ToVec2,
+            end: ToVec2,
             width: float,
             layer: str,
             net: int | Net,
             tstamp: Uuid = NEW_INSTANCE
     ) -> None:
-        if isinstance(net, Net):
-            net = net.ordinal
+        super().__init__(locals())
 
+class ViaType(SymbolEnum):
+    Blind = "blind"
+    Micro = "micro"
+
+class ViaLayers(Node):
+    node_name = "layers"
+
+    start: Annotated[str, Attr.Positional]
+    end: Annotated[str, Attr.Positional]
+
+    def __init__(
+            self,
+            start: str = Layer.FCu,
+            end: str = Layer.BCu,
+    ) -> None:
+        super().__init__(locals())
+
+class TrackVia(Node):
+    node_name = "via"
+
+    type: Annotated[Optional[ViaType], Attr.Positional]
+    locked: Annotated[bool, Attr.Bool.SymbolInList]
+    at: Annotated[Vec2, Attr.Transform]
+    size: float
+    drill: float
+    layers: ViaLayers
+    net: int
+    tstamp: Uuid
+
+    def __init__(
+            self,
+            at: ToVec2,
+            size: float,
+            drill: float,
+            net: int | Net,
+            layers: ViaLayers = NEW_INSTANCE,
+            type: Optional[ViaType] = None,
+            locked: bool = False,
+            tstamp: Uuid = NEW_INSTANCE,
+    ) -> None:
         super().__init__(locals())
 
 class Rect(Node):
@@ -163,16 +293,41 @@ class Rect(Node):
 
     def __init__(
             self,
-            start: Vec2,
-            end: Vec2,
+            start: ToVec2,
+            end: ToVec2,
             width: float,
             layer: str,
             tstamp: Uuid = NEW_INSTANCE,
     ) -> None:
         super().__init__(locals())
 
+class Circle(Node):
+    node_name = "gr_circle"
+
+    center: Annotated[Vec2, Attr.Transform]
+    end: Annotated[Vec2, Attr.Transform]
+    width: float
+    layer: str
+    tstamp: Uuid
+
+    def __init__(
+            self,
+            center: ToVec2,
+            radius: float,
+            width: float,
+            layer: str,
+            tstamp: Uuid = NEW_INSTANCE,
+    ) -> None:
+        end = Vec2(center) + Vec2(radius, 0)
+
+        super().__init__(locals())
+
+GraphicsItems = (Circle, Footprint, Net, Rect, Rotate, TrackArc, TrackSegment, TrackVia, Transform)
+Rotate.child_types = GraphicsItems
+Transform.child_types = GraphicsItems
+
 class PcbFile(ContainerNode, NodeLoadSaveMixin):
-    child_types = (Net, Footprint, Track, Rect)
+    child_types = GraphicsItems
     node_name = "kicad_pcb"
     order_attrs = ("version", "generator")
 
@@ -205,7 +360,7 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
 
         self.append(Net(0, ""))
 
-    def add_net(self, name: str) -> None:
+    def add_net(self, name: str) -> Net:
         if self.get_net(name):
             raise ValueError(f"Net '{name} already exists")
 
@@ -220,7 +375,7 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
             self,
             footprint: Footprint | LibraryFootprint,
             layer: str,
-            at: Pos2,
+            at: ToPos2,
             path: Optional[str | SchematicSymbol] = None,
             library_link: Optional[str] = None,
             parent: Optional[ContainerNode] = None,
@@ -242,7 +397,7 @@ class PcbFile(ContainerNode, NodeLoadSaveMixin):
         if not library_link:
             raise ValueError("library_link is required if footprint does not provide one")
 
-        children = []
+        children: list[Node] = []
 
         if isinstance(path, SchematicSymbol):
             for prop in path.find_all(SymbolProperty, lambda p: p.name.startswith("ki_")):

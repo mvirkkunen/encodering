@@ -1,0 +1,214 @@
+(kicad_pcb
+  (version 20230121)
+  (generator kigen)
+  (general (thickness 1.6))
+  (paper A4)
+  (layers
+    (0 "F.Cu" signal)
+    (31 "B.Cu" signal)
+    (32 "B.Adhes" user "B.Adhesive")
+    (33 "F.Adhes" user "F.Adhesive")
+    (34 "B.Paste" user)
+    (35 "F.Paste" user)
+    (36 "B.SilkS" user "B.Silkscreen")
+    (37 "F.SilkS" user "F.Silkscreen")
+    (38 "B.Mask" user)
+    (39 "F.Mask" user)
+    (40 "Dwgs.User" user "User.Drawings")
+    (41 "Cmts.User" user "User.Comments")
+    (42 "Eco1.User" user "User.Eco1")
+    (43 "Eco2.User" user "User.Eco2")
+    (44 "Edge.Cuts" user)
+    (45 "Margin" user)
+    (46 "B.CrtYd" user "B.Courtyard")
+    (47 "F.CrtYd" user "F.Courtyard")
+    (48 "B.Fab" user)
+    (49 "F.Fab" user)
+    (50 "User.1" user)
+    (51 "User.2" user)
+    (52 "User.3" user)
+    (53 "User.4" user)
+    (54 "User.5" user)
+    (55 "User.6" user)
+    (56 "User.7" user)
+    (57 "User.8" user)
+    (58 "User.9" user)
+  )
+  (setup (pad_to_mask_clearance 0.0) (aux_axis_origin 0 0) (grid_origin 0 0))
+  (net 0 "")
+  (net 1 "P1")
+  (net 2 "P2")
+  (footprint
+    "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+    (layer "F.Cu")
+    (descr "Through hole straight pin header, 1x02, 2.54mm pitch, single row")
+    (tags "Through hole pin header THT 1x02 2.54mm single row")
+    (attr through_hole)
+    (tstamp 8a21f9bb-0bcb-461b-818c-29d7e0769ebe)
+    (at 25.4 25.4 0)
+    (path "/2a22713f-5da6-4c29-a770-a4bcba8bfe04")
+    (fp_text
+      reference
+      "REF**"
+      (at 0 -2.33)
+      (layer "F.SilkS")
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 9f449d09-37db-4679-b4e5-533258de06b2)
+    )
+    (fp_text
+      value
+      "PinHeader_1x02_P2.54mm_Vertical"
+      (at 0 4.87)
+      (layer "F.Fab")
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 38fef59b-958b-45b7-8820-2d51d2463f7b)
+    )
+    (fp_text
+      user
+      "${REFERENCE}"
+      (at 0 1.27 90)
+      (layer "F.Fab")
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 37dcc22b-aaa5-40bf-8441-c3e442439a19)
+    )
+    (model
+      "${KICAD6_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.wrl"
+      (offset (xyz 0 0 0))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
+    (property "ki_locked" "")
+    (property "ki_keywords" "connector")
+    (property "ki_description" "Generic connector, single row, 01x02, script generated")
+    (property "ki_fp_filters" "Connector*:*_1x??_*")
+    (fp_line (start -1.33 0) (end -1.33 -1.33) (layer "F.SilkS") (width 0.12) (tstamp 17065d0c-b729-4411-a0ba-609477102cae))
+    (fp_line (start -1.33 3.87) (end 1.33 3.87) (layer "F.SilkS") (width 0.12) (tstamp 356cd7c3-c732-46f6-901c-08ed3018653a))
+    (fp_line (start -1.33 1.27) (end -1.33 3.87) (layer "F.SilkS") (width 0.12) (tstamp 5039dc18-b6d0-4711-8037-7004e69e6695))
+    (fp_line (start -1.33 1.27) (end 1.33 1.27) (layer "F.SilkS") (width 0.12) (tstamp acc4628e-df19-42c5-8749-bf9d024c5546))
+    (fp_line (start -1.33 -1.33) (end 0 -1.33) (layer "F.SilkS") (width 0.12) (tstamp c8d9f458-d8ec-4ce7-837b-0c157bcfe850))
+    (fp_line (start 1.33 1.27) (end 1.33 3.87) (layer "F.SilkS") (width 0.12) (tstamp cb13b7ee-2d34-4ee0-a235-16f903038f41))
+    (fp_line (start 1.8 -1.8) (end -1.8 -1.8) (layer "F.CrtYd") (width 0.05) (tstamp 0431df18-ccfa-43ed-988f-ccfa94f64588))
+    (fp_line (start 1.8 4.35) (end 1.8 -1.8) (layer "F.CrtYd") (width 0.05) (tstamp 39e4174d-3678-46b7-8a86-e101b522ee01))
+    (fp_line (start -1.8 -1.8) (end -1.8 4.35) (layer "F.CrtYd") (width 0.05) (tstamp 4c579f0c-22ef-46f1-9321-ced1932e9de8))
+    (fp_line (start -1.8 4.35) (end 1.8 4.35) (layer "F.CrtYd") (width 0.05) (tstamp bbe4fc65-e3ef-4f3e-a8f2-a145d26dd2d0))
+    (fp_line (start 1.27 3.81) (end -1.27 3.81) (layer "F.Fab") (width 0.1) (tstamp 4862cb63-0472-41cc-a8df-0b9bad363bce))
+    (fp_line (start -1.27 -0.635) (end -0.635 -1.27) (layer "F.Fab") (width 0.1) (tstamp 568e96c1-5e2a-4c04-bbbf-fe7e31835e6c))
+    (fp_line (start -1.27 3.81) (end -1.27 -0.635) (layer "F.Fab") (width 0.1) (tstamp 56968ee9-c95b-4291-bcb7-1793b34b76a2))
+    (fp_line (start -0.635 -1.27) (end 1.27 -1.27) (layer "F.Fab") (width 0.1) (tstamp 6febb08f-4976-439b-a073-38d3b74479d4))
+    (fp_line (start 1.27 -1.27) (end 1.27 3.81) (layer "F.Fab") (width 0.1) (tstamp eecb46da-29c2-41e8-8b5f-45913974fea0))
+    (pad
+      "1"
+      thru_hole
+      rect
+      (at 0 0 0)
+      (size 1.7 1.7)
+      (drill 1.0)
+      (layers *.Cu *.Mask)
+      (net 1 "P1")
+      (tstamp 2b0a2100-e129-47ab-bd5f-042914e5b9df)
+    )
+    (pad
+      "2"
+      thru_hole
+      oval
+      (at 0 2.54 0)
+      (size 1.7 1.7)
+      (drill 1.0)
+      (layers *.Cu *.Mask)
+      (net 2 "P2")
+      (tstamp 09ceeb43-9fac-40b4-a3bb-4f36cdd20ed2)
+    )
+  )
+  (footprint
+    "Resistor_SMD:R_0805_2012Metric"
+    (layer "F.Cu")
+    (descr
+      "Resistor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator"
+    )
+    (tags "resistor")
+    (attr smd)
+    (tstamp 26b9d687-2281-42d4-84d5-0060f659cbfc)
+    (at 50.8 25.4 -90)
+    (path "/df834b50-d745-4a96-a749-2af23970f98b")
+    (fp_text
+      reference
+      "REF**"
+      (at 0 -1.65)
+      (layer "F.SilkS")
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp effead60-2b17-4463-91cf-34792a2b459a)
+    )
+    (fp_text
+      value
+      "R_0805_2012Metric"
+      (at 0 1.65)
+      (layer "F.Fab")
+      (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 83cd9c78-75b4-4eec-9501-2ff4a6e7a26e)
+    )
+    (fp_text
+      user
+      "${REFERENCE}"
+      (at 0 0)
+      (layer "F.Fab")
+      (effects (font (size 0.5 0.5) (thickness 0.08)))
+      (tstamp b5354c63-16aa-4898-aa0c-eeb3d035fc5f)
+    )
+    (model
+      "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0805_2012Metric.wrl"
+      (offset (xyz 0 0 0))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
+    (property "ki_keywords" "R res resistor")
+    (property "ki_description" "Resistor")
+    (property "ki_fp_filters" "R_*")
+    (fp_line
+      (start -0.227064 -0.735)
+      (end 0.227064 -0.735)
+      (layer "F.SilkS")
+      (width 0.12)
+      (tstamp 1d1dfe66-8d95-48c7-9468-1437fe352fc9)
+    )
+    (fp_line
+      (start -0.227064 0.735)
+      (end 0.227064 0.735)
+      (layer "F.SilkS")
+      (width 0.12)
+      (tstamp 9aaa9150-dbb8-4657-a223-476b55b89dae)
+    )
+    (fp_line (start -1.68 -0.95) (end 1.68 -0.95) (layer "F.CrtYd") (width 0.05) (tstamp 245c0818-3ccc-4969-b35b-0d4f8723400e))
+    (fp_line (start 1.68 -0.95) (end 1.68 0.95) (layer "F.CrtYd") (width 0.05) (tstamp 5b983e02-1ada-4414-ad21-290f1424bf3d))
+    (fp_line (start -1.68 0.95) (end -1.68 -0.95) (layer "F.CrtYd") (width 0.05) (tstamp c9825373-da58-4067-816d-465cdf887dc6))
+    (fp_line (start 1.68 0.95) (end -1.68 0.95) (layer "F.CrtYd") (width 0.05) (tstamp f3d9ee21-ffbd-4620-abbf-7bc99e9f4420))
+    (fp_line (start -1 0.625) (end -1 -0.625) (layer "F.Fab") (width 0.1) (tstamp 37f98079-19ff-4dd9-ac60-76d47722b840))
+    (fp_line (start 1 0.625) (end -1 0.625) (layer "F.Fab") (width 0.1) (tstamp b0e87530-3bac-4895-be8c-fdb50669192d))
+    (fp_line (start 1 -0.625) (end 1 0.625) (layer "F.Fab") (width 0.1) (tstamp b1a33891-38ab-48fb-8542-eb6b9260c23c))
+    (fp_line (start -1 -0.625) (end 1 -0.625) (layer "F.Fab") (width 0.1) (tstamp e73c85cd-37bc-422b-91a3-e268ce9a1281))
+    (pad
+      "1"
+      smd
+      roundrect
+      (at -0.9125 0 0)
+      (size 1.025 1.4)
+      (layers F.Cu F.Paste F.Mask)
+      (net 1 "P1")
+      (tstamp 9702d628-9b91-4d58-9130-9271bd872f5b)
+      (roundrect_rratio 0.243902)
+    )
+    (pad
+      "2"
+      smd
+      roundrect
+      (at 0.9125 0 0)
+      (size 1.025 1.4)
+      (layers F.Cu F.Paste F.Mask)
+      (net 2 "P2")
+      (tstamp 1ad1544b-7ba3-4927-93fd-ab9c0a8dba06)
+      (roundrect_rratio 0.243902)
+    )
+  )
+  (segment (start 25.4 25.4) (end 50.8 24.4875) (width 0.5) (layer "F.Cu") (net 1) (tstamp 23186260-e933-4079-a577-fd9c072874fa))
+  (segment (start 25.4 27.94) (end 50.8 26.3125) (width 0.5) (layer "F.Cu") (net 2) (tstamp 9e435d98-ef28-4f54-a0f0-6d7bcd0e6899))
+  (gr_rect (start 0 0) (end 76.2 76.2) (width 0.5) (layer "Edge.Cuts") (tstamp 958277f0-3d6f-4d22-8bcf-476302a4687c))
+)

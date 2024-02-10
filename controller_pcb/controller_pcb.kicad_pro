@@ -411,7 +411,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "encodering.kicad_pro",
+    "filename": "controller_pcb.kicad_pro",
     "version": 1
   },
   "net_settings": {

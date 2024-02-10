@@ -14,6 +14,9 @@ from .impl.footprint import (
     Polygon,
     Rect,
     Rotate,
+    Text,
+    TextLayer,
+    TextType,
     Transform,
 
     Vec2,

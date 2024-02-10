@@ -7,7 +7,8 @@ from functools import cache
 import typing
 from typing import Any, Callable, ClassVar, Annotated, Optional, Protocol, Self, TypeAlias, TypeVar, Union
 
-from . import pickle_cache, sexpr, util, values
+from . import pickle_cache, sexpr, util
+from .values import Pos2, ToPos2
 
 class NewInstance: pass
 NEW_INSTANCE: Any = NewInstance()
@@ -46,12 +47,7 @@ class Attr:
         Type annotation. Attribute is processed by Node.transform() when serializing.
         """
 
-    class TransformRelativeRotation:
-        """
-        Type annotation. Attribute is processed by Node.transform() but only for rotation when serializing.
-        """
-
-    Meta: TypeAlias = Ignore | Positional | Bool | Transform | TransformRelativeRotation
+    Meta: TypeAlias = Ignore | Positional | Bool | Transform
 
     name: str
     value_type: type
@@ -64,10 +60,12 @@ class Attr:
         self.optional = optional
         self.meta = meta
 
-    _T = TypeVar("_T", bound=Meta)
+    _T = TypeVar("_T", Ignore, Positional, Bool, Transform)
 
-    def get_meta(self, type: type[_T]) -> Optional[_T]:
-        return self.meta.get(type, None)
+    def get_meta(self, meta_type: type[_T]) -> Optional[_T]:
+        m: Any = self.meta.get(meta_type, None)
+        assert not m or isinstance(m, meta_type)
+        return m
 
     @staticmethod
     @cache
@@ -81,8 +79,8 @@ class Attr:
             optional = False
 
             if typing.get_origin(hint) is Annotated:
-                hint, *meta = typing.get_args(hint)
-                meta = dict(((m, m()) if type(m) == type else (type(m), m)) for m in meta)
+                hint, *meta_args = typing.get_args(hint)
+                meta = dict(((m, m()) if type(m) == type else (type(m), m)) for m in meta_args)
             else:
                 meta = {}
 
@@ -119,7 +117,7 @@ class Node:
     order_attrs: ClassVar[Optional[tuple[str, ...]]]
 
     # Parent node.
-    __parent: "Annotated[Optional[ContainerNode], Attr.Ignore]"
+    __parent: "Annotated[Optional[Node], Attr.Ignore]"
 
     # Unknown S-expression data that was encountered while deserializing. Will be retained when serializing.
     unknown: Annotated[Optional[list[sexpr.SExpr]], Attr.Ignore]
@@ -143,10 +141,7 @@ class Node:
             if value is None:
                 if not a.optional:
                     raise ValueError(f"{self.__class__.__name__} requires attribute '{a.name}'")
-
-                setattr(self, a.name, None)
-                continue
-            if value is NEW_INSTANCE:
+            elif value is NEW_INSTANCE:
                 value = a.value_type()
             elif not isinstance(value, a.value_type):
                 value = a.value_type(value)
@@ -157,14 +152,14 @@ class Node:
             parent.append(self)
 
     @property
-    def parent(self) -> "Optional[ContainerNode]":
+    def parent(self) -> "Optional[Node]":
         """
         Gets the parent of the node, or None if it has none.
         """
 
         return self.__parent
 
-    def _set_parent(self, parent: "Optional[ContainerNode]") -> None:
+    def _set_parent(self, parent: "Optional[Node]") -> None:
         """
         For internal use. Sets the parent reference of the node.
         """
@@ -176,8 +171,10 @@ class Node:
         Detaches node from its parent, if any.
         """
 
-        if self.__parent:
+        if isinstance(self.__parent, ContainerNode):
             self.__parent.remove(self)
+        else:
+            self.__parent = None
 
     def clone(self) -> Self:
         """
@@ -219,9 +216,6 @@ class Node:
             if a.get_meta(Attr.Transform) and self.__parent:
                 val = a.value_type(self.__parent.transform_pos(val))
 
-            if a.get_meta(Attr.TransformRelativeRotation) and self.__parent:
-                val = a.value_type(val.x, val.y, self.__parent.transform_pos(val).r)
-
             if issubclass(a.value_type, bool):
                 bool_ser: Attr.Bool = typing.cast(Attr.Bool, a.get_meta(Attr.Bool) or Attr.Bool.Symbol)
                 if bool_ser == Attr.Bool.Symbol:
@@ -253,7 +247,7 @@ class Node:
         expr = list(expr[1:])
 
         node_name = cls.node_name
-        attrs = {}
+        attrs: dict[str, Any] = {}
 
         for a in Attr.get_class_attributes(cls):
             if issubclass(a.value_type, bool):
@@ -270,7 +264,7 @@ class Node:
             else:
                 pos = a.get_meta(Attr.Positional)
                 if pos:
-                    if a.optional and not (expr and issubclass(expr[0], a.value_type)):
+                    if a.optional and not (expr and isinstance(expr[0], a.value_type)):
                         continue
 
                     if len(expr) == 0:
@@ -314,7 +308,7 @@ class Node:
         Can be overridden in a child class to validate node attributes before serialization.
         """
 
-    def transform_pos(self, pos: values.ToPos2) -> values.Pos2:
+    def transform_pos(self, pos: ToPos2) -> Pos2:
         """
         Can be overridden in a child class to transform positioning attributes marked with Attr.Transform before serialization.
         """
@@ -322,7 +316,7 @@ class Node:
         if self.__parent:
             return self.__parent.transform_pos(pos)
         else:
-            return values.Pos2(pos)
+            return Pos2(pos)
 
     @classmethod
     def parse(cls, s: str) -> Self:
@@ -337,7 +331,7 @@ class NodeLoadSaveProtocol(Protocol):
     def _set_path(self, path: Path) -> None: ...
 
 class NodeLoadSaveMixin(NodeLoadSaveProtocol):
-    def save(self, path: str) -> None:
+    def save(self, path: Path | str) -> None:
         """
         Saves a node into a file.
         """
@@ -410,12 +404,15 @@ class ContainerNode(Node):
         node._set_parent(self)
         return node
 
-    def append(self, node: Node) -> None:
+    _T = TypeVar("_T", bound=Node)
+
+    def append(self, node: _T) -> _T:
         """
         Adds a new child node to this container. The node type must be one of the allowed types, and it must not already have a parent.
         """
 
         self.__children.append(self._validate_child(node))
+        return node
 
     def insert(self, index: int, node: Node) -> None:
         """
@@ -439,19 +436,23 @@ class ContainerNode(Node):
         for n in nodes:
             self.append(n)
 
-    _T = TypeVar("_T", bound=Node)
-
-    def find_one(self, child_type: type[_T], predicate: Optional[Callable[[_T], bool]] = None) -> Optional[_T]:
+    def find_one(self, child_type: type[_T], predicate: Optional[Callable[[_T], bool]] = None, *, recursive: bool = False) -> Optional[_T]:
         """
         Finds the first child node of this node matching the type and optionally also a predicate. Returns None if not found.
         """
 
-        return next(self.find_all(child_type, predicate), None)
+        return next(self.find_all(child_type, predicate, recursive=recursive), None)
 
-    def find_all(self, child_type: type[_T], predicate: Optional[Callable[[_T], bool]] = None) -> Iterator[_T]:
+    def find_all(self, child_type: type[_T], predicate: Optional[Callable[[_T], bool]] = None, *, recursive: bool = False) -> Iterator[_T]:
         """
         Finds all child nodes of this node matching the type and optionally also a predicate.
         """
+
+        for c in self:
+            if isinstance(c, child_type) and (not predicate or predicate(c)):
+                yield c
+            if recursive and isinstance(c, ContainerNode):
+                yield from c.find_all(child_type, predicate=predicate, recursive=True)
 
         return (c for c in self if isinstance(c, child_type) and (not predicate or predicate(c)))
 

@@ -32,6 +32,8 @@ def get_cache_path(path: str) -> Optional[str]:
     return os.path.join(cache_dir, filename)
 
 def load(path: str, loader: Callable[[str], Any]) -> Any:
+    return loader(path)
+
     cache_path = get_cache_path(path)
     if not cache_path:
         return loader(path)

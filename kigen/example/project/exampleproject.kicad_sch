@@ -1,0 +1,137 @@
+(kicad_sch
+  (version 20230121)
+  (generator kigen)
+  (uuid daa0ab2c-3eb2-4921-b314-82ce35180389)
+  (paper A4)
+  (lib_symbols
+    (symbol
+      "Connector:Conn_01x02_Pin"
+      (pin_names (offset 1.016) hide)
+      (in_bom yes)
+      (on_board yes)
+      (property "Reference" "J" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+      (property "Value" "Conn_01x02_Pin" (at 0 -5.08 0) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "ki_locked" "" (at 0 0 0) (effects (font (size 1.27 1.27))))
+      (property "ki_keywords" "connector" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property
+        "ki_description"
+        "Generic connector, single row, 01x02, script generated"
+        (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "ki_fp_filters" "Connector*:*_1x??_*" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol
+        "Conn_01x02_Pin_1_1"
+        (polyline (pts (xy 1.27 -2.54) (xy 0.8636 -2.54)) (stroke (width 0.1524) (type default)) (fill (type none)))
+        (polyline (pts (xy 1.27 0) (xy 0.8636 0)) (stroke (width 0.1524) (type default)) (fill (type none)))
+        (rectangle (start 0.8636 -2.413) (end 0 -2.667) (stroke (width 0.1524) (type default)) (fill (type outline)))
+        (rectangle (start 0.8636 0.127) (end 0 -0.127) (stroke (width 0.1524) (type default)) (fill (type outline)))
+        (pin
+          passive
+          line
+          (at 5.08 0 180)
+          (length 3.81)
+          (name "Pin_1" (effects (font (size 1.27 1.27))))
+          (number "1" (effects (font (size 1.27 1.27))))
+        )
+        (pin
+          passive
+          line
+          (at 5.08 -2.54 180)
+          (length 3.81)
+          (name "Pin_2" (effects (font (size 1.27 1.27))))
+          (number "2" (effects (font (size 1.27 1.27))))
+        )
+      )
+    )
+    (symbol
+      "Device:R"
+      (pin_numbers hide)
+      (pin_names (offset 0.0))
+      (in_bom yes)
+      (on_board yes)
+      (property "Reference" "R" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
+      (property "Value" "R" (at 0 0 90) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at -1.778 0 90) (effects (font (size 1.27 1.27)) hide))
+      (property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "ki_keywords" "R res resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "ki_description" "Resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "ki_fp_filters" "R_*" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "R_0_1" (rectangle (start -1.016 -2.54) (end 1.016 2.54) (stroke (width 0.254) (type default)) (fill (type none))))
+      (symbol
+        "R_1_1"
+        (pin
+          passive
+          line
+          (at 0 3.81 270)
+          (length 1.27)
+          (name "~" (effects (font (size 1.27 1.27))))
+          (number "1" (effects (font (size 1.27 1.27))))
+        )
+        (pin
+          passive
+          line
+          (at 0 -3.81 90)
+          (length 1.27)
+          (name "~" (effects (font (size 1.27 1.27))))
+          (number "2" (effects (font (size 1.27 1.27))))
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "Connector:Conn_01x02_Pin")
+    (at 25.4 25.4 0)
+    (unit 1)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced)
+    (uuid 2a22713f-5da6-4c29-a770-a4bcba8bfe04)
+    (instances (project "project" (path "/daa0ab2c-3eb2-4921-b314-82ce35180389" (reference "J1") (unit 1))))
+    (pin "1" (uuid f8ab5d0d-8821-4123-92e2-227248e73764))
+    (pin "2" (uuid 29db6a4f-84bc-47fc-bdca-bda7204f1796))
+    (property "Reference" "J" (at 25.4 22.86 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Conn_01x02_Pin" (at 25.4 30.48 0) (effects (font (size 1.27 1.27))))
+    (property
+      "Footprint"
+      "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+      (at 25.4 25.4 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (at 25.4 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "ki_locked" "" (at 25.4 25.4 0) (effects (font (size 1.27 1.27))))
+    (property "ki_keywords" "connector" (at 25.4 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property
+      "ki_description"
+      "Generic connector, single row, 01x02, script generated"
+      (at 25.4 25.4 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "ki_fp_filters" "Connector*:*_1x??_*" (at 25.4 25.4 0) (effects (font (size 1.27 1.27)) hide))
+  )
+  (symbol
+    (lib_id "Device:R")
+    (at 50.8 25.4 0)
+    (unit 1)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced)
+    (uuid df834b50-d745-4a96-a749-2af23970f98b)
+    (instances (project "project" (path "/daa0ab2c-3eb2-4921-b314-82ce35180389" (reference "R1") (unit 1))))
+    (pin "1" (uuid 561ead55-04d5-464a-94b7-9ee54d40892c))
+    (pin "2" (uuid 00698947-fe59-48ce-bcba-4e5016356665))
+    (property "Reference" "R" (at 52.832 25.4 90) (effects (font (size 1.27 1.27))))
+    (property "Value" "R" (at 50.8 25.4 90) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric" (at 49.022 25.4 90) (effects (font (size 1.27 1.27)) hide))
+    (property "Datasheet" "~" (at 50.8 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "ki_keywords" "R res resistor" (at 50.8 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "ki_description" "Resistor" (at 50.8 25.4 0) (effects (font (size 1.27 1.27)) hide))
+    (property "ki_fp_filters" "R_*" (at 50.8 25.4 0) (effects (font (size 1.27 1.27)) hide))
+  )
+  (wire (pts (xy 30.48 25.4) (xy 50.8 21.59)) (stroke (width 0.0) (type default)) (uuid de5ae356-3039-4ff1-99c4-b870ccb353ba))
+  (wire (pts (xy 30.48 27.94) (xy 50.8 29.21)) (stroke (width 0.0) (type default)) (uuid 4baf7266-fd78-421d-8d4f-65062872a58b))
+)

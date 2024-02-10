@@ -1010,7 +1010,7 @@
     (pin "2" (uuid d4abde6b-9caf-4de4-9f51-92679271c316))
     (pin "1" (uuid 3b166982-755d-4785-874f-9979991260e1))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R6") (unit 1)
         )
@@ -1035,7 +1035,7 @@
     )
     (pin "1" (uuid c3af92ea-b021-4d65-ab03-a9a3d4a81e80))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR02") (unit 1)
         )
@@ -1060,7 +1060,7 @@
     )
     (pin "1" (uuid 81e41a0f-b5d6-481f-aaf7-8723383a436a))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR07") (unit 1)
         )
@@ -1086,7 +1086,7 @@
     (pin "2" (uuid fcda4d4a-c586-4be0-9172-aa64d3b393fd))
     (pin "1" (uuid fdd9eef4-60c7-49a7-84c5-0a81085db9a3))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R1") (unit 1)
         )
@@ -1112,7 +1112,7 @@
     (pin "2" (uuid f2239658-0c1c-49fc-98a5-25d873119ee7))
     (pin "1" (uuid b42d8b4f-340f-4ddc-b17f-ce80e191675d))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R2") (unit 1)
         )
@@ -1141,7 +1141,7 @@
     (pin "3" (uuid 6aba5060-31db-4750-8c1b-638f829f3563))
     (pin "4" (uuid 165dbe18-13d7-47c4-a2a6-76d83746b3f7))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "J2") (unit 1)
         )
@@ -1166,7 +1166,7 @@
     )
     (pin "1" (uuid e3226217-77b1-40bd-9cd6-f69a4df10df2))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR04") (unit 1)
         )
@@ -1191,7 +1191,7 @@
     )
     (pin "1" (uuid 6ffc99d0-2a5e-4d64-8d88-660f82e4bd1c))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "TP1") (unit 1)
         )
@@ -1216,7 +1216,7 @@
     )
     (pin "1" (uuid 03ce2fd9-4bfc-4e03-ad40-dab6cd710320))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR08") (unit 1)
         )
@@ -1242,7 +1242,7 @@
     (pin "2" (uuid 0ee175cf-701a-49de-9017-e94d4a59b5ec))
     (pin "1" (uuid da30579f-67d6-4117-8dd9-1e9f421b185e))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R9") (unit 1)
         )
@@ -1268,7 +1268,7 @@
     (pin "2" (uuid 49690255-226e-43db-9459-85615085aa9e))
     (pin "1" (uuid 2986c633-92d5-4120-9a5e-c64f36b0955c))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R10") (unit 1)
         )
@@ -1293,7 +1293,7 @@
     )
     (pin "1" (uuid 4deea833-d74a-4ce5-bf14-16dd15b9c3a6))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR011") (unit 1)
         )
@@ -1319,7 +1319,7 @@
     (pin "2" (uuid 8c85065c-4f02-4c38-97c2-f1a817d7b972))
     (pin "1" (uuid 3f2244c8-778a-4ac1-bc45-6d7fc8a8a6f4))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R7") (unit 1)
         )
@@ -1344,7 +1344,7 @@
     )
     (pin "1" (uuid 1ecfcb5f-7eb8-4de7-b844-4e9b244dc6c6))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR012") (unit 1)
         )
@@ -1370,7 +1370,7 @@
     (pin "2" (uuid dcf02803-c80f-4f43-b315-a8277e747397))
     (pin "1" (uuid dcc3b2c4-fe6f-4a38-a1ef-adee5251149c))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R3") (unit 1)
         )
@@ -1399,7 +1399,7 @@
     (pin "B" (uuid 74e176e3-7c9d-468b-8053-3bc325b015c9))
     (pin "S1" (uuid 8e42fb1f-8eb9-40b7-88ec-93e5ecbe5513))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "SW1") (unit 1)
         )
@@ -1410,7 +1410,7 @@
   (symbol (lib_id "Device:C") (at 125.73 71.755 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid b328bf72-27c6-4adc-be7a-4f8914544ab1)
-    (property "Reference" "C2" (at 129.54 70.485 0)
+    (property "Reference" "C1" (at 129.54 70.485 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "10n" (at 129.54 73.025 0)
@@ -1425,9 +1425,9 @@
     (pin "2" (uuid 1f808574-af24-469e-b026-471380bbf9b7))
     (pin "1" (uuid 61584935-3a44-4695-a641-cb3f1ddacd1f))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
-          (reference "C2") (unit 1)
+          (reference "C1") (unit 1)
         )
       )
     )
@@ -1451,7 +1451,7 @@
     (pin "2" (uuid 22a18d1e-2ea3-450c-add2-ef73a8599022))
     (pin "1" (uuid b4598e1f-8f17-40f7-8f0a-4fbaf2723eb2))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R4") (unit 1)
         )
@@ -1477,7 +1477,7 @@
     (pin "2" (uuid 317e3bec-8490-439b-ad49-2f2c4d57471e))
     (pin "1" (uuid f94285c2-bddc-4d43-9f82-d862c7ab40c0))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "C3") (unit 1)
         )
@@ -1502,7 +1502,7 @@
     )
     (pin "1" (uuid ea5755ef-7eca-4fcd-88f4-d89b7e28cefb))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR03") (unit 1)
         )
@@ -1527,7 +1527,7 @@
     )
     (pin "1" (uuid 677b1f9f-c9fa-49bf-96bf-be952663b21b))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR09") (unit 1)
         )
@@ -1552,7 +1552,7 @@
     )
     (pin "1" (uuid 0d365714-91e9-4f9c-83cb-02ed1be38165))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR010") (unit 1)
         )
@@ -1577,7 +1577,7 @@
     )
     (pin "1" (uuid 9948a5d8-67c3-4f0f-91af-14d0186240d7))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR05") (unit 1)
         )
@@ -1603,7 +1603,7 @@
     (pin "2" (uuid 6329bf9f-7089-4926-b15b-7dafe99480a9))
     (pin "1" (uuid 55dcd137-3673-4ffe-b400-bdfcd1559dfe))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R8") (unit 1)
         )
@@ -1628,7 +1628,7 @@
     )
     (pin "1" (uuid efba7aee-6c2d-4753-b902-34cd3eb1a8fa))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR06") (unit 1)
         )
@@ -1657,7 +1657,7 @@
     (pin "5" (uuid 0e706d83-62f7-4b63-892d-8dbd30254d09))
     (pin "2" (uuid 6aeb1558-fc1e-4f67-beff-343f994ad4d8))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "J1") (unit 1)
         )
@@ -1682,7 +1682,7 @@
     )
     (pin "1" (uuid 756eaf32-027d-4985-add3-525323760f81))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "#PWR01") (unit 1)
         )
@@ -1708,7 +1708,7 @@
     (pin "2" (uuid ab1a98aa-16a0-41e6-80be-cf59c7e48858))
     (pin "1" (uuid 9874b48a-2712-4e9f-8438-7b6f9fbfc434))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "C1") (unit 1)
         )
@@ -1734,7 +1734,7 @@
     (pin "2" (uuid 4a791e7b-8b90-44a7-add3-5ab9c5283928))
     (pin "1" (uuid f0eb5607-605c-45eb-ac2f-05c292d788d4))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "R5") (unit 1)
         )
@@ -1755,6 +1755,9 @@
       (effects (font (size 1.27 1.27) italic) hide)
     )
     (property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/ATtiny806_1606_Data_Sheet_40002029A.pdf" (at 48.26 81.28 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "LCSC" "pollo" (at 48.26 81.28 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "16" (uuid 62fa7114-9deb-4fcf-85eb-aeca6659b87e))
@@ -1779,7 +1782,7 @@
     (pin "13" (uuid d1f4b713-9a5c-42ac-9268-3384c5ebd08d))
     (pin "10" (uuid 2642cac9-f118-4736-ad50-262682e69ec9))
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35"
           (reference "U1") (unit 1)
         )
@@ -1798,7 +1801,7 @@
       (effects (font (size 1.27 1.27)) (justify left top))
     )
     (instances
-      (project "encodering"
+      (project "controller_pcb"
         (path "/512aed83-5f66-45ea-b2c1-65299dbb2e35" (page "2"))
       )
     )

@@ -325,3 +325,9 @@ class Net(Node):
         """
 
         super().__init__(locals())
+
+    def __int__(self) -> int:
+        return self.ordinal
+
+    def __repr__(self) -> str:
+        return f"Net({self.ordinal}, '{self.name}')"

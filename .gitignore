@@ -2,6 +2,7 @@
 *.pdf
 **/*-backups/
 __pycache__/
-testproject/
+testproject*/
 scratch.txt
-
+**/fp-info-cache
+build/

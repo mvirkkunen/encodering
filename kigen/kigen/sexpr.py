@@ -30,14 +30,17 @@ class Sym:
             self.sym_id = sym_id
 
     @property
-    def name(self):
+    def name(self) -> str:
         return sym_id_to_name[self.sym_id]
 
-    def __eq__(self, other: "Sym") -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Sym) and self.sym_id == other.sym_id
 
     def __repr__(self) -> str:
         return f"Symbol({self.name})"
+
+    def __getnewargs__(self):
+        return (self.name,)
 
 @dataclass(frozen=True)
 class UnknownFlatSExpr:
@@ -141,7 +144,7 @@ def sexpr_flatten(obj: SExpr, show_unknown: bool) -> list[FlatSExpr]:
 def sexpr_serialize(obj: SExpr, width: int = 120, show_unknown: bool = False) -> str:
     return sexpr_format(sexpr_flatten(obj, show_unknown)[0], width)
 
-sexpr_re = re.compile(r"(\()|(\))|(-?[0-9]*\.[0-9]+\b)|(-?[0-9]+\b)|(" + SYM_RE + r")|\"((?:[^\\\"]*|\\.)*)\"|(\s+)", re.I)
+sexpr_re = re.compile(r"(\()|(\))|(-?[0-9]*\.[0-9]+(?=[ ()]))|(-?[0-9]+(?=[ ()]))|(" + SYM_RE + r")|\"((?:[^\\\"]*|\\.)*)\"|(\s+)", re.I)
 
 def sexpr_parse(s: str) -> SExpr:
     root: list[SExpr] = []

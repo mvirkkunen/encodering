@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import overload, Annotated, Optional
+from typing import overload, runtime_checkable, Annotated, Optional, Protocol
 
 from ..common import BaseTransform, BaseRotate, CoordinatePointList, Generator, Net, Property, TextEffects, ToCoordinatePointList, Uuid, KIGEN_GENERATOR, KIGEN_VERSION
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
@@ -12,10 +12,15 @@ class Transform(BaseTransform):
 class Rotate(BaseRotate):
     pass
 
+class TextType(SymbolEnum):
+    Reference = "reference"
+    Value = "value"
+    User = "user"
+
 class TextLayer(Node):
     node_name = "layer"
 
-    layer: str
+    layer: Annotated[str, Attr.Positional]
     knockout: bool
 
     def __init__(
@@ -23,27 +28,31 @@ class TextLayer(Node):
             layer: str,
             knockout: bool = False,
     ):
-        super.__init__(locals())
+        super().__init__(locals())
 
 class Text(Node):
     node_name = "fp_text"
 
+    type: Annotated[TextType, Attr.Positional]
     text: Annotated[str, Attr.Positional]
     at: Annotated[Pos2, Attr.Transform]
+    unlocked: bool
+    layer: TextLayer
+    hide: bool
     effects: TextEffects
     tstamp: Uuid
 
     def __init__(
             self,
+            type: TextType,
             text: str,
             at: ToPos2,
             layer: str | TextLayer,
+            unlocked: bool = False,
+            hide: bool = False,
             effects: TextEffects = NEW_INSTANCE,
             tstamp: Uuid = NEW_INSTANCE
     ):
-        if isinstance(layer, str):
-            layer = TextLayer(layer)
-
         super().__init__(locals())
 
 class Line(Node):
@@ -228,7 +237,7 @@ class Polygon(Node):
             layer: str,
             fill: Optional[FillMode] = None,
             tstamp: Uuid = NEW_INSTANCE,
-    ):
+    ) -> "Polygon":
         start = Vec2(start)
         end = Vec2(end)
 
@@ -319,6 +328,8 @@ class LayerRef:
 
     @classmethod
     def from_sexpr(cls, expr: sexpr.SExpr) -> "LayerRef":
+        assert isinstance(expr, list)
+
         return LayerRef([
             s.name if isinstance(s, sexpr.Sym) else str(s)
             for s
@@ -331,7 +342,7 @@ class DrillDefinition(Node):
     oval: Annotated[bool, Attr.Positional]
     diameter: Annotated[float, Attr.Positional]
     width: Annotated[Optional[float], Attr.Positional]
-    offset: Annotated[Optional[Vec2], Attr.TransformRelativeRotation]
+    offset: Annotated[Optional[Vec2], Attr.Transform]
 
     def __init__(
             self,
@@ -349,7 +360,7 @@ class Pad(ContainerNode):
     number: Annotated[str, Attr.Positional]
     type: Annotated[PadType, Attr.Positional]
     shape: Annotated[PadShape, Attr.Positional]
-    at: Annotated[Pos2, Attr.Transform] # TODO: Rotation when not actually transformed!!
+    at: Annotated[Pos2, Attr.Transform]
     locked: Annotated[bool, Attr.Bool.SymbolInList]
     size: Vec2
     drill: Optional[DrillDefinition]
@@ -389,13 +400,20 @@ class Pad(ContainerNode):
         parent_at = self.parent.transform_pos(self.parent.at)
         return parent_at + self.at.add_rotation(parent_at.r)
 
-GraphicsItemTypes = (Arc, Circle, Line, Pad, Polygon, Rect, Rotate, Transform)
+GraphicsItemTypes = (Arc, Circle, Line, Pad, Polygon, Rect, Rotate, Text, Transform)
 Transform.child_types = GraphicsItemTypes
 Rotate.child_types = GraphicsItemTypes
 
+def _get_layer_name(n: Node) -> Optional[str]:
+    if isinstance(n, Text):
+        return n.layer.layer
+    elif hasattr(n, "layer") and isinstance(n.layer, str):
+        return n.layer
+    else:
+        return None
+
 class BaseFootprint(ContainerNode):
     node_name = "footprint"
-    child_types = GraphicsItemTypes
 
     layer: str
     descr: Optional[str]
@@ -403,11 +421,15 @@ class BaseFootprint(ContainerNode):
     attr: Optional[FootprintAttributes]
 
     def get_pad(self, number: str) -> Pad:
-        pad = self.find_one(Pad, lambda p: p.number == number)
+        pad = self.find_one(Pad, lambda p: p.number == number, recursive = True)
         if not pad:
             raise RuntimeError(f"Footprint does not have a pad with number '{number}'")
 
         return pad
+
+    def delete_layer(self, layer: str) -> None:
+        for c in self.find_all(Node, lambda n: _get_layer_name(n) == layer):
+            c.detach()
 
 class Footprint(BaseFootprint):
     child_types = GraphicsItemTypes + (Property,)
@@ -434,6 +456,14 @@ class Footprint(BaseFootprint):
     def get_pad_position(self, number: str) -> Pos2:
         at = self.transform_pos(self.at)
         return at + self.get_pad(number).at.add_rotation(at.r)
+
+    def transform_pos(self, pos: ToPos2) -> Pos2:
+        # Coordinates within footprints are relative to the footprint, except for rotation for some reason, so propagate only the rotation part
+
+        if self.parent:
+            return Pos2(pos).add_rotation(self.parent.transform_pos(self.at).r)
+        else:
+            return Pos2(pos).add_rotation(self.at.r)
 
 class LibraryFootprint(BaseFootprint, NodeLoadSaveMixin):
     child_types = GraphicsItemTypes
