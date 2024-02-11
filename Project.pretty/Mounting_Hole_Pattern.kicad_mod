@@ -4,6 +4,7 @@
   (generator kigen)
   (layer "F.Cu")
   (descr "Mounting hole pattern for led_pcb")
+  (attr through_hole exclude_from_bom)
   (pad
     "2"
     thru_hole
@@ -12,7 +13,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 9ebd46f8-547d-48c4-b288-1fdd69afcf99)
+    (tstamp 36751bfa-199e-4250-844b-f68c108ba948)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -28,7 +29,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 8530b3e1-d5bb-49ba-a493-03245de0886f)
+    (tstamp 1bc4420b-5f67-4a87-9235-e151ab25e13a)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -44,7 +45,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 2d525a3a-1cc6-4143-858b-d85e6bbfa05c)
+    (tstamp 6122bb76-6065-4f4c-be70-089b54277641)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -60,7 +61,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 4d881f74-c1dc-4f00-8563-612afb018adc)
+    (tstamp 29d8edd3-009b-4aca-9ea3-ade367e432d7)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -76,7 +77,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 7decc74f-4217-4a74-9cfa-2849f67bae74)
+    (tstamp 314acdcc-d962-400c-a4ac-ec2f4a75703c)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -92,7 +93,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 650579d0-65db-49b9-9b9a-189949c83220)
+    (tstamp dfc67f75-d562-44ff-9dc5-1f15915c98c9)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"

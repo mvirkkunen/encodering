@@ -115,7 +115,7 @@
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
   )
-  (model "PEC11L-4220F-S0015--3DModel-STEP-269445.STEP"
+  (model "${KIPRJMOD}/../Project.pretty/PEC11L-4220F-S0015--3DModel-STEP-269445.STEP"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz -90 0 90))

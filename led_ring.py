@@ -254,8 +254,8 @@ def generate_led_pcb():
 
         mounting_hole_fp.append(fp.Model(pin_model, offset=(at.x, -at.y, -3.5)))
 
+    mounting_hole_fp.attr = fp.FootprintAttributes(fp.FootprintType.ThroughHole, exclude_from_bom=True)
     mounting_hole_fp.append(fp.Model(root / "build" / "led_pcb.step", offset=(0, 0, -4.5 - 1.6), rotate=(180, 0, 0)))
-
     mounting_hole_fp.save(root / "Project.pretty" / "Mounting_Hole_Pattern.kicad_mod")
 
     return origin

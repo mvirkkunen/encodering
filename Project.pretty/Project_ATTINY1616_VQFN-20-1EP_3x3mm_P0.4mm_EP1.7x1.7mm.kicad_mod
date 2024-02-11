@@ -186,7 +186,7 @@
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
   )
-  (model "ATTINY1616-MFR--3DModel-STEP-510211.STEP"
+  (model "${KIPRJMOD}/../Project.pretty/ATTINY1616-MFR--3DModel-STEP-510211.STEP"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz -90 0 0))
