@@ -13,7 +13,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 36751bfa-199e-4250-844b-f68c108ba948)
+    (tstamp 3eb04115-57b2-46f1-9e76-53d2459b7c17)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -29,7 +29,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 1bc4420b-5f67-4a87-9235-e151ab25e13a)
+    (tstamp 1212f563-63b2-48f8-a27c-53810a28de77)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -45,7 +45,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 6122bb76-6065-4f4c-be70-089b54277641)
+    (tstamp da7f170a-5574-484e-99a6-97d4ed305ccb)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -61,7 +61,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 29d8edd3-009b-4aca-9ea3-ade367e432d7)
+    (tstamp 0b7861bc-fbf4-4fd4-9462-4debc1388bc4)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -77,7 +77,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 314acdcc-d962-400c-a4ac-ec2f4a75703c)
+    (tstamp 8d52a230-1e90-4900-9f91-93947bba157f)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
@@ -93,7 +93,7 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp dfc67f75-d562-44ff-9dc5-1f15915c98c9)
+    (tstamp fc3315bf-4d61-418f-adb3-a2f8e1411f46)
   )
   (model
     "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"

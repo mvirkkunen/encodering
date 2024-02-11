@@ -11,6 +11,8 @@ cat <<EOF >build/led_pcb/fp-lib-table
   (lib (name "Project")(type "KiCad")(uri "\${KIPRJMOD}/../../Project.pretty")(options "")(descr ""))
 )
 EOF
+pcbnew build/led_pcb/led_pcb.kicad_pcb
+exit 0
 
 kicad-cli pcb export step build/led_pcb/led_pcb.kicad_pcb --subst-models --user-origin 50.8x50.8mm -o build/led_pcb.step
 #freecad -c "import Mesh, Part; p = Part.read('build/led_pcb.step'); m = Mesh.Mesh(); m.addFacets(p.tessellate(0.05)); m.write('build/led_pcb.3mf')"
@@ -24,7 +26,6 @@ kicad-cli pcb export step build/led_pcb/led_pcb.kicad_pcb --subst-models --user-
 #display -density 1000 build/display.svg
 #display build/display.svg
 
-#pcbnew build/led_pcb/led_pcb.kicad_pcb
 
 count=6
 

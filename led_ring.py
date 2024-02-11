@@ -35,6 +35,7 @@ ring0_r = hole_diam * 0.5 + 1
 led_sym = sym.SymbolLibrary.load("/usr/share/kicad/symbols/LED.kicad_sym").get("LED")
 
 #led_fp = fp.FootprintLibrary("/usr/share/kicad/footprints/LED_SMD.pretty").load("LED_0603_1608Metric")
+#led_fp = fp.FootprintLibrary("/usr/share/kicad/footprints/LED_SMD.pretty").load("LED_0805_2012Metric")
 #for t in led_fp.find_all(fp.Text):
 #    t.hide = True
 led_fp = fp.FootprintLibrary("Project.pretty").load("LED_0603_1608Metric")
@@ -47,6 +48,7 @@ def generate_led_pcb():
     led_pad_dist = (led_fp.get_pad("1").position - led_fp.get_pad("2").position).length()
     chamfer_angle = ((180 / math.pi) / ring_r) * led_pad_dist * 0.5
     rotation = 3 * angle_step + (90 - (pin_count * angle_step))
+    #rotation = 0
 
     mounting_pad_fp = fp.LibraryFootprint("Project.pretty", "Mounting_Pad", layer=Layer.FCu)
     mounting_pad_fp.append(fp.Pad(
@@ -73,7 +75,7 @@ def generate_led_pcb():
         in enumerate(p for c in list(combinations(range(pin_count), 2)) for p in (c,) * (3 - led_colors))
     ][:led_count]
 
-    origin = pcb.Transform((50.8, 50.8, rotation), parent=led_pcb)
+    origin = pcb.Transform((25.4 + outer_diam * 0.5, 25.4 + outer_diam * 0.5, rotation), parent=led_pcb)
 
     for led in leds:
         rotate = (led_colors == 1 and bool(led.index % 2))
@@ -119,14 +121,14 @@ def generate_led_pcb():
 
         if count > 2:
             # Inner to outer segment connection
-            inner_pad = Vec2(ring_r - led_pad_dist * 0.5, 0).rotate(first.angle + angle_step)
+            inner_pad = Vec2(ring_r - led_pad_dist * 0.5, 0).rotate(first.angle + (angle_step if led_colors == 1 else 0))
             outer_pad = Vec2(ring_r + led_pad_dist * 0.5, 0).rotate(last.angle + angle_step)
 
             # Arc between LEDs
             arc = origin.append(pcb.TrackArc(
                 center=[0, 0],
                 radius=ring_r,
-                start_angle=first.angle + angle_step + chamfer_angle,
+                start_angle=first.angle + (angle_step if led_colors == 1 else 0) + chamfer_angle,
                 end_angle=last.angle + angle_step - chamfer_angle,
                 width=track_width,
                 layer=Layer.FCu,
@@ -178,7 +180,7 @@ def generate_led_pcb():
                 center=[0, 0],
                 radius=ring0_r + (int(net) - 3) * ring_spacing,
                 # wat
-                end_angle=net_groups[0][1].angle - angle_step,
+                end_angle=net_groups[0][1].angle - (angle_step if led_colors == 1 else 0),
                 start_angle=net_groups[-1][0].angle,
                 width=track_width,
                 layer=Layer.BCu,
