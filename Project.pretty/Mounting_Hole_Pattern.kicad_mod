@@ -12,7 +12,13 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 153c7def-7065-49ee-a268-c5e5c03bb559)
+    (tstamp 9ebd46f8-547d-48c4-b288-1fdd69afcf99)
+  )
+  (model
+    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
+    (offset (xyz 6.142356 8.454228 -3.5))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
   )
   (pad
     "3"
@@ -22,7 +28,13 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp db1813ad-d121-4cad-baf2-d9a5fef51a3d)
+    (tstamp 8530b3e1-d5bb-49ba-a493-03245de0886f)
+  )
+  (model
+    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
+    (offset (xyz 2.172677 10.221642 -3.5))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
   )
   (pad
     "4"
@@ -32,7 +44,13 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp df410a9b-75aa-451a-876d-f8006dd735be)
+    (tstamp 2d525a3a-1cc6-4143-858b-d85e6bbfa05c)
+  )
+  (model
+    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
+    (offset (xyz -2.172677 10.221642 -3.5))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
   )
   (pad
     "5"
@@ -42,7 +60,13 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp a300a534-eee5-4cc9-ad6b-c9adbda4f13b)
+    (tstamp 4d881f74-c1dc-4f00-8563-612afb018adc)
+  )
+  (model
+    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
+    (offset (xyz -6.142356 8.454228 -3.5))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
   )
   (pad
     "6"
@@ -52,7 +76,13 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 1add854a-cc3a-44b5-abcf-93887cad7c29)
+    (tstamp 7decc74f-4217-4a74-9cfa-2849f67bae74)
+  )
+  (model
+    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
+    (offset (xyz -9.049965 5.225 -3.5))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
   )
   (pad
     "1"
@@ -62,6 +92,13 @@
     (size 2 2)
     (drill 1.0)
     (layers *.Cu *.Mask)
-    (tstamp 4554c14c-b28e-447d-9211-6783d6088004)
+    (tstamp 650579d0-65db-49b9-9b9a-189949c83220)
   )
+  (model
+    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
+    (offset (xyz 9.049965 5.225 -3.5))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
+  )
+  (model "/home/matti/devel/encodering/build/led_pcb.step" (offset (xyz 0 0 -6.1)) (scale (xyz 1 1 1)) (rotate (xyz 180 0 0)))
 )

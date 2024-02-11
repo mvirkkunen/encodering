@@ -12,6 +12,6 @@
     (drill (offset -1 0))
     (layers F.Cu F.Mask)
     (roundrect_rratio 0.25)
-    (tstamp 6957f40f-793e-42ae-a892-117a2d0f8493)
+    (tstamp bf641eff-aae0-452d-ace8-bd065d0b67f7)
   )
 )

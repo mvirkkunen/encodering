@@ -11,14 +11,6 @@ def pairs(iterable):
     while batch := tuple(islice(it, 2)):
         yield batch
 
-#def first(iterable):
-#    x, *_ = iterable
-#    return x
-
-#def last(iterable):
-#    *_, x = iterable
-#    return x
-
 root = pathlib.Path(__file__).resolve().parent
 sys.path.append(str(root / "kigen"))
 
@@ -29,10 +21,11 @@ outer_diam = 24
 hole_diam = 7
 ring_r = 10
 led_count = 30
+led_colors = 1 # only 1 or 2
 track_width = 0.2
 
 # led_count = pins * (pins - 1) <=> pins = 1 + sqrt(1 + 4 * led_count) / 2
-pin_count = int(math.ceil((1 + math.sqrt(1 + 4 * led_count)) / 2))
+pin_count = int(math.ceil((1 + math.sqrt(1 + 4 * led_count * led_colors)) / 2))
 
 ring_spacing = 0.8
 ring0_r = hole_diam * 0.5 + 1
@@ -45,6 +38,8 @@ led_sym = sym.SymbolLibrary.load("/usr/share/kicad/symbols/LED.kicad_sym").get("
 #for t in led_fp.find_all(fp.Text):
 #    t.hide = True
 led_fp = fp.FootprintLibrary("Project.pretty").load("LED_0603_1608Metric")
+
+pin_model = "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
 
 def generate_led_pcb():
     #ring_pcb = fp.LibraryFootprint("Led_ring", "led_ring", layer=Layer.FCu, descr="Generated LED ring connections")
@@ -75,13 +70,13 @@ def generate_led_pcb():
     leds = [
         LedInfo(i, nets[p[0]], nets[p[1]], i * angle_step, Pos2(ring_r, 0).rotate(i * angle_step))
         for i, p
-        in enumerate(p for c in list(combinations(range(pin_count), 2)) for p in (c, c))
+        in enumerate(p for c in list(combinations(range(pin_count), 2)) for p in (c,) * (3 - led_colors))
     ][:led_count]
 
     origin = pcb.Transform((50.8, 50.8, rotation), parent=led_pcb)
 
     for led in leds:
-        rotate = bool(led.index % 2)
+        rotate = (led_colors == 1 and bool(led.index % 2))
 
         # LED footprint
         led_instance = led_pcb.place(
@@ -245,15 +240,21 @@ def generate_led_pcb():
     mounting_hole_fp = fp.LibraryFootprint("Project.pretty", "Mounting_Hole_Pattern", Layer.FCu, "Mounting hole pattern for led_pcb")
 
     for pad in mounting_pads:
+        at = pad.at.rotate(origin.at.r)
+
         mounting_hole_fp.append(fp.Pad(
             number=int(pad.get_pad("1").net.name[3:]),
             type=fp.PadType.ThruHole,
             shape=fp.PadShape.Circle,
-            at=pad.at.rotate(origin.at.r),
+            at=at,
             size=2,
             layers=[Layer.AllCu, Layer.AllMask],
             drill=1,
         ))
+
+        mounting_hole_fp.append(fp.Model(pin_model, offset=(at.x, -at.y, -3.5)))
+
+    mounting_hole_fp.append(fp.Model(root / "build" / "led_pcb.step", offset=(0, 0, -4.5 - 1.6), rotate=(180, 0, 0)))
 
     mounting_hole_fp.save(root / "Project.pretty" / "Mounting_Hole_Pattern.kicad_mod")
 
