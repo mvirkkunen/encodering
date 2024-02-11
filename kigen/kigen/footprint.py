@@ -9,6 +9,7 @@ from .impl.footprint import (
     FootprintType,
     LibraryFootprint,
     Line,
+    Model,
     Pad,
     PadShape,
     PadType,

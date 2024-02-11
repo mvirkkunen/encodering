@@ -106,14 +106,14 @@ class Pos2:
             # Pos2((1, 2, 3?))
             # Pos2([1, 2, 3?])
             self.__init(*args[0][:3])
-        elif len(args) == 2 and isinstance(args[0], (list, tuple)):
-            # Pos2((1, 2), 3)
-            # Pos2([1, 2], 3)
-            self.__init(args[0][0], args[0][1], args[1])
         elif len(args) == 2 and isinstance(args[0], (Pos2, Vec2)):
             # Pos2(pos2, 3)
             # Pos2(vec2, 3)
             self.__init(args[0].x, args[0].y, args[1])
+        elif len(args) == 2 and isinstance(args[0], (list, tuple)):
+            # Pos2((1, 2), 3)
+            # Pos2([1, 2], 3)
+            self.__init(args[0][0], args[0][1], args[1])
         elif len(args) == 2 or len(args) == 3:
             # Pos2(1, 2, 3?)
             self.__init(*args[:3])
@@ -163,20 +163,61 @@ class Pos2:
     def __neg__(self) -> "Pos2":
         return Pos2(-self.x, -self.y, -self.r)
 
+ToVec3: TypeAlias = "Vec3 | Vec2 | Pos2 | list[float] | Tuple[float, ...] | Tuple[()]"
+
 @dataclass(frozen=True)
 class Vec3:
     x: float
     y: float
     z: float
 
+    @overload
+    def __init__(self) -> None:...
+
+    @overload
+    def __init__(self, xyz: ToVec3, /) -> None: ...
+
+    @overload
+    def __init__(self, xy: "ToVec2 | ToPos2", z: float, /) -> None: ...
+
+    @overload
+    def __init__(self, x: float, y: float, z: float = 0, /) -> None: ...
+
+    def __init__(self, *args: Any) -> None:
+        if not args or (len(args) == 1 and not args[0]):
+            # Vec3()
+            # Vec3(())
+            self.__init(0, 0, 0)
+        elif len(args) == 1 and isinstance(args[0], Vec3):
+            # Vec3(vec3)
+            self.__init(args[0].x, args[0].y, args[0].z)
+        elif len(args) == 1 and isinstance(args[0], (list, tuple)):
+            self.__init__(*args[0])
+        elif len(args) <= 2 and isinstance(args[0], (Vec2, Pos2)):
+            # Vec3(Vec, 3?)
+            self.__init(args[0].x, args[0].y, args[1] if len(args) == 2 else 0)
+        elif 2 <= len(args) <= 3:
+            # Vec3(1, 2, 3?)
+            self.__init(*args)
+        else:
+            raise ValueError(f"Invalid initializer for Vec2(): {args}")
+
+        print(args, self)
+
+    def __init(self, x: float, y: float, z: float = 0) -> None:
+        object.__setattr__(self, "x", x)
+        object.__setattr__(self, "y", y)
+        object.__setattr__(self, "z", z)
+
     def to_sexpr(self) -> sexpr.SExpr:
-        return [self.x, self.y, self.z]
+        return [[sexpr.Sym("xyz"), self.x, self.y, self.z]]
 
     @classmethod
     def from_sexpr(cls, expr: sexpr.SExpr) -> "Vec3":
-        assert isinstance(expr, list) and isinstance(expr[0], (float, int)) and isinstance(expr[1], (float, int)) and isinstance(expr[2], (float, int))
+        assert isinstance(expr, list)
+        assert expr[0][0] == sexpr.Sym("xyz")
 
-        return Vec3(expr[0], expr[1], expr[2])
+        return Vec3(*expr[0][1:])
 
 @dataclass(frozen=True)
 class Rgba:

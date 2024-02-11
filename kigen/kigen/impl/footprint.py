@@ -3,7 +3,7 @@ from typing import overload, runtime_checkable, Annotated, Optional, Protocol
 
 from ..common import BaseTransform, BaseRotate, CoordinatePointList, Generator, Net, Property, StrokeDefinition, TextEffects, ToCoordinatePointList, Uuid, KIGEN_GENERATOR, KIGEN_VERSION
 from ..node import Attr, ContainerNode, Node, NodeLoadSaveMixin, NEW_INSTANCE
-from ..values import SymbolEnum, Pos2, ToPos2, ToVec2, Vec2
+from ..values import SymbolEnum, Pos2, ToPos2, ToVec2, ToVec3, Vec2, Vec3
 from .. import sexpr, util
 
 class Transform(BaseTransform):
@@ -405,6 +405,31 @@ class Pad(ContainerNode):
         parent_at = self.parent.transform_pos(self.parent.at)
         return parent_at + self.at.add_rotation(parent_at.r)
 
+class Model(Node):
+    node_name = "model"
+
+    file: Annotated[str, Attr.Positional]
+    hide: bool
+    offset: Vec3
+    scale: Vec3
+    rotate: Vec3
+
+    def __init__(
+            self,
+            file: str | Path,
+            offset: ToVec3 = NEW_INSTANCE,
+            scale: Optional[ToVec3] = None,
+            rotate: ToVec3 = NEW_INSTANCE,
+            hide: bool = False,
+    ):
+        if isinstance(file, Path):
+            file = str(file)
+
+        if scale is None:
+            scale = Vec3(1, 1, 1)
+
+        super().__init__(locals())
+
 GraphicsItemTypes = (Arc, Circle, Line, Pad, Polygon, Rect, Rotate, Text, Transform)
 Transform.child_types = GraphicsItemTypes
 Rotate.child_types = GraphicsItemTypes
@@ -437,7 +462,7 @@ class BaseFootprint(ContainerNode):
             c.detach()
 
 class Footprint(BaseFootprint):
-    child_types = GraphicsItemTypes + (Property,)
+    child_types = GraphicsItemTypes + (Model, Property)
 
     library_link: Annotated[Optional[str], Attr.Positional]
     tstamp: Optional[Uuid]
@@ -471,7 +496,7 @@ class Footprint(BaseFootprint):
             return Pos2(pos).add_rotation(self.at.r)
 
 class LibraryFootprint(BaseFootprint, NodeLoadSaveMixin):
-    child_types = GraphicsItemTypes
+    child_types = GraphicsItemTypes + (Model,)
     order_attrs = ("version", "generator")
 
     library_name: Annotated[str, Attr.Ignore]
