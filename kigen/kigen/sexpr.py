@@ -39,7 +39,7 @@ class Sym:
     def __repr__(self) -> str:
         return f"Symbol({self.name})"
 
-    def __getnewargs__(self):
+    def __getnewargs__(self) -> tuple:
         return (self.name,)
 
 @dataclass(frozen=True)

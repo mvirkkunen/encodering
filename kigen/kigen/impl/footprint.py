@@ -62,18 +62,23 @@ class Line(Node):
     end: Annotated[Vec2, Attr.Transform]
     angle: Optional[float]
     layer: str
-    stroke: StrokeDefinition
+    width: Optional[float]
+    stroke: Optional[StrokeDefinition]
     tstamp: Uuid
 
     def __init__(
             self,
             start: ToVec2,
             end: ToVec2,
-            stroke: float | StrokeDefinition,
             layer: str,
+            width: Optional[float] = None,
+            stroke: Optional[float | StrokeDefinition] = None,
             angle: Optional[float] = None,
             tstamp: Uuid = NEW_INSTANCE,
     ):
+        if not (width is not None or stroke is not None):
+            raise ValueError("Either width or stroke must be defined")
+
         super().__init__(locals())
 
 class FillMode(SymbolEnum):
@@ -86,7 +91,8 @@ class Rect(Node):
     start: Annotated[Vec2, Attr.Transform]
     end: Annotated[Vec2, Attr.Transform]
     layer: str
-    stroke: StrokeDefinition
+    width: Optional[float]
+    stroke: Optional[StrokeDefinition]
     fill: Optional[FillMode]
     tstamp: Uuid
 
@@ -94,11 +100,15 @@ class Rect(Node):
             self,
             start: ToVec2,
             end: ToVec2,
-            stroke: float | StrokeDefinition,
             layer: str,
+            width: Optional[float] = None,
+            stroke: Optional[float | StrokeDefinition] = None,
             fill: Optional[FillMode] = None,
             tstamp: Uuid = NEW_INSTANCE,
     ):
+        if not (width is not None or stroke is not None):
+            raise ValueError("Either width or stroke must be defined")
+
         super().__init__(locals())
 
 class Circle(Node):
@@ -107,7 +117,8 @@ class Circle(Node):
     center: Annotated[Vec2, Attr.Transform]
     end: Annotated[Vec2, Attr.Transform]
     layer: str
-    stroke: StrokeDefinition
+    width: Optional[float]
+    stroke: Optional[StrokeDefinition]
     fill: Optional[FillMode]
     tstamp: Uuid
 
@@ -115,11 +126,15 @@ class Circle(Node):
             self,
             center: ToVec2,
             radius: "float | ToVec2",
-            stroke: float | StrokeDefinition,
             layer: str,
+            width: Optional[float] = None,
+            stroke: Optional[float | StrokeDefinition] = None,
             fill: Optional[FillMode] = None,
             tstamp: Uuid = NEW_INSTANCE,
     ):
+        if not (width is not None or stroke is not None):
+            raise ValueError("Either width or stroke must be defined")
+
         if isinstance(radius, (int, float)):
             radius = Vec2(center) + Vec2(radius, 0)
 
@@ -134,7 +149,8 @@ class Arc(Node):
     mid: Annotated[Vec2, Attr.Transform]
     end: Annotated[Vec2, Attr.Transform]
     layer: str
-    stroke: StrokeDefinition
+    width: Optional[float]
+    stroke: Optional[StrokeDefinition]
     tstamp: Uuid
 
     @overload
@@ -144,8 +160,9 @@ class Arc(Node):
             start: ToVec2,
             mid: ToVec2,
             end: ToVec2,
-            stroke: float | StrokeDefinition,
             layer: str,
+            width: Optional[float] = None,
+            stroke: Optional[float | StrokeDefinition] = None,
     ) -> None:
         """
         :param start: Start point of the arc.
@@ -164,8 +181,9 @@ class Arc(Node):
             radius: float,
             start_angle: float,
             end_angle: float,
-            stroke: float | StrokeDefinition,
             layer: str,
+            width: Optional[float] = None,
+            stroke: Optional[float | StrokeDefinition] = None,
     ) -> None:
         """
         :param center: Center point of the circle that defines the arc.
@@ -187,8 +205,9 @@ class Arc(Node):
             radius: Optional[float] = None,
             start_angle: Optional[float] = None,
             end_angle: Optional[float] = None,
-            stroke: float | StrokeDefinition,
             layer: str,
+            width: Optional[float] = None,
+            stroke: Optional[float | StrokeDefinition] = None,
             tstamp: Uuid = NEW_INSTANCE,
     ) -> None:
         """
@@ -205,6 +224,9 @@ class Arc(Node):
         :param fill: Fill style.
         """
 
+        if not (width is not None or stroke is not None):
+            raise ValueError("Either width or stroke must be defined")
+
         start, mid, end = util.calculate_arc(locals())
 
         super().__init__(locals())
@@ -214,18 +236,23 @@ class Polygon(Node):
 
     pts: CoordinatePointList
     layer: str
-    stroke: StrokeDefinition
+    width: Optional[float]
+    stroke: Optional[StrokeDefinition]
     fill: Optional[FillMode]
     tstamp: Uuid
 
     def __init__(
             self,
             pts: ToCoordinatePointList,
-            stroke: float | StrokeDefinition,
             layer: str,
+            width: Optional[float] = None,
+            stroke: Optional[float | StrokeDefinition] = None,
             fill: Optional[FillMode] = None,
             tstamp: Uuid = NEW_INSTANCE,
     ):
+        if not (width is not None or stroke is not None):
+            raise ValueError("Either width or stroke must be defined")
+
         super().__init__(locals())
         self.pts._set_parent(self)
 
@@ -259,16 +286,21 @@ class Bezier(Node):
 
     pts: CoordinatePointList
     layer: str
-    stroke: StrokeDefinition
+    width: Optional[float]
+    stroke: Optional[StrokeDefinition]
     tstamp: Uuid
 
     def __init__(
             self,
             pts: ToCoordinatePointList,
-            stroke: float | StrokeDefinition,
             layer: str,
+            width: Optional[float] = None,
+            stroke: Optional[float | StrokeDefinition] = None,
             tstamp: Uuid = NEW_INSTANCE,
     ):
+        if not (width is not None or stroke is not None):
+            raise ValueError("Either width or stroke must be defined")
+
         super().__init__(locals())
 
     def validate(self) -> None:
@@ -336,7 +368,7 @@ class LayerRef:
             in expr
         ])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"LayerRef({repr(self.layers)})"
 
 class DrillDefinition(Node):
@@ -473,7 +505,7 @@ class Footprint(BaseFootprint):
         self,
         library_link: str,
         layer: str,
-        at: Pos2,
+        at: ToPos2,
         path: Optional[str] = None,
         descr: Optional[str] = None,
         tags: Optional[str] = None,

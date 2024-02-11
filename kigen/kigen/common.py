@@ -78,6 +78,7 @@ class Layer:
     AllCu = "*.Cu"
     AllMask = "*.Mask"
 
+    @staticmethod
     def flip(l: str) -> str:
         if l.startswith("F."):
             return "B." + l[2:]

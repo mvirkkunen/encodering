@@ -192,7 +192,7 @@ class Vec3:
             # Vec3(vec3)
             self.__init(args[0].x, args[0].y, args[0].z)
         elif len(args) == 1 and isinstance(args[0], (list, tuple)):
-            self.__init__(*args[0])
+            Vec3.__init__(self, *args[0])
         elif len(args) <= 2 and isinstance(args[0], (Vec2, Pos2)):
             # Vec3(Vec, 3?)
             self.__init(args[0].x, args[0].y, args[1] if len(args) == 2 else 0)
@@ -214,7 +214,7 @@ class Vec3:
 
     @classmethod
     def from_sexpr(cls, expr: sexpr.SExpr) -> "Vec3":
-        assert isinstance(expr, list)
+        assert isinstance(expr, list) and isinstance(expr[0], list)
         assert expr[0][0] == sexpr.Sym("xyz")
 
         return Vec3(*expr[0][1:])
@@ -309,7 +309,7 @@ class SymbolEnum(Enum):
 
         return SymbolEnumUnknownValue(expr[0].name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.value)
 
 @dataclass(frozen=True)
