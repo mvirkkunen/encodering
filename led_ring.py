@@ -12,10 +12,10 @@ def pairs(iterable):
         yield batch
 
 root = pathlib.Path(__file__).resolve().parent
-sys.path.append(str(root / "kigen"))
+sys.path.append(str(root / "kicadet"))
 
-import kigen.pcb as pcb, kigen.footprint as fp, kigen.symbol as sym
-from kigen.common import Vec2, Pos2, Layer
+import kicadet.pcb as pcb, kicadet.footprint as fp, kicadet.symbol as sym
+from kicadet.common import Vec2, Pos2, Layer
 
 outer_diam = 24
 hole_diam = 7

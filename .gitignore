@@ -1,6 +1,7 @@
 .vscode/
 *.pdf
 **/*-backups/
+~*
 __pycache__/
 testproject*/
 scratch.txt
