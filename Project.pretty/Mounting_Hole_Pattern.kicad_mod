@@ -1,7 +1,7 @@
 (footprint
   "Mounting_Hole_Pattern"
   (version 20230121)
-  (generator kigen)
+  (generator kicadet)
   (layer "F.Cu")
   (descr "Mounting hole pattern for led_pcb")
   (attr through_hole exclude_from_bom)
@@ -9,97 +9,151 @@
     "2"
     thru_hole
     circle
-    (at 6.142356 -8.454228 54.0)
-    (size 2 2)
-    (drill 1.0)
+    (at 5.730906 -7.887916 54.0)
+    (size 1.5 1.5)
+    (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp 3eb04115-57b2-46f1-9e76-53d2459b7c17)
+    (tstamp 91d32775-4fc9-4304-a020-1e09a572c06d)
+  )
+  (pad
+    "2"
+    smd
+    roundrect
+    (at 5.730906 -7.887916 54.0)
+    (size 1.5 3)
+    (layers F.Cu F.Mask)
+    (tstamp 8c38364a-bb98-484b-a5e2-21345f57d69b)
   )
   (model
-    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
-    (offset (xyz 6.142356 8.454228 -3.5))
+    "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
+    (offset (xyz 5.730906 7.887916 -0.1))
     (scale (xyz 1 1 1))
-    (rotate (xyz 0 0 0))
+    (rotate (xyz -90 0 0))
   )
   (pad
     "3"
     thru_hole
     circle
-    (at 2.172677 -10.221642 78.0)
-    (size 2 2)
-    (drill 1.0)
+    (at 2.027139 -9.536939 78.0)
+    (size 1.5 1.5)
+    (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp 1212f563-63b2-48f8-a27c-53810a28de77)
+    (tstamp ac44050a-7d3a-46a5-a721-f1b9d454aba9)
+  )
+  (pad
+    "3"
+    smd
+    roundrect
+    (at 2.027139 -9.536939 78.0)
+    (size 1.5 3)
+    (layers F.Cu F.Mask)
+    (tstamp ff189103-64fd-4353-82f3-1e6b578a2a9f)
   )
   (model
-    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
-    (offset (xyz 2.172677 10.221642 -3.5))
+    "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
+    (offset (xyz 2.027139 9.536939 -0.1))
     (scale (xyz 1 1 1))
-    (rotate (xyz 0 0 0))
+    (rotate (xyz -90 0 0))
   )
   (pad
     "4"
     thru_hole
     circle
-    (at -2.172677 -10.221642 102.0)
-    (size 2 2)
-    (drill 1.0)
+    (at -2.027139 -9.536939 102.0)
+    (size 1.5 1.5)
+    (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp da7f170a-5574-484e-99a6-97d4ed305ccb)
+    (tstamp 7845df0b-825a-451a-8188-26856098c696)
+  )
+  (pad
+    "4"
+    smd
+    roundrect
+    (at -2.027139 -9.536939 102.0)
+    (size 1.5 3)
+    (layers F.Cu F.Mask)
+    (tstamp 9872243f-edc9-4a24-8fe8-b1a9c9f8550a)
   )
   (model
-    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
-    (offset (xyz -2.172677 10.221642 -3.5))
+    "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
+    (offset (xyz -2.027139 9.536939 -0.1))
     (scale (xyz 1 1 1))
-    (rotate (xyz 0 0 0))
+    (rotate (xyz -90 0 0))
   )
   (pad
     "5"
     thru_hole
     circle
-    (at -6.142356 -8.454228 126.0)
-    (size 2 2)
-    (drill 1.0)
+    (at -5.730906 -7.887916 126.0)
+    (size 1.5 1.5)
+    (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp 0b7861bc-fbf4-4fd4-9462-4debc1388bc4)
+    (tstamp d78034c9-b804-4533-9a12-78db3709df03)
+  )
+  (pad
+    "5"
+    smd
+    roundrect
+    (at -5.730906 -7.887916 126.0)
+    (size 1.5 3)
+    (layers F.Cu F.Mask)
+    (tstamp 833a008a-1dac-4815-be52-8fea976ddba1)
   )
   (model
-    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
-    (offset (xyz -6.142356 8.454228 -3.5))
+    "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
+    (offset (xyz -5.730906 7.887916 -0.1))
     (scale (xyz 1 1 1))
-    (rotate (xyz 0 0 0))
+    (rotate (xyz -90 0 0))
   )
   (pad
     "6"
     thru_hole
     circle
-    (at -9.049965 -5.225 150.0)
-    (size 2 2)
-    (drill 1.0)
+    (at -8.443748 4.875 210.0)
+    (size 1.5 1.5)
+    (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp 8d52a230-1e90-4900-9f91-93947bba157f)
+    (tstamp f1d62f1b-5c81-4f46-8092-f7267199aae9)
+  )
+  (pad
+    "6"
+    smd
+    roundrect
+    (at -8.443748 4.875 210.0)
+    (size 1.5 3)
+    (layers F.Cu F.Mask)
+    (tstamp 28801296-b14b-4328-89d2-0eaab2fb807b)
   )
   (model
-    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
-    (offset (xyz -9.049965 5.225 -3.5))
+    "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
+    (offset (xyz -8.443748 -4.875 -0.1))
     (scale (xyz 1 1 1))
-    (rotate (xyz 0 0 0))
+    (rotate (xyz -90 0 0))
   )
   (pad
     "1"
     thru_hole
     circle
-    (at 9.049965 -5.225 30.0)
-    (size 2 2)
-    (drill 1.0)
+    (at 8.443748 4.875 -30.0)
+    (size 1.5 1.5)
+    (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp fc3315bf-4d61-418f-adb3-a2f8e1411f46)
+    (tstamp 6a1776ae-5657-4da4-8de3-c7db780c14cd)
+  )
+  (pad
+    "1"
+    smd
+    roundrect
+    (at 8.443748 4.875 -30.0)
+    (size 1.5 3)
+    (layers F.Cu F.Mask)
+    (tstamp 831b7f91-1d3e-4b8c-a4ed-414509b99197)
   )
   (model
-    "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
-    (offset (xyz 9.049965 5.225 -3.5))
+    "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
+    (offset (xyz 8.443748 -4.875 -0.1))
     (scale (xyz 1 1 1))
-    (rotate (xyz 0 0 0))
+    (rotate (xyz -90 0 0))
   )
-  (model "/home/matti/devel/encodering/build/led_pcb.step" (offset (xyz 0 0 -6.1)) (scale (xyz 1 1 1)) (rotate (xyz 180 0 0)))
+  (model "/home/matti/devel/encodering/build/led_pcb/led_pcb.wrl" (offset (xyz 0 0 4.6)) (scale (xyz 1 1 1)) (rotate (xyz 0 0 0)))
 )

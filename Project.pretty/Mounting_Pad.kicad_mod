@@ -1,17 +1,18 @@
 (footprint
   "Mounting_Pad"
   (version 20230121)
-  (generator kigen)
+  (generator kicadet)
   (layer "F.Cu")
   (pad
     "1"
     smd
     roundrect
     (at 0 0 0)
-    (size 3.0 1.6)
-    (drill (offset -1 0))
+    (size 3 3.5)
+    (drill (offset -0.6 0))
     (layers F.Cu F.Mask)
-    (roundrect_rratio 0.25)
-    (tstamp 6a55d73f-52bd-4619-91cd-262d4e67999b)
+    (roundrect_rratio 0.2)
+    (solder_mask_margin -0.5)
+    (tstamp 17128b1a-ddf6-4db5-af22-3e202b04e2fd)
   )
 )
