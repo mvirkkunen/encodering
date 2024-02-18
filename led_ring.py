@@ -203,7 +203,7 @@ def generate_led_pcb():
         ))
     mounting_pad_fp.save(root / "Project.pretty" / "Mounting_Pad.kicad_mod")
 
-    led_pcb = pcb.PcbFile()
+    led_pcb = pcb.PcbFile(mask_color=pcb.StackupColor.Black, silkscreen_color=pcb.StackupColor.White)
 
     nets = [led_pcb.add_net(f"PIN{i+1}") for i in range(pin_count)]
 
