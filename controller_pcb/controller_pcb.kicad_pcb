@@ -89,22 +89,22 @@
   (net 10 "LED1")
   (net 11 "LED2")
   (net 12 "LED3")
-  (net 13 "Net-(J3-Pin_1)")
+  (net 13 "Net-(J2-Pin_1)")
   (net 14 "LED5")
   (net 15 "LED4")
-  (net 16 "Net-(J3-Pin_2)")
-  (net 17 "Net-(J3-Pin_3)")
-  (net 18 "Net-(J3-Pin_4)")
-  (net 19 "Net-(J3-Pin_5)")
-  (net 20 "Net-(J3-Pin_6)")
+  (net 16 "Net-(J2-Pin_2)")
+  (net 17 "Net-(J2-Pin_3)")
+  (net 18 "Net-(J2-Pin_4)")
+  (net 19 "Net-(J2-Pin_5)")
+  (net 20 "Net-(J2-Pin_6)")
   (net 21 "Net-(R3-Pad2)")
-  (net 22 "Net-(R4-Pad2)")
-  (net 23 "Net-(U2-~{RESET}{slash}PA0)")
-  (net 24 "unconnected-(U2-PA5-Pad6)")
-  (net 25 "unconnected-(U2-PA7-Pad8)")
-  (net 26 "unconnected-(U2-PB5-Pad9)")
-  (net 27 "unconnected-(U2-PB4-Pad10)")
-  (net 28 "unconnected-(U2-PB2-Pad12)")
+  (net 22 "Net-(R2-Pad2)")
+  (net 23 "Net-(U1-~{RESET}{slash}PA0)")
+  (net 24 "unconnected-(U1-PA5-Pad6)")
+  (net 25 "unconnected-(U1-PA7-Pad8)")
+  (net 26 "unconnected-(U1-PB5-Pad9)")
+  (net 27 "unconnected-(U1-PB4-Pad10)")
+  (net 28 "unconnected-(U1-PB2-Pad12)")
 
   (footprint "Resistor_SMD:R_0603_1608Metric" (layer "F.Cu")
     (tstamp 017c2cae-12a8-4929-be2a-cc691776ad86)
@@ -118,7 +118,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/8ac4e1be-688d-4b08-98be-cd8abeb0d4d0")
     (attr smd)
-    (fp_text reference "R8" (at 0 -1.43) (layer "F.SilkS") hide
+    (fp_text reference "R7" (at 0 -1.43) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 879f33b7-01ea-4778-9b4c-43e779adb0fa)
     )
@@ -153,7 +153,7 @@
     (pad "1" smd roundrect (at -0.825 0 180) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 11 "LED2") (pintype "passive") (tstamp 83458e7e-ed09-4b8e-b797-025c4c0aea7c))
     (pad "2" smd roundrect (at 0.825 0 180) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 16 "Net-(J3-Pin_2)") (pintype "passive") (tstamp 03e33d8b-a89c-4962-beb2-cfda6e760317))
+      (net 16 "Net-(J2-Pin_2)") (pintype "passive") (tstamp 03e33d8b-a89c-4962-beb2-cfda6e760317))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -173,7 +173,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/c678fad4-9244-4950-b82a-371740f6fc9a")
     (attr smd)
-    (fp_text reference "R9" (at 0 -1.43) (layer "F.SilkS") hide
+    (fp_text reference "R8" (at 0 -1.43) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp a074907f-4777-461e-8640-c11d9ad4066e)
     )
@@ -208,7 +208,7 @@
     (pad "1" smd roundrect (at -0.825 0) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 12 "LED3") (pintype "passive") (tstamp 1bceeb2e-94b7-41ee-b4c5-06bbcbe1aa6b))
     (pad "2" smd roundrect (at 0.825 0) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 17 "Net-(J3-Pin_3)") (pintype "passive") (tstamp ac91164e-c2cf-421b-b9c7-2bb45e5bbde0))
+      (net 17 "Net-(J2-Pin_3)") (pintype "passive") (tstamp ac91164e-c2cf-421b-b9c7-2bb45e5bbde0))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -228,7 +228,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/db6e9ca5-012a-4408-baa3-9fa7bb257da4")
     (attr smd)
-    (fp_text reference "R12" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "R11" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 2226c4bc-ec49-4141-b103-e314d0423976)
     )
@@ -263,7 +263,7 @@
     (pad "1" smd roundrect (at -0.825 0 270) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 8 "LED6") (pintype "passive") (tstamp d68f8862-37c8-48af-bf3d-5365090e7c2c))
     (pad "2" smd roundrect (at 0.825 0 270) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 20 "Net-(J3-Pin_6)") (pintype "passive") (tstamp e13ba343-4afd-4718-b277-89f990eb45b4))
+      (net 20 "Net-(J2-Pin_6)") (pintype "passive") (tstamp e13ba343-4afd-4718-b277-89f990eb45b4))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -283,7 +283,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/b344d85c-3d31-4161-b3c7-7be82767df7f")
     (attr smd)
-    (fp_text reference "R5" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "R4" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 3d30ed3b-1898-4d1c-8b7f-5effc7555139)
     )
@@ -316,7 +316,7 @@
     (fp_line (start 0.8 0.4125) (end -0.8 0.4125)
       (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp 30d4aa8f-bcbf-4049-a96e-9328146c16ae))
     (pad "1" smd roundrect (at -0.825 0 90) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 21 "Net-(R3-Pad2)") (pintype "passive") (tstamp ecd6fe5f-c146-4030-81db-d8a4c4f3b881))
+      (net 22 "Net-(R2-Pad2)") (pintype "passive") (tstamp ecd6fe5f-c146-4030-81db-d8a4c4f3b881))
     (pad "2" smd roundrect (at 0.825 0 90) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 2 "ENCB") (pintype "passive") (tstamp c45a29bc-1dc7-481f-898f-9351b7754d24))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
@@ -338,7 +338,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/13638060-aa35-4e8a-a831-3f0488d3ee44")
     (attr smd)
-    (fp_text reference "R11" (at 0 -1.43) (layer "F.SilkS") hide
+    (fp_text reference "R10" (at 0 -1.43) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 4c118727-5f44-4019-aff5-4f078078a0a3)
     )
@@ -373,7 +373,7 @@
     (pad "1" smd roundrect (at -0.825 0) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 14 "LED5") (pintype "passive") (tstamp 7aeb0b51-8047-4b02-b722-ffa370f2900c))
     (pad "2" smd roundrect (at 0.825 0) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 19 "Net-(J3-Pin_5)") (pintype "passive") (tstamp 25c363b9-54ab-4756-a090-6fb3b74de2c7))
+      (net 19 "Net-(J2-Pin_5)") (pintype "passive") (tstamp 25c363b9-54ab-4756-a090-6fb3b74de2c7))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -393,7 +393,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/9d16d2bf-8023-4ca7-bf0a-6d290e5b3b49")
     (attr smd)
-    (fp_text reference "R2" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "R1" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 72d1bf6b-3c71-4f80-94cc-d97026ffc32d)
     )
@@ -448,7 +448,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/acc895bb-ba0a-4239-a785-4872bf17b565")
     (attr smd)
-    (fp_text reference "R3" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "R2" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp c0ebac85-ae8e-4d1e-bd48-ca0eec59955b)
     )
@@ -483,7 +483,7 @@
     (pad "1" smd roundrect (at -0.825 0 270) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 3 "VCC") (pintype "passive") (tstamp 826dec3b-c993-48a1-87d9-8fe17d3b8321))
     (pad "2" smd roundrect (at 0.825 0 270) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 21 "Net-(R3-Pad2)") (pintype "passive") (tstamp d335a0b8-b475-435b-9bb1-5fa6a3a84f7a))
+      (net 22 "Net-(R2-Pad2)") (pintype "passive") (tstamp d335a0b8-b475-435b-9bb1-5fa6a3a84f7a))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -503,7 +503,7 @@
     (property "ki_keywords" "cap capacitor")
     (path "/b328bf72-27c6-4adc-be7a-4f8914544ab1")
     (attr smd)
-    (fp_text reference "C4" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "C3" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp ee425817-5701-4286-8951-203716e4a1d1)
     )
@@ -558,7 +558,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/17c4a683-79bb-45fb-867c-ff2e664b66bd")
     (attr smd)
-    (fp_text reference "R4" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "R3" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp ca6ed373-04ab-41b6-adff-95303e4da7de)
     )
@@ -593,7 +593,7 @@
     (pad "1" smd roundrect (at -0.825 0 90) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 3 "VCC") (pintype "passive") (tstamp 2aa593ad-c099-4967-a1a6-0db35a78974e))
     (pad "2" smd roundrect (at 0.825 0 90) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 22 "Net-(R4-Pad2)") (pintype "passive") (tstamp fefbc012-278a-4069-919a-fb8e8b2eb95f))
+      (net 21 "Net-(R3-Pad2)") (pintype "passive") (tstamp fefbc012-278a-4069-919a-fb8e8b2eb95f))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -613,7 +613,7 @@
     (property "ki_keywords" "test point tp")
     (path "/6a27f9b1-2371-44ef-95d8-6a07ba2adafa")
     (attr exclude_from_pos_files exclude_from_bom)
-    (fp_text reference "TP2" (at 0 -1.448) (layer "F.SilkS") hide
+    (fp_text reference "TP1" (at 0 -1.448) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 38d9a529-a9bb-40d6-8476-e6ed71bbfcfc)
     )
@@ -630,7 +630,7 @@
     (fp_circle (center 0 0) (end 1 0)
       (stroke (width 0.05) (type solid)) (fill none) (layer "F.CrtYd") (tstamp 28626506-6d52-47f6-a868-8631c1593527))
     (pad "1" smd circle (at 0 0) (size 1 1) (layers "F.Cu" "F.Mask")
-      (net 23 "Net-(U2-~{RESET}{slash}PA0)") (pinfunction "1") (pintype "passive") (tstamp 5b3e2d27-4dc1-4c6a-a8b8-25b8562795cc))
+      (net 23 "Net-(U1-~{RESET}{slash}PA0)") (pinfunction "1") (pintype "passive") (tstamp 5b3e2d27-4dc1-4c6a-a8b8-25b8562795cc))
   )
 
   (footprint "Resistor_SMD:R_0603_1608Metric" (layer "F.Cu")
@@ -645,7 +645,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/a401e228-bb25-427a-8081-6ef79a4ba9a9")
     (attr smd)
-    (fp_text reference "R10" (at 0 -1.43) (layer "F.SilkS") hide
+    (fp_text reference "R9" (at 0 -1.43) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 0ca4c94f-7462-480d-a13e-0ee0f1fb7f5c)
     )
@@ -680,7 +680,7 @@
     (pad "1" smd roundrect (at -0.825 0 180) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 15 "LED4") (pintype "passive") (tstamp 212b53cb-577a-46cb-b75d-05a632238a18))
     (pad "2" smd roundrect (at 0.825 0 180) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 18 "Net-(J3-Pin_4)") (pintype "passive") (tstamp 723ee543-fed0-4ce1-963b-550adce68391))
+      (net 18 "Net-(J2-Pin_4)") (pintype "passive") (tstamp 723ee543-fed0-4ce1-963b-550adce68391))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -693,6 +693,7 @@
     (at 50.292 52.07)
     (descr "VQFN, 20 Pin (http://ww1.microchip.com/downloads/en/DeviceDoc/20%20Lead%20VQFN%203x3x0_9mm_1_7EP%20U2B%20C04-21496a.pdf), generated with kicad-footprint-generator ipc_noLead_generator.py")
     (tags "VQFN NoLead")
+    (property "JLCPCB_CORRECTION" "0;0;270")
     (property "LCSC" "C507118")
     (property "Sheetfile" "controller_pcb.kicad_sch")
     (property "Sheetname" "")
@@ -700,7 +701,7 @@
     (property "ki_keywords" "AVR 8bit Microcontroller tinyAVR")
     (path "/e3e1cfc1-36e1-4392-af83-5c00475955cc")
     (attr smd)
-    (fp_text reference "U2" (at 0 -2.8) (layer "F.SilkS") hide
+    (fp_text reference "U1" (at 0 -2.8) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 71946ae2-960b-43c3-8cd6-9a2da8223a97)
     )
@@ -783,7 +784,7 @@
           (width 0.1) (fill yes))
       ) (tstamp e0b99c32-02ba-48e5-9ddd-65d1dbc9a965))
     (pad "6" smd custom (at -0.8 1.45) (size 0.143431 0.143431) (layers "F.Cu" "F.Paste" "F.Mask")
-      (net 24 "unconnected-(U2-PA5-Pad6)") (pinfunction "PA5") (pintype "bidirectional+no_connect") (thermal_bridge_angle 90)
+      (net 24 "unconnected-(U1-PA5-Pad6)") (pinfunction "PA5") (pintype "bidirectional+no_connect") (thermal_bridge_angle 90)
       (options (clearance outline) (anchor circle))
       (primitives
         (gr_poly
@@ -799,11 +800,11 @@
     (pad "7" smd roundrect (at -0.4 1.45) (size 0.2 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 7 "INT") (pinfunction "PA6") (pintype "bidirectional") (tstamp 91fecc6b-80d7-411d-80ba-8d4c9224054d))
     (pad "8" smd roundrect (at 0 1.45) (size 0.2 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 25 "unconnected-(U2-PA7-Pad8)") (pinfunction "PA7") (pintype "bidirectional+no_connect") (tstamp f41745c7-d3c5-475e-8231-c0c58da1d35c))
+      (net 25 "unconnected-(U1-PA7-Pad8)") (pinfunction "PA7") (pintype "bidirectional+no_connect") (tstamp f41745c7-d3c5-475e-8231-c0c58da1d35c))
     (pad "9" smd roundrect (at 0.4 1.45) (size 0.2 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 26 "unconnected-(U2-PB5-Pad9)") (pinfunction "PB5") (pintype "bidirectional+no_connect") (tstamp 674a2ccf-b7de-46cf-952b-c5910b3ed7f9))
+      (net 26 "unconnected-(U1-PB5-Pad9)") (pinfunction "PB5") (pintype "bidirectional+no_connect") (tstamp 674a2ccf-b7de-46cf-952b-c5910b3ed7f9))
     (pad "10" smd custom (at 0.8 1.45) (size 0.143431 0.143431) (layers "F.Cu" "F.Paste" "F.Mask")
-      (net 27 "unconnected-(U2-PB4-Pad10)") (pinfunction "PB4") (pintype "bidirectional+no_connect") (thermal_bridge_angle 90)
+      (net 27 "unconnected-(U1-PB4-Pad10)") (pinfunction "PB4") (pintype "bidirectional+no_connect") (thermal_bridge_angle 90)
       (options (clearance outline) (anchor circle))
       (primitives
         (gr_poly
@@ -831,7 +832,7 @@
           (width 0.1) (fill yes))
       ) (tstamp df4030c4-6f52-42aa-b7bf-3c7fc3c5179c))
     (pad "12" smd roundrect (at 1.45 0.4) (size 0.8 0.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 28 "unconnected-(U2-PB2-Pad12)") (pinfunction "PB2") (pintype "bidirectional+no_connect") (tstamp d65fe28d-e724-4267-8de2-3488a7c5f072))
+      (net 28 "unconnected-(U1-PB2-Pad12)") (pinfunction "PB2") (pintype "bidirectional+no_connect") (tstamp d65fe28d-e724-4267-8de2-3488a7c5f072))
     (pad "13" smd roundrect (at 1.45 0) (size 0.8 0.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 6 "SDA") (pinfunction "PB1") (pintype "bidirectional") (tstamp 1c531406-a424-4a01-8c7d-fa349fb67a1f))
     (pad "14" smd roundrect (at 1.45 -0.4) (size 0.8 0.2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
@@ -869,7 +870,7 @@
     (pad "18" smd roundrect (at 0 -1.45) (size 0.2 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 15 "LED4") (pinfunction "PC3") (pintype "bidirectional") (tstamp dc68cc85-1b4b-47b0-8ac8-fa9cf763f63e))
     (pad "19" smd roundrect (at -0.4 -1.45) (size 0.2 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 23 "Net-(U2-~{RESET}{slash}PA0)") (pinfunction "~{RESET}/PA0") (pintype "bidirectional") (tstamp c9ef3bca-e44c-43a9-91f8-ed3ffae1a44b))
+      (net 23 "Net-(U1-~{RESET}{slash}PA0)") (pinfunction "~{RESET}/PA0") (pintype "bidirectional") (tstamp c9ef3bca-e44c-43a9-91f8-ed3ffae1a44b))
     (pad "20" smd custom (at -0.8 -1.45) (size 0.143431 0.143431) (layers "F.Cu" "F.Paste" "F.Mask")
       (net 12 "LED3") (pinfunction "PA1") (pintype "bidirectional") (thermal_bridge_angle 90)
       (options (clearance outline) (anchor circle))
@@ -910,7 +911,7 @@
     (property "ki_keywords" "cap capacitor")
     (path "/b69e9266-40bf-4c6b-b330-4cb40dbd052b")
     (attr smd)
-    (fp_text reference "C3" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "C2" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 74f494ec-c550-4a23-b600-fbc9b7e2a52f)
     )
@@ -965,7 +966,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/9d46f09d-5fd9-42ea-95f5-4e1786d9b1b1")
     (attr smd)
-    (fp_text reference "R7" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "R6" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 948efbff-28db-41c0-ac13-b2739f0d6d3e)
     )
@@ -1000,7 +1001,7 @@
     (pad "1" smd roundrect (at -0.825 0 270) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 10 "LED1") (pintype "passive") (tstamp ad8c389c-dc63-4632-97ad-22435da06a05))
     (pad "2" smd roundrect (at 0.825 0 270) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 13 "Net-(J3-Pin_1)") (pintype "passive") (tstamp 6d5f350f-f575-4b6f-8414-e316bee95928))
+      (net 13 "Net-(J2-Pin_1)") (pintype "passive") (tstamp 6d5f350f-f575-4b6f-8414-e316bee95928))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -1020,7 +1021,7 @@
     (property "ki_keywords" "cap capacitor")
     (path "/d3f43617-8056-457f-997e-293394ec0d5b")
     (attr smd)
-    (fp_text reference "C2" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "C1" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 4b5c706f-799f-4997-b7cd-f98b72a7ccf2)
     )
@@ -1075,7 +1076,7 @@
     (property "ki_keywords" "connector")
     (path "/cb3a6206-2625-4e02-9f3b-ffc7c78c01a4")
     (attr through_hole exclude_from_bom)
-    (fp_text reference "J2" (at 0 -2.33 90) (layer "F.SilkS") hide
+    (fp_text reference "J1" (at 0 -2.33 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp a5de3420-1080-495d-8077-59d882585e3b)
     )
@@ -1134,7 +1135,7 @@
     (property "ki_keywords" "R res resistor")
     (path "/37c19abc-fecc-4bac-b8c1-0b04c68a3127")
     (attr smd)
-    (fp_text reference "R6" (at 0 -1.43 90) (layer "F.SilkS") hide
+    (fp_text reference "R5" (at 0 -1.43 90) (layer "F.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp c82db345-f743-440b-8379-2bfa0de6c311)
     )
@@ -1167,7 +1168,7 @@
     (fp_line (start 0.8 0.4125) (end -0.8 0.4125)
       (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp 875c7990-133f-4803-bacd-c3a5a5b4fd9f))
     (pad "1" smd roundrect (at -0.825 0 270) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 22 "Net-(R4-Pad2)") (pintype "passive") (tstamp 33f28f6e-561d-40d2-a582-58ecaeef73b4))
+      (net 21 "Net-(R3-Pad2)") (pintype "passive") (tstamp 33f28f6e-561d-40d2-a582-58ecaeef73b4))
     (pad "2" smd roundrect (at 0.825 0 270) (size 0.8 0.95) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 1 "ENCA") (pintype "passive") (tstamp 6b13acc0-0310-426d-9438-97eb9ae0b613))
     (model "${KICAD6_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
@@ -1188,7 +1189,7 @@
     (property "ki_keywords" "connector")
     (path "/0e4bb6e3-1d32-4321-b0b2-16f28e84e751")
     (attr through_hole exclude_from_bom)
-    (fp_text reference "J3" (at 0 0) (layer "B.SilkS") hide
+    (fp_text reference "J2" (at 0 0) (layer "B.SilkS") hide
         (effects (font (size 1.27 1.27) (thickness 0.15)) (justify mirror))
       (tstamp 21a82c5d-ff8b-4220-9b2c-878e1a114619)
     )
@@ -1197,29 +1198,29 @@
       (tstamp 84e34799-31e4-42a3-be05-ec60db02ecd7)
     )
     (pad "1" thru_hole circle (at 8.443748 -4.875 210) (size 1.5 1.5) (drill 0.75) (layers "*.Cu" "*.Mask")
-      (net 13 "Net-(J3-Pin_1)") (pinfunction "Pin_1") (pintype "passive") (tstamp 8e96dce7-1d32-4e82-a1a7-c93e9887cf08))
+      (net 13 "Net-(J2-Pin_1)") (pinfunction "Pin_1") (pintype "passive") (tstamp 8e96dce7-1d32-4e82-a1a7-c93e9887cf08))
     (pad "1" smd roundrect (at 8.443748 -4.875 210) (size 1.5 3) (layers "B.Cu" "B.Mask") (roundrect_rratio 0.25)
-      (net 13 "Net-(J3-Pin_1)") (pinfunction "Pin_1") (pintype "passive") (tstamp 8659dce7-47f7-4b4b-9426-acaff471b0f4))
+      (net 13 "Net-(J2-Pin_1)") (pinfunction "Pin_1") (pintype "passive") (tstamp 8659dce7-47f7-4b4b-9426-acaff471b0f4))
     (pad "2" thru_hole circle (at 5.730906 7.887916 126) (size 1.5 1.5) (drill 0.75) (layers "*.Cu" "*.Mask")
-      (net 16 "Net-(J3-Pin_2)") (pinfunction "Pin_2") (pintype "passive") (tstamp 397109cc-21fe-440b-a067-803ced180860))
+      (net 16 "Net-(J2-Pin_2)") (pinfunction "Pin_2") (pintype "passive") (tstamp 397109cc-21fe-440b-a067-803ced180860))
     (pad "2" smd roundrect (at 5.730906 7.887916 126) (size 1.5 3) (layers "B.Cu" "B.Mask") (roundrect_rratio 0.25)
-      (net 16 "Net-(J3-Pin_2)") (pinfunction "Pin_2") (pintype "passive") (tstamp 57c70a1b-384c-405e-b854-b71ee79c3608))
+      (net 16 "Net-(J2-Pin_2)") (pinfunction "Pin_2") (pintype "passive") (tstamp 57c70a1b-384c-405e-b854-b71ee79c3608))
     (pad "3" thru_hole circle (at 2.027139 9.536939 102) (size 1.5 1.5) (drill 0.75) (layers "*.Cu" "*.Mask")
-      (net 17 "Net-(J3-Pin_3)") (pinfunction "Pin_3") (pintype "passive") (tstamp e4511809-7cc7-4b27-a295-d129f5a0f60d))
+      (net 17 "Net-(J2-Pin_3)") (pinfunction "Pin_3") (pintype "passive") (tstamp e4511809-7cc7-4b27-a295-d129f5a0f60d))
     (pad "3" smd roundrect (at 2.027139 9.536939 102) (size 1.5 3) (layers "B.Cu" "B.Mask") (roundrect_rratio 0.25)
-      (net 17 "Net-(J3-Pin_3)") (pinfunction "Pin_3") (pintype "passive") (tstamp eb6fbce1-080a-46c8-a88a-bf0eb5b481c9))
+      (net 17 "Net-(J2-Pin_3)") (pinfunction "Pin_3") (pintype "passive") (tstamp eb6fbce1-080a-46c8-a88a-bf0eb5b481c9))
     (pad "4" thru_hole circle (at -2.027139 9.536939 78) (size 1.5 1.5) (drill 0.75) (layers "*.Cu" "*.Mask")
-      (net 18 "Net-(J3-Pin_4)") (pinfunction "Pin_4") (pintype "passive") (tstamp fa9379d3-1bcb-4f80-8239-54afc5295011))
+      (net 18 "Net-(J2-Pin_4)") (pinfunction "Pin_4") (pintype "passive") (tstamp fa9379d3-1bcb-4f80-8239-54afc5295011))
     (pad "4" smd roundrect (at -2.027139 9.536939 78) (size 1.5 3) (layers "B.Cu" "B.Mask") (roundrect_rratio 0.25)
-      (net 18 "Net-(J3-Pin_4)") (pinfunction "Pin_4") (pintype "passive") (tstamp ecc54772-3435-4c1a-b80a-489259eeb5c1))
+      (net 18 "Net-(J2-Pin_4)") (pinfunction "Pin_4") (pintype "passive") (tstamp ecc54772-3435-4c1a-b80a-489259eeb5c1))
     (pad "5" thru_hole circle (at -5.730906 7.887916 54) (size 1.5 1.5) (drill 0.75) (layers "*.Cu" "*.Mask")
-      (net 19 "Net-(J3-Pin_5)") (pinfunction "Pin_5") (pintype "passive") (tstamp 0196d68d-57b8-4463-ba92-5c3351199921))
+      (net 19 "Net-(J2-Pin_5)") (pinfunction "Pin_5") (pintype "passive") (tstamp 0196d68d-57b8-4463-ba92-5c3351199921))
     (pad "5" smd roundrect (at -5.730906 7.887916 54) (size 1.5 3) (layers "B.Cu" "B.Mask") (roundrect_rratio 0.25)
-      (net 19 "Net-(J3-Pin_5)") (pinfunction "Pin_5") (pintype "passive") (tstamp f6ba13d3-5363-4847-a9aa-1fe73e444587))
+      (net 19 "Net-(J2-Pin_5)") (pinfunction "Pin_5") (pintype "passive") (tstamp f6ba13d3-5363-4847-a9aa-1fe73e444587))
     (pad "6" thru_hole circle (at -8.443748 -4.875 330) (size 1.5 1.5) (drill 0.75) (layers "*.Cu" "*.Mask")
-      (net 20 "Net-(J3-Pin_6)") (pinfunction "Pin_6") (pintype "passive") (tstamp f9ab9828-9e35-43d0-9f51-e5c198aec80b))
+      (net 20 "Net-(J2-Pin_6)") (pinfunction "Pin_6") (pintype "passive") (tstamp f9ab9828-9e35-43d0-9f51-e5c198aec80b))
     (pad "6" smd roundrect (at -8.443748 -4.875 330) (size 1.5 3) (layers "B.Cu" "B.Mask") (roundrect_rratio 0.25)
-      (net 20 "Net-(J3-Pin_6)") (pinfunction "Pin_6") (pintype "passive") (tstamp bff72477-9a3e-4cc6-9689-7560828947fe))
+      (net 20 "Net-(J2-Pin_6)") (pinfunction "Pin_6") (pintype "passive") (tstamp bff72477-9a3e-4cc6-9689-7560828947fe))
     (model "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
       (offset (xyz 5.730906 7.887916 -0.1))
       (scale (xyz 1 1 1))
@@ -1269,7 +1270,7 @@
     (property "ki_keywords" "rotary switch encoder switch push button")
     (path "/b070699f-0c64-4543-97e5-aaa3d412a0ee")
     (attr through_hole exclude_from_bom)
-    (fp_text reference "SW2" (at -4.5 7.25) (layer "B.SilkS") hide
+    (fp_text reference "SW1" (at -4.5 7.25) (layer "B.SilkS") hide
         (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
       (tstamp 882b3bd8-e6c4-4345-97bc-a7f7330d77a7)
     )
@@ -1366,9 +1367,9 @@
     (fp_circle (center 0 0) (end 4.5 0)
       (stroke (width 0.1) (type default)) (fill none) (layer "B.Fab") (tstamp 081d2216-c417-46e1-ac25-d391020a28cd))
     (pad "A" thru_hole roundrect (at -7.5 2.5 180) (size 1.6 1.6) (drill 1) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.15625)
-      (net 22 "Net-(R4-Pad2)") (pinfunction "A") (pintype "passive") (tstamp b5c5f101-1e7e-474d-8b4b-1047702b44a6))
+      (net 21 "Net-(R3-Pad2)") (pinfunction "A") (pintype "passive") (tstamp b5c5f101-1e7e-474d-8b4b-1047702b44a6))
     (pad "B" thru_hole circle (at -7.5 -2.5 180) (size 1.6 1.6) (drill 1) (layers "*.Cu" "*.Mask")
-      (net 21 "Net-(R3-Pad2)") (pinfunction "B") (pintype "passive") (tstamp bc048f2c-f5a1-49d2-acc7-19151dabe5d2))
+      (net 22 "Net-(R2-Pad2)") (pinfunction "B") (pintype "passive") (tstamp bc048f2c-f5a1-49d2-acc7-19151dabe5d2))
     (pad "C" thru_hole circle (at -7.5 0 180) (size 1.6 1.6) (drill 1) (layers "*.Cu" "*.Mask")
       (net 4 "GND") (pinfunction "C") (pintype "passive") (tstamp 5ffea645-c18a-4bf7-a915-242c0bbcc243))
     (pad "S1" thru_hole circle (at 7 2.5 180) (size 1.6 1.6) (drill 1) (layers "*.Cu" "*.Mask")
@@ -1389,6 +1390,8 @@
     )
   )
 
+  (gr_circle (center 48.514 50.8) (end 48.614 50.8)
+    (stroke (width 0.1) (type solid)) (fill solid) (layer "F.SilkS") (tstamp 05b52b25-5adf-4c03-8311-117624fae419))
   (gr_line (start 49.784 58.166) (end 57.912 58.166)
     (stroke (width 0.15) (type default)) (layer "F.SilkS") (tstamp 32cf6052-451f-4d15-a02c-88484696f6b8))
   (gr_line (start 57.15 60.96) (end 44.45 60.96)
@@ -1532,12 +1535,12 @@
   (segment (start 56.197 44.958) (end 56.197 43.24599) (width 0.16) (layer "F.Cu") (net 19) (tstamp b7510d21-2169-4bf1-928b-937a5a16acb9))
   (segment (start 60.706 54.212748) (end 59.243748 55.675) (width 0.16) (layer "F.Cu") (net 20) (tstamp 1158cfff-94ff-4758-a3c1-37277061f944))
   (segment (start 60.706 53.657) (end 60.706 54.212748) (width 0.16) (layer "F.Cu") (net 20) (tstamp 72d264b3-6e03-4de9-b3f0-c75aff952783))
-  (segment (start 54.61 54.927) (end 56.388 54.927) (width 0.16) (layer "F.Cu") (net 21) (tstamp 345921de-1d5e-4a99-8bba-d3bc07c2d9b1))
-  (segment (start 56.673 54.927) (end 58.3 53.3) (width 0.16) (layer "F.Cu") (net 21) (tstamp 3af4f733-5e47-4729-8dc9-a4a964cbaf4d))
-  (segment (start 56.388 54.927) (end 56.673 54.927) (width 0.16) (layer "F.Cu") (net 21) (tstamp eb145892-900f-4816-90ae-df7f519ee02a))
-  (segment (start 56.673 46.673) (end 58.3 48.3) (width 0.16) (layer "F.Cu") (net 22) (tstamp 282cb3b0-9708-4a5f-8910-c3923973b367))
-  (segment (start 56.388 46.673) (end 54.61 46.673) (width 0.16) (layer "F.Cu") (net 22) (tstamp 2db96a0b-14d9-4fef-b338-a0527eaf6586))
-  (segment (start 56.388 46.673) (end 56.673 46.673) (width 0.16) (layer "F.Cu") (net 22) (tstamp 52284290-f909-4471-975b-7cfc899f582a))
+  (segment (start 56.673 46.673) (end 58.3 48.3) (width 0.16) (layer "F.Cu") (net 21) (tstamp 282cb3b0-9708-4a5f-8910-c3923973b367))
+  (segment (start 56.388 46.673) (end 54.61 46.673) (width 0.16) (layer "F.Cu") (net 21) (tstamp 2db96a0b-14d9-4fef-b338-a0527eaf6586))
+  (segment (start 56.388 46.673) (end 56.673 46.673) (width 0.16) (layer "F.Cu") (net 21) (tstamp 52284290-f909-4471-975b-7cfc899f582a))
+  (segment (start 54.61 54.927) (end 56.388 54.927) (width 0.16) (layer "F.Cu") (net 22) (tstamp 345921de-1d5e-4a99-8bba-d3bc07c2d9b1))
+  (segment (start 56.673 54.927) (end 58.3 53.3) (width 0.16) (layer "F.Cu") (net 22) (tstamp 3af4f733-5e47-4729-8dc9-a4a964cbaf4d))
+  (segment (start 56.388 54.927) (end 56.673 54.927) (width 0.16) (layer "F.Cu") (net 22) (tstamp eb145892-900f-4816-90ae-df7f519ee02a))
   (segment (start 49.892 48.914) (end 50.8 48.006) (width 0.16) (layer "F.Cu") (net 23) (tstamp bee04be3-a217-4454-bf3b-463a2b7fb1b2))
   (segment (start 49.892 50.62) (end 49.892 48.914) (width 0.16) (layer "F.Cu") (net 23) (tstamp eefbb7e4-f103-411d-ae0d-33e23aec8859))
 

@@ -13,7 +13,7 @@ cat <<EOF >build/led_pcb/fp-lib-table
 )
 EOF
 
-kicad-cli pcb export step build/led_pcb/led_pcb.kicad_pcb --subst-models -o build/led_pcb.step --drill-origin
+#kicad-cli pcb export step build/led_pcb/led_pcb.kicad_pcb --subst-models -o build/led_pcb.step --drill-origin
 
 #pcbnew build/led_pcb/led_pcb.kicad_pcb; exit 0
 #eeschema build/led_pcb/led_pcb.kicad_sch; exit 0
@@ -50,14 +50,16 @@ kikit panelize \
   build/panel/panel.kicad_pcb
 
 kikit fab jlcpcb \
-  --no-drc \
   --assembly \
-  --nametemplate "encodering_{}" \
+  --nametemplate "encoderingv1_{}" \
   --schematic controller_pcb/controller_pcb.kicad_sch \
   --schematic build/led_pcb/led_pcb.kicad_sch \
   build/panel/panel.kicad_pcb \
   build/
 
-  #--schematic build/led_pcb/led_pcb.kicad_sch \
+kikit fab jlcpcb \
+  --nametemplate "encoderingjig_{}" \
+  build/jig_pcb/jig_pcb.kicad_pcb \
+  build/
 
 pcbnew build/panel/panel.kicad_pcb

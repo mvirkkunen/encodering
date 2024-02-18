@@ -43,6 +43,9 @@ led_order_code = "C2290"
 
 mount_hole_fp_r_offset = -0.7
 
+alignment_hole_r = 6.5
+alignment_hole_a = 30
+
 #pin_model = "${KICAD6_3DMODEL_DIR}/Connector_Pin.3dshapes/Pin_D1.0mm_L10.0mm.wrl"
 #pin_model = root / "Project.pretty" / "keystone-PN1238.STEP"
 pin_model = root / "Project.pretty" / "Connfly_DS-1006-11_No_Pin.step"
@@ -194,7 +197,7 @@ def generate_led_pcb():
             at=Vec2(0, 0),
             size=Vec2(3, 3.5),
             drill=fp.DrillDefinition(offset=Vec2(-0.6, 0)),
-            solder_mask_margin=-0.5,
+            solder_mask_margin=-0.2,
             layers=[Layer.FCu, Layer.FMask],
             roundrect_rratio=0.20,
         ))
@@ -391,6 +394,9 @@ def generate_led_pcb():
 
     # Center hole
     origin.append(pcb.Circle(center=[0, 0], radius=hole_diam / 2, layer=Layer.EdgeCuts, width=0.1))
+
+    # Alignment hole
+    position.append(pcb.Circle(center=Vec2(alignment_hole_r, 0).rotate(alignment_hole_a), radius=1, layer=Layer.EdgeCuts, width=0.1))
 
     # PCB edge
     origin.append(pcb.Circle(center=[0, 0], radius=outer_diam / 2, layer=Layer.EdgeCuts, width=0.1))

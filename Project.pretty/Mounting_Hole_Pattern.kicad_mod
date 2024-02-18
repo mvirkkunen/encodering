@@ -13,7 +13,7 @@
     (size 1.5 1.5)
     (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp 91d32775-4fc9-4304-a020-1e09a572c06d)
+    (tstamp d042adcc-1413-4737-b625-fcb0d8cc83ac)
   )
   (pad
     "2"
@@ -22,7 +22,7 @@
     (at 5.730906 -7.887916 54.0)
     (size 1.5 3)
     (layers F.Cu F.Mask)
-    (tstamp 8c38364a-bb98-484b-a5e2-21345f57d69b)
+    (tstamp f0bdc0f3-9fda-42cb-b2dd-a4047b390168)
   )
   (model
     "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
@@ -38,7 +38,7 @@
     (size 1.5 1.5)
     (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp ac44050a-7d3a-46a5-a721-f1b9d454aba9)
+    (tstamp 7d27c4ca-c3d2-49ec-9715-239e74408efb)
   )
   (pad
     "3"
@@ -47,7 +47,7 @@
     (at 2.027139 -9.536939 78.0)
     (size 1.5 3)
     (layers F.Cu F.Mask)
-    (tstamp ff189103-64fd-4353-82f3-1e6b578a2a9f)
+    (tstamp 20e0ee4f-d531-44f4-ae78-48636ff4a45a)
   )
   (model
     "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
@@ -63,7 +63,7 @@
     (size 1.5 1.5)
     (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp 7845df0b-825a-451a-8188-26856098c696)
+    (tstamp 5e597430-f947-4f8d-bbcb-f7c5d63203b9)
   )
   (pad
     "4"
@@ -72,7 +72,7 @@
     (at -2.027139 -9.536939 102.0)
     (size 1.5 3)
     (layers F.Cu F.Mask)
-    (tstamp 9872243f-edc9-4a24-8fe8-b1a9c9f8550a)
+    (tstamp 2dd3baa7-ab70-4fdc-94e5-c86d56c5a03b)
   )
   (model
     "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
@@ -88,7 +88,7 @@
     (size 1.5 1.5)
     (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp d78034c9-b804-4533-9a12-78db3709df03)
+    (tstamp 7a849750-8d7c-4f37-808a-2d0e4b9879dc)
   )
   (pad
     "5"
@@ -97,7 +97,7 @@
     (at -5.730906 -7.887916 126.0)
     (size 1.5 3)
     (layers F.Cu F.Mask)
-    (tstamp 833a008a-1dac-4815-be52-8fea976ddba1)
+    (tstamp 153e44e3-b368-48bd-a7b4-8e1ac31d9a38)
   )
   (model
     "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
@@ -113,7 +113,7 @@
     (size 1.5 1.5)
     (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp f1d62f1b-5c81-4f46-8092-f7267199aae9)
+    (tstamp 5c882214-6d96-4599-b633-fcdd95d7d90a)
   )
   (pad
     "6"
@@ -122,7 +122,7 @@
     (at -8.443748 4.875 210.0)
     (size 1.5 3)
     (layers F.Cu F.Mask)
-    (tstamp 28801296-b14b-4328-89d2-0eaab2fb807b)
+    (tstamp d675cb96-fc35-464c-9a7c-b11ba3fe2ad8)
   )
   (model
     "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
@@ -138,7 +138,7 @@
     (size 1.5 1.5)
     (drill 0.75)
     (layers *.Cu *.Mask)
-    (tstamp 6a1776ae-5657-4da4-8de3-c7db780c14cd)
+    (tstamp 14ccf960-57f5-490e-b8c4-361ef3eeef37)
   )
   (pad
     "1"
@@ -147,7 +147,7 @@
     (at 8.443748 4.875 -30.0)
     (size 1.5 3)
     (layers F.Cu F.Mask)
-    (tstamp 831b7f91-1d3e-4b8c-a4ed-414509b99197)
+    (tstamp f2ab414e-2ade-4d75-9936-30fcb85bb673)
   )
   (model
     "/home/matti/devel/encodering/Project.pretty/Connfly_DS-1006-11_No_Pin.step"
