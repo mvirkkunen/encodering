@@ -49,7 +49,7 @@ int main(void) {
 
         uint8_t style = regs.config.style;
         if (style < STYLE_COUNT) {
-            STYLES[style]();
+            STYLES[style](delta);
         }
     }
 }

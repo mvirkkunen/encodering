@@ -1,4 +1,5 @@
 #include "styles.h"
+#include "leds.h"
 #include "registers.h"
 
 static void fill(uint8_t level) {
@@ -7,14 +8,16 @@ static void fill(uint8_t level) {
     }
 }
 
-static void style_single(void) {
-    fill(regs.config.off_level);
-
-    regs.led_level[reg_counter % LED_COUNT] = regs.config.on_level;
+static void style_single(uint8_t delta) {
+    if (delta) {
+        fill(regs.config.off_level);
+        regs.led_level[reg_counter % LED_COUNT] = regs.config.on_level;
+        leds_update();
+    }
 }
 
-static void style_manual(void) {
-    // no-op
+static void style_manual(uint8_t delta) {
+    leds_update();
 }
 
 const style_func_t STYLES[STYLE_COUNT] = {
