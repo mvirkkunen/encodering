@@ -1,8 +1,10 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "encoder.h"
+#include "registers.h"
 
 volatile int8_t encoder_delta = 0;
 
@@ -13,6 +15,18 @@ volatile int8_t encoder_delta = 0;
 void encoder_init(void) {
     PORT_ENCA.PINCTRL_ENCA = PORT_ISC_BOTHEDGES_gc;
     PORT_ENCB.PINCTRL_ENCB = PORT_ISC_BOTHEDGES_gc;
+}
+
+void encoder_poll_button(void) {
+    static bool prev_held = 0;
+
+    bool held = PORT_ENCS.IN & BIT_ENCS;
+
+    regs.status = (
+        (held ? STATUS_BUTTON_HELD : 0)
+        | ((held && !prev_held) ? STATUS_BUTTON_PRESSED : 0)
+        | ((!held && prev_held) ? STATUS_BUTTON_RELEASED : 0)
+    );
 }
 
 ISR(PORTA_PORT_vect) {
@@ -40,16 +54,3 @@ ISR(PORTA_PORT_vect) {
 
 ISR(PORTB_PORT_vect, ISR_ALIASOF(PORTA_PORT_vect));
 ISR(PORTC_PORT_vect, ISR_ALIASOF(PORTA_PORT_vect));
-
-/*ISR(PORTB_vect) {
-    // Clear interrupt
-    PORTB.INTFLAGS |= PORT_INT3_bm;
-
-}
-
-ISR(PORTC_vect) {
-    // Clear interrupt
-    PORTC.INTFLAGS |= PORT_INT0_bm;
-
-
-}*/

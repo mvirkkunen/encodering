@@ -28,6 +28,8 @@ void i2c_disable(void) {
     TWI0.SCTRLA &= ~(TWI_PIEN_bm | TWI_APIEN_bm | TWI_DIEN_bm);
 }
 
+#define PTR_WITHIN_MEMBER(PTR, MEMBER) (offsetof(registers_t, MEMBER) <= (PTR) && (PTR) < offsetof(registers_t, MEMBER) + sizeof(regs.MEMBER))
+
 ISR(TWI0_TWIS_vect) {
     static uint8_t ptr = 0;
     static bool counter_written = false;
@@ -44,6 +46,11 @@ ISR(TWI0_TWIS_vect) {
             // Read
 
             TWI0.SDATA = ((uint8_t*)&regs)[ptr];
+
+            if (ptr == offsetof(registers_t, status)) {
+                // TODO: this is racey
+                regs.status &= ~0x7f;
+            }
         } else {
             // Write
 
@@ -57,9 +64,12 @@ ISR(TWI0_TWIS_vect) {
                 regs.buffered_counter = reg_counter;
             } else {
                 // Data
-                ((uint8_t*)&regs)[ptr] = TWI0.SDATA;
 
-                if (offsetof(registers_t, buffered_counter) <= ptr && ptr < offsetof(registers_t, buffered_counter) + sizeof(regs.buffered_counter)) {
+                if (!PTR_WITHIN_MEMBER(ptr, read_only)) {
+                    ((uint8_t*)&regs)[ptr] = TWI0.SDATA;
+                }
+
+                if (PTR_WITHIN_MEMBER(ptr, buffered_counter)) {
                     counter_written = true;
                 }
             }

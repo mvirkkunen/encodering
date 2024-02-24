@@ -28,6 +28,8 @@ const PROGMEM uint8_t GAMMA_LUT[256] = {
     226, 228, 230, 232, 233, 235, 237, 239, 241, 243, 245, 247, 249, 251, 253, 255,
 };
 
+volatile uint16_t led_cycles = 0;
+
 typedef struct led_schedule_item {
     uint8_t port_dir[3];
     uint8_t next_cmp;
@@ -179,6 +181,8 @@ ISR(TCA0_OVF_vect) {
 
     // Calculate next schedule
     update_led_schedule();
+
+    led_cycles++;
 
     // TODO: maybe sleep CPU if no LEDs active
 }

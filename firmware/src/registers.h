@@ -3,13 +3,20 @@
 #include <stdint.h>
 #include "config.h"
 
-enum {
+#define DEVICE_ID 0x1337
+#define DEVICE_VERSION 0x0001
+
+/*enum {
     MODE_SINGLE     = (1 << 0),
     MODE_FILL       = (1 << 1),
     MODE_ANTI_ALIAS = (1 << 2),
     MODE_INT_OUT    = (1 << 3),
     MODE_DAC_OUT    = (1 << 4),
     MODE_MANUAL     = (1 << 5),
+};*/
+
+enum {
+    STYLE_SINGLE = 0,
 };
 
 enum {
@@ -19,25 +26,31 @@ enum {
 };
 
 enum {
-    STATUS_BUTTON_PRESSED  = (1 << 0),
-    STATUS_BUTTON_RELEASED = (1 << 1),
+    STATUS_BUTTON_HELD     = (1 << 0),
+    STATUS_BUTTON_PRESSED  = (1 << 1),
+    STATUS_BUTTON_RELEASED = (1 << 2),
 };
 
 typedef struct __attribute__((__packed__)) config {
-    uint16_t mode;
+    uint8_t style;
     uint16_t counter_min;
     uint16_t counter_max;
     uint8_t led_min;
     uint8_t led_max;
+    uint8_t on_level;
+    uint8_t off_level;
+    uint8_t unused_level;
     uint8_t i2c_addr;
 } config_t;
 
-typedef struct __attribute__((__packed__)) regs {
+typedef struct __attribute__((__packed__)) registers {
     uint16_t buffered_counter;
     uint8_t status;
     uint8_t command;
-    uint16_t device_id;
-    uint16_t device_version;
+    struct {
+        uint16_t device_id;
+        uint16_t device_version;
+    } read_only;
     config_t config;
     uint8_t led_level[LED_COUNT];
 } registers_t;
