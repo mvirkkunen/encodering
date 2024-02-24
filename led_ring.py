@@ -453,6 +453,19 @@ def generate_led_pcb():
 
     generate_mounting_jig_pcb(mounting_pads)
 
+    led_indices = [
+        (led.inner_net.ordinal, led.outer_net.ordinal, led.index) if led.rotate else (led.outer_net.ordinal, led.inner_net.ordinal, led.index)
+        for led in leds
+    ]
+
+    led_indices.sort(key=lambda l: l[0])
+
+    print("const led_def_t LED_DEFS[LED_COUNT] = {")
+    for (high_pin, low_pin, index) in led_indices:
+        print(f"    {{ {high_pin - 1}, {low_pin - 1}, {index} }},")
+
+    print("};")
+
     return origin
 
 generate_led_pcb()

@@ -147,9 +147,7 @@ void leds_init(void) {
 }
 
 ISR(TCA0_OVF_vect) {
-    static VPORT_t * const ports[3] = { &VPORTA, &VPORTB, &VPORTC };
-
-    // Stop and reset timer
+    // Stop and reset timer while we set up next schedule
     TCA0.SINGLE.CTRLA &= ~TCA_SINGLE_ENABLE_bm;
     TCA0.SINGLE.CNT = 0;
 

@@ -15,7 +15,7 @@ EOF
 
 #kicad-cli pcb export step build/led_pcb/led_pcb.kicad_pcb --subst-models -o build/led_pcb.step --drill-origin
 
-pcbnew build/led_pcb/led_pcb.kicad_pcb; exit 0
+#pcbnew build/led_pcb/led_pcb.kicad_pcb; exit 0
 #eeschema build/led_pcb/led_pcb.kicad_sch; exit 0
 #pcbnew build/jig_pcb/jig_pcb.kicad_pcb; exit 0
 

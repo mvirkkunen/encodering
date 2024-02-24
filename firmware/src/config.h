@@ -1,9 +1,6 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-#include "avr/io.h"
-#include "avr/pgmspace.h"
+#include "config_types.h"
 
 #define I2C_ADDRESS 0x37
 #define PIN_COUNT 6
@@ -23,34 +20,51 @@
 #define PORT_INT     PORTA
 #define BIT_INT      PIN6_bm
 
-typedef struct pin_def {
-    uint8_t port;
-    uint8_t bit;
-} pin_def_t;
-
-typedef struct led_def {
-    uint8_t high_pin;
-    uint8_t low_pin;
-    uint8_t led_index;
-} led_def_t;
-
 extern const pin_def_t PIN_DEFS[PIN_COUNT];
 extern const led_def_t LED_DEFS[LED_COUNT];
 
 #ifdef CONFIG_C
 
 const pin_def_t PIN_DEFS[PIN_COUNT] = {
-    { 0, PIN3_bm },
-    { 0, PIN2_bm },
-    { 0, PIN1_bm },
-    { 2, PIN3_bm },
-    { 2, PIN2_bm },
-    { 2, PIN1_bm },
+    { 0, 1 << 3 },
+    { 0, 1 << 2 },
+    { 0, 1 << 1 },
+    { 2, 1 << 3 },
+    { 2, 1 << 2 },
+    { 2, 1 << 1 },
 };
 
 const led_def_t LED_DEFS[LED_COUNT] = {
     { 0, 1, 0 },
+    { 0, 2, 2 },
+    { 0, 3, 4 },
+    { 0, 4, 6 },
+    { 0, 5, 8 },
     { 1, 0, 1 },
+    { 1, 2, 10 },
+    { 1, 3, 12 },
+    { 1, 4, 14 },
+    { 1, 5, 16 },
+    { 2, 0, 3 },
+    { 2, 1, 11 },
+    { 2, 3, 18 },
+    { 2, 4, 20 },
+    { 2, 5, 22 },
+    { 3, 0, 5 },
+    { 3, 1, 13 },
+    { 3, 2, 19 },
+    { 3, 4, 24 },
+    { 3, 5, 26 },
+    { 4, 0, 7 },
+    { 4, 1, 15 },
+    { 4, 2, 21 },
+    { 4, 3, 25 },
+    { 4, 5, 28 },
+    { 5, 0, 9 },
+    { 5, 1, 17 },
+    { 5, 2, 23 },
+    { 5, 3, 27 },
+    { 5, 4, 29 },
 };
 
 #endif
