@@ -31,9 +31,9 @@ int main(void) {
     sei();
 
     while (true) {
-        // Run main loop around 100 times a second
+        // Run main loop around 200 times a second
 
-        while (led_cycles < LED_CYCLES_PER_SECOND / 100) { }
+        while (led_cycles < LED_CYCLES_PER_SECOND / 200) { }
         led_cycles = 0;
 
         encoder_poll_button();

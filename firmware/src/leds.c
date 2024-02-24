@@ -28,7 +28,7 @@ const PROGMEM uint8_t GAMMA_LUT[256] = {
     226, 228, 230, 232, 233, 235, 237, 239, 241, 243, 245, 247, 249, 251, 253, 255,
 };
 
-volatile uint16_t led_cycles = 0;
+volatile uint8_t led_cycles = 0;
 
 typedef struct led_schedule_item {
     uint8_t port_dir[3];
@@ -110,7 +110,7 @@ static void update_led_schedule(void) {
         uint8_t next_pwm = 255;
 
         // Initialize schedule item with enabled LED bits from previous step and current PWM value
-        si[1] = (led_schedule_item_t){si[0].port_dir[0], si[0].port_dir[1], si[0].port_dir[2], cur_pwm};
+        si[1] = (led_schedule_item_t){{si[0].port_dir[0], si[0].port_dir[1], si[0].port_dir[2]}, cur_pwm};
         for (uint8_t i = 0; i < count; i++) {
             if (group[i].pwm == cur_pwm) {
                 // Turn off this LED at this step
