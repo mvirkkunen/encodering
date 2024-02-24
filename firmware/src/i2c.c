@@ -10,7 +10,7 @@ static volatile bool i2c_in_progress = false;
 
 void i2c_init(void) {
     // Smart mode enable, stop interrupt enable, data interrupt enable
-    TWI0.SCTRLA = TWI_SMEN_bm | TWI_PIEN_bm | TWI_DIEN_bm;
+    TWI0.SCTRLA = TWI_SMEN_bm;
 
     TWI0.SADDR = I2C_ADDRESS;
 
@@ -18,8 +18,19 @@ void i2c_init(void) {
     TWI0.SCTRLA |= TWI_ENABLE_bm;
 }
 
+void i2c_enable(void) {
+    // Enable stop and data interrupts
+    TWI0.SCTRLA |= TWI_PIEN_bm | TWI_APIEN_bm | TWI_DIEN_bm;
+}
+
+void i2c_disable(void) {
+    // Disable stop and data interupts
+    TWI0.SCTRLA &= ~(TWI_PIEN_bm | TWI_APIEN_bm | TWI_DIEN_bm);
+}
+
 ISR(TWI0_TWIS_vect) {
     static uint8_t ptr = 0;
+    static bool counter_written = false;
     static bool first = true;
 
     uint8_t status = TWI0.SSTATUS;
@@ -32,7 +43,7 @@ ISR(TWI0_TWIS_vect) {
         if (status & TWI_DIR_bm) {
             // Read
 
-            TWI0.SDATA = ((uint8_t*)&reg)[ptr];
+            TWI0.SDATA = ((uint8_t*)&regs)[ptr];
         } else {
             // Write
 
@@ -40,9 +51,17 @@ ISR(TWI0_TWIS_vect) {
                 // Register address
                 first = false;
                 ptr = TWI0.SDATA - 1;
+
+                // Update buffered counter
+                counter_written = false;
+                regs.buffered_counter = reg_counter;
             } else {
                 // Data
-                ((uint8_t*)&reg)[ptr] = TWI0.SDATA;
+                ((uint8_t*)&regs)[ptr] = TWI0.SDATA;
+
+                if (offsetof(registers_t, buffered_counter) <= ptr && ptr < offsetof(registers_t, buffered_counter) + sizeof(regs.buffered_counter)) {
+                    counter_written = true;
+                }
             }
         }
     }
@@ -53,10 +72,10 @@ ISR(TWI0_TWIS_vect) {
         first = true;
         i2c_in_progress = false;
 
-        // Update buffered registers
-        //reg.counter = counter;
-        //reg.status = status;
-        status = 0;
+        // Update counter if written
+        if (counter_written) {
+            reg_counter = regs.buffered_counter;
+        }
 
         // TODO: INT pin
 
@@ -65,7 +84,7 @@ ISR(TWI0_TWIS_vect) {
     }
 
     ptr++;
-    if (ptr >= sizeof(reg)) {
+    if (ptr >= sizeof(regs)) {
         ptr = 0;
     }
 }

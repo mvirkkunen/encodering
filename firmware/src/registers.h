@@ -32,8 +32,8 @@ typedef struct __attribute__((__packed__)) config {
     uint8_t i2c_addr;
 } config_t;
 
-typedef struct __attribute__((__packed__)) reg {
-    uint16_t counter;
+typedef struct __attribute__((__packed__)) regs {
+    uint16_t buffered_counter;
     uint8_t status;
     uint8_t command;
     uint16_t device_id;
@@ -42,4 +42,6 @@ typedef struct __attribute__((__packed__)) reg {
     uint8_t led_level[LED_COUNT];
 } registers_t;
 
-extern volatile registers_t reg;
+extern volatile uint16_t reg_counter;
+
+extern volatile registers_t regs;

@@ -9,6 +9,20 @@
 #define PIN_COUNT 6
 #define LED_COUNT 30
 
+#define PORT_ENCA    PORTC
+#define BIT_ENCA     PIN0_bm
+#define PINCTRL_ENCA PIN0CTRL
+
+#define PORT_ENCB    PORTB
+#define BIT_ENCB     PIN3_bm
+#define PINCTRL_ENCB PIN3CTRL
+
+#define PORT_ENCS    PORTA
+#define BIT_ENCS     PIN4_bm
+
+#define PORT_INT     PORTA
+#define BIT_INT      PIN6_bm
+
 typedef struct pin_def {
     uint8_t port;
     uint8_t bit;

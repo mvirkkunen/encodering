@@ -1,27 +1,36 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/sleep.h>
+#include <util/atomic.h>
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "config.h"
-#include "i2c.h"
-#include "leds.h"
 #include "registers.h"
+#include "leds.h"
+#include "encoder.h"
+#include "i2c.h"
 
-volatile registers_t reg = {0};
+volatile uint16_t reg_counter;
 
-volatile uint32_t counter = 0;
-volatile uint32_t status = 0;
-volatile bool i2c_in_progress = false;
+volatile registers_t regs;
 
 int main(void) {
     leds_init();
+    encoder_init();
     i2c_init();
+    i2c_enable();
 
     sei();
 
     while (true) {
-        //sleep_cpu();
+        int8_t delta;
+        ATOMIC_BLOCK(ATOMIC_FORCEON) {
+            delta = encoder_delta;
+        }
+
+        i2c_disable();
+        reg_counter += delta;
+        i2c_enable();
     }
 }

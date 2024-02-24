@@ -1,10 +1,10 @@
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
 #include "config.h"
 #include "leds.h"
 #include "registers.h"
@@ -34,8 +34,8 @@ typedef struct led_schedule_item {
 } led_schedule_item_t;
 
 typedef struct led_schedule {
-    led_schedule_item_t items[PIN_COUNT + 1];
-    uint8_t enabled_pins[3];
+    // 1 item for enabled pins, PIN_COUNT - 1 items for actual schedule items, 1 item for guard values
+    led_schedule_item_t items[PIN_COUNT + 2];
     uint8_t high_pin[3];
 } led_schedule_t;
 
@@ -51,22 +51,35 @@ typedef struct group_led {
 
 static void update_led_schedule(void) {
     // High pin number for this group
-    uint8_t high_pin_index = led_def_p->high_pin;
+    uint8_t group_high_pin_index = led_def_p->high_pin;
 
     // LEDs for this group
     uint8_t count = 0;
     group_led_t group[PIN_COUNT] = {0};
 
+    // Enable high pin in schedule
+    const pin_def_t *high_pin = &PIN_DEFS[group_high_pin_index];
+    for (uint8_t port = 0; port < 2; port++) {
+        next_schedule.items[0].port_dir[port] = next_schedule.high_pin[port] = (high_pin->port == port) ? high_pin->bit : 0;
+    }
+
+    uint8_t cur_pwm = 255;
+
     // Find next group of consecutive LEDs with identical high_pin and copy their information to group array
     // Copying is performed to ensure that values don't change while we're sorting them
     // LED PWM values are also gamma corrected here
-    while (led_def_p->high_pin == high_pin_index) {
+    while (led_def_p->high_pin == group_high_pin_index) {
         // Look up PWM value from registers and gamma correct it
-        uint8_t pwm = pgm_read_byte(&GAMMA_LUT[reg.led_level[led_def_p->led_index]]);
+        uint8_t pwm = pgm_read_byte(&GAMMA_LUT[regs.led_level[led_def_p->led_index]]);
 
         if (pwm == 0) {
             // LED is off, skip it
             continue;
+        }
+
+        // Calculate minimum PWM in group for starting value
+        if (pwm < cur_pwm) {
+            cur_pwm = pwm;
         }
 
         // Insert LED to schedule
@@ -76,8 +89,10 @@ static void update_led_schedule(void) {
             .bit = low_pin->bit,
             .pwm = pwm,
         };
-
         count++;
+
+        // Enable pin in schedule
+        next_schedule.items[0].port_dir[low_pin->port] = low_pin->bit;
 
         // Go to next LED definition, wrapping if needed
         led_def_p++;
@@ -86,27 +101,18 @@ static void update_led_schedule(void) {
         }
     }
 
-    // Enable high pin in schedule
-    const pin_def_t *high_pin = &PIN_DEFS[high_pin_index];
-    for (uint8_t port = 0; port < 2; port++) {
-        next_schedule.enabled_pins[port] = next_schedule.high_pin[port] = (high_pin->port == port) ? high_pin->bit : 0;
-    }
-
     // Create LED schedule by inserting LEDs sorted by ascending PWM level. If multiple LEDs have the same PWM value,
     // they are all inserted into the same item.
-    led_schedule_item_t *si = &next_schedule.items[0];
-    uint8_t cur_pwm = 0;
+    led_schedule_item_t *si = &next_schedule.items[1];
     for (uint8_t inserted = 0; inserted < count; ) {
         uint8_t next_pwm = 255;
 
-        // Zero port bits and store PWM value
-        *si = (led_schedule_item_t){0, 0, 0, cur_pwm};
+        // Initialize schedule item for enabled LED bits from previous step and current PWM value
+        si[1] = (led_schedule_item_t){si[0].port_dir[0], si[0].port_dir[1], si[0].port_dir[2], cur_pwm};
         for (uint8_t i = 0; i < count; i++) {
             if (group[i].pwm == cur_pwm) {
-                // Add this LED's low pin in the current schedule item
-                si->port_dir[group[i].port] |= group[i].bit;
-                // Enable this LED's low pin in the schedule
-                next_schedule.enabled_pins[group[i].port] |= group[i].bit;
+                // Turn off this LED at this step
+                si[1].port_dir[group[i].port] |= ~group[i].bit;
                 inserted++;
             } else if (cur_pwm < group[i].pwm && group[i].pwm < next_pwm) {
                 // Potential next PWM level to consider
@@ -119,8 +125,6 @@ static void update_led_schedule(void) {
     }
 
     // Add guard values to end of schedule
-    si->next_cmp = 255;
-    si++;
     si->next_cmp = 255;
 }
 
@@ -157,18 +161,18 @@ ISR(TCA0_OVF_vect) {
     GPIOR0 = (uint8_t)(uint16_t)&led_schedule.items[0];
     GPIOR1 = (uint8_t)((uint16_t)&led_schedule.items[0] + 1);
 
+    // Set first compare value
+    TCA0.SINGLE.CMP0 = led_schedule.items[0].next_cmp;
+
     // Set pin levels, high pin is high, others are low
     VPORTA.OUT = led_schedule.high_pin[0];
     VPORTB.OUT = led_schedule.high_pin[1];
     VPORTC.OUT = led_schedule.high_pin[2];
 
-    // Enable all pin outputs
-    VPORTA.DIR = led_schedule.enabled_pins[0];
-    VPORTB.DIR = led_schedule.enabled_pins[1];
-    VPORTC.DIR = led_schedule.enabled_pins[2];
-
-    // Set first compare value
-    TCA0.SINGLE.CMP0 = led_schedule.items[0].next_cmp;
+    // Enable all pin outputs used by schedule
+    VPORTA.DIR = led_schedule.items[0].port_dir[0];
+    VPORTB.DIR = led_schedule.items[0].port_dir[1];
+    VPORTC.DIR = led_schedule.items[0].port_dir[2];
 
     // Enable timer
     TCA0.SINGLE.CTRLA |= TCA_SINGLE_ENABLE_bm;
