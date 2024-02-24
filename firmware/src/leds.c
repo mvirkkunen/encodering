@@ -79,12 +79,12 @@ static void update_led_schedule(void) {
             continue;
         }
 
-        // Calculate minimum PWM in group for starting value
+        // Calculate minimum PWM in group to use as starting value later
         if (pwm < cur_pwm) {
             cur_pwm = pwm;
         }
 
-        // Insert LED to schedule
+        // Include LED in schedule
         const pin_def_t *low_pin = &PIN_DEFS[led_def_p->low_pin];
         group[count] = (group_led_t){
             .port = low_pin->port,
@@ -105,11 +105,11 @@ static void update_led_schedule(void) {
 
     // Create LED schedule by inserting LEDs sorted by ascending PWM level. If multiple LEDs have the same PWM value,
     // they are all inserted into the same item.
-    led_schedule_item_t *si = &next_schedule.items[1];
+    led_schedule_item_t *si = &next_schedule.items[0];
     for (uint8_t inserted = 0; inserted < count; ) {
         uint8_t next_pwm = 255;
 
-        // Initialize schedule item for enabled LED bits from previous step and current PWM value
+        // Initialize schedule item with enabled LED bits from previous step and current PWM value
         si[1] = (led_schedule_item_t){si[0].port_dir[0], si[0].port_dir[1], si[0].port_dir[2], cur_pwm};
         for (uint8_t i = 0; i < count; i++) {
             if (group[i].pwm == cur_pwm) {
@@ -160,11 +160,11 @@ ISR(TCA0_OVF_vect) {
     memcpy(&led_schedule, &next_schedule, sizeof(led_schedule));
 
     // Set LED ISR pointer
-    GPIOR0 = (uint8_t)(uint16_t)&led_schedule.items[0];
-    GPIOR1 = (uint8_t)((uint16_t)&led_schedule.items[0] + 1);
+    GPIOR0 = (uint8_t)(uint16_t)&led_schedule.items[1];
+    GPIOR1 = (uint8_t)((uint16_t)&led_schedule.items[1] + 1);
 
     // Set first compare value
-    TCA0.SINGLE.CMP0 = led_schedule.items[0].next_cmp;
+    TCA0.SINGLE.CMP0 = led_schedule.items[1].next_cmp;
 
     // Set pin levels, high pin is high, others are low
     VPORTA.OUT = led_schedule.high_pin[0];
