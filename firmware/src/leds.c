@@ -8,6 +8,7 @@
 #include "config.h"
 #include "leds.h"
 #include "registers.h"
+#include "unittest.h"
 
 const PROGMEM uint8_t GAMMA_LUT[256] = {
       0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,
@@ -75,9 +76,11 @@ void leds_update(void) {
         led_schedule_t *sched = &pending_led_schedules[high_pin_index];
         led_schedule_item_t *item = &sched->items[0];
 
+        // TLOG("processing high pin %d", high_pin_index);
+
         // Enable current high pin in schedule
         const pin_def_t *high_pin = &PIN_DEFS[high_pin_index];
-        for (uint8_t port = 0; port < 2; port++) {
+        for (uint8_t port = 0; port < 3; port++) {
             item->port_dir[port] = sched->high_pin[port] = (high_pin->port == port) ? high_pin->bit : 0;
         }
 
@@ -177,8 +180,8 @@ ISR(TCA0_OVF_vect) {
     VPORTC.DIR = sched->items[0].port_dir[2];
 
     // Set LED ISR pointer
-    GPIOR0 = (uint8_t)(uint16_t)&sched->items[1];
-    GPIOR1 = (uint8_t)((uint16_t)&sched->items[1] + 1);
+    GPIOR0 = (uint8_t)(intptr_t)&sched->items[1];
+    GPIOR1 = (uint8_t)((intptr_t)&sched->items[1] + 1);
 
     // Enable timer
     TCA0.SINGLE.CTRLA |= TCA_SINGLE_ENABLE_bm;

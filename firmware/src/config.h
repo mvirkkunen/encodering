@@ -1,3 +1,7 @@
+#ifdef UNITTEST
+#include_next "config.h"
+#else
+
 #pragma once
 
 #include "config_types.h"
@@ -66,5 +70,7 @@ const led_def_t LED_DEFS[LED_COUNT] = {
     { 5, 3, 27 },
     { 5, 4, 29 },
 };
+
+#endif
 
 #endif
