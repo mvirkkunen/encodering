@@ -9,6 +9,8 @@ $AVR_GCC $AVR_CFLAGS \
     -mmcu=attiny1616 \
     -DF_CPU=20000000UL \
     -Os \
+    -Wall \
+    -Werror \
     src/*.c \
     src/*.S \
     -o encodering.elf
