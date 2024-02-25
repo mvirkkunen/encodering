@@ -2,6 +2,8 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include "avr/io.h"
+
 #define CONFIG_C
 #include "config.h"
 
@@ -12,9 +14,10 @@
 #define GREEN "\e[1;32m"
 #define RESET "\e[0m"
 
+_test_io_t _test_io;
+
 volatile uint16_t reg_counter;
 volatile registers_t regs;
-uint8_t _io_mem[0x10000];
 
 static _test_record_t records[1024] = {0};
 static unsigned record_count = 0;
@@ -53,7 +56,7 @@ int main() {
 
         reg_counter = 0;
         memset((void*)&regs, 0, sizeof(regs));
-        memset(_io_mem, 0, sizeof(_io_mem));
+        memset(&_test_io, 0, sizeof(_test_io));
 
         log_buf_p = log_buf;
 
