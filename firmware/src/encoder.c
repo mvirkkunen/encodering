@@ -5,6 +5,7 @@
 #include "config.h"
 #include "encoder.h"
 #include "registers.h"
+#include "unittest.h"
 
 volatile int8_t encoder_delta = 0;
 
@@ -30,26 +31,31 @@ void encoder_poll_button(void) {
 }
 
 ISR(PORTA_PORT_vect) {
-    uint8_t same = !(PORT_ENCA.IN & BIT_ENCA) == !(PORT_ENCB.IN & BIT_ENCB);
-    uint8_t inc = 1;
+    uint8_t event = (
+        0
+        | !!(PORT_ENCA.IN & BIT_ENCA) << 3
+        | !!(PORT_ENCB.IN & BIT_ENCB) << 2
+        | !!(PORT_ENCA.INTFLAGS & BIT_ENCA) << 1
+        | !!(PORT_ENCB.INTFLAGS & BIT_ENCB) << 0
+    );
 
-    // who knows if this is correct...
-
-    if (PORT_ENCA.INTFLAGS & BIT_ENCA) {
-        PORT_ENCA.INTFLAGS |= BIT_ENCA;
-        if (same) {
-            inc = -inc;
-        }
+    switch (event) {
+        case 0b1010:
+        case 0b1101:
+        case 0b0110:
+        case 0b0001:
+            encoder_delta++;
+            break;
+        case 0b0101:
+        case 0b1110:
+        case 0b1001:
+        case 0b0010:
+            encoder_delta--;
+            break;
     }
 
-    if (PORT_ENCB.INTFLAGS & BIT_ENCB) {
-        PORT_ENCB.INTFLAGS |= BIT_ENCB;
-        if (!same) {
-            inc = -inc;
-        }
-    }
-
-    encoder_delta += inc;
+    PORT_ENCB.INTFLAGS &= ~BIT_ENCB;
+    PORT_ENCA.INTFLAGS &= ~BIT_ENCA;
 }
 
 ISR(PORTB_PORT_vect, ISR_ALIASOF(PORTA_PORT_vect));

@@ -60,16 +60,14 @@ int main() {
 
         log_buf_p = log_buf;
 
-        setup();
-
         int result = setjmp(fail_jmp);
         if (result == 0) {
+            setup();
             records[i].func();
+            teardown();
         }
 
         r |= result;
-
-        teardown();
 
         if (result == 0) {
             printf(GREEN "PASS" RESET "\n");

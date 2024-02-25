@@ -57,7 +57,7 @@ for test in tests/*.c; do
         -o build/${test}_runner
 
     echo ${test}:
-    if ! build/${test}_runner; then
+    if ! valgrind -q build/${test}_runner; then
         fail=1
     fi
     echo
