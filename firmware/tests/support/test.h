@@ -11,12 +11,14 @@ typedef struct _test_record {
 } _test_record_t;
 
 __attribute__ ((format (printf, 1, 2))) void _test_fail(const char *fmt, ...);
+__attribute__ ((format (printf, 1, 2))) void _test_log(const char *fmt, ...);
 void _test_register(const char *name, _test_func_t func);
-__attribute__((weak)) void setup(void) { }
-__attribute__((weak)) void teardown(void) { }
+
+void setup(void);
+void teardown(void);
 
 #define TEST(NAME) \
-    static void NAME(void);                                                                                \
+    static void NAME(void);                                                                               \
     __attribute__((constructor)) static void _test_register_##NAME(void) { _test_register(#NAME, NAME); } \
     void NAME(void)
 

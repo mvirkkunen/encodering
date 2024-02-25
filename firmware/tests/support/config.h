@@ -33,10 +33,10 @@ const pin_def_t PIN_DEFS[PIN_COUNT] = {
 
 const led_def_t LED_DEFS[LED_COUNT] = {
     { 0, 1, 0 },
-    { 0, 2, 2 },
-    { 1, 0, 4 },
-    { 1, 2, 1 },
-    { 2, 0, 3 },
+    { 0, 2, 1 },
+    { 1, 0, 2 },
+    { 1, 2, 3 },
+    { 2, 0, 4 },
     { 2, 1, 5 },
 };
 

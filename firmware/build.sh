@@ -22,7 +22,7 @@ $AVR_GCC $AVR_CFLAGS \
 mkdir build/tests
 fail=0
 for test in tests/*.c; do
-    $CC -Itests/support/ -Isrc/ -Wall -Werror -DUNITTEST -DUNITTEST_LOG tests/support/test.c $test -o build/${test}_runner
+    $CC -Itests/support/ -Isrc/ -Wall -Werror -DUNITTEST tests/support/test.c $test -o build/${test}_runner
     echo ${test}:
     if ! build/${test}_runner; then
         fail=1
