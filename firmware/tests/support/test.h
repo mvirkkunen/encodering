@@ -34,3 +34,15 @@ void teardown(void);
             _ASSERT_FAIL("%d == %d (%s == %s)", _actual, _expected, #ACTUAL, #EXPECTED); \
         }                                                                                \
     } while (0);
+
+#define ASSERT_EQ_BYTES(ACTUAL, ...) \
+    do {                                                                \
+        uint8_t *_actual = ACTUAL;                                      \
+        uint8_t _expected[] = __VA_ARGS__;                              \
+        for (size_t i = 0; i < sizeof(_expected); i++) {                \
+            if (_actual[i] != _expected[i]) {                           \
+                _ASSERT_FAIL("at offset %zu: %02x != %02x (%s == %s)",  \
+                    i, _actual[i], _expected[i], #ACTUAL, #__VA_ARGS__) \
+            }                                                           \
+        }                                                               \
+    } while (0);

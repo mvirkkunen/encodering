@@ -14,19 +14,13 @@
 
 volatile uint16_t reg_counter;
 
-volatile registers_t regs;
+volatile registers_t regs = REGS_INIT;
 
 int main(void) {
     leds_init();
     encoder_init();
     i2c_init();
     i2c_enable();
-
-    regs.config.on_level = 255;
-    regs.config.off_level = 0;
-    regs.config.unused_level = 0;
-    regs.read_only.device_id = DEVICE_ID;
-    regs.read_only.device_version = DEVICE_VERSION;
 
     sei();
 

@@ -58,3 +58,12 @@ typedef struct __attribute__((__packed__)) registers {
 extern volatile uint16_t reg_counter;
 
 extern volatile registers_t regs;
+
+#define DEVICE_ID 0x1337
+#define DEVICE_VERSION 0x0001
+
+#define REGS_INIT \
+    {                                                                              \
+        .config = { .on_level = 255 },                                             \
+        .read_only = { .device_id = DEVICE_ID, .device_version = DEVICE_VERSION }, \
+    }

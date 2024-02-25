@@ -16,8 +16,8 @@
 
 _test_io_t _test_io;
 
-volatile uint16_t reg_counter;
-volatile registers_t regs;
+volatile uint16_t reg_counter = 0;
+volatile registers_t regs = REGS_INIT;
 
 static _test_record_t records[1024] = {0};
 static unsigned record_count = 0;
@@ -55,7 +55,7 @@ int main() {
         printf("  %s: ", records[i].name);
 
         reg_counter = 0;
-        memset((void*)&regs, 0, sizeof(regs));
+        regs = (registers_t)REGS_INIT;
         memset(&_test_io, 0, sizeof(_test_io));
 
         log_buf_p = log_buf;
