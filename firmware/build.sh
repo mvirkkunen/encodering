@@ -33,7 +33,6 @@ do
             if [[ -f "$dir/$file" ]]; then
                 mkdir -p build/include_next/$(dirname $file)
                 echo "#include \"$dir/$file\"" > build/include_next/$file
-                break
             fi
         done
     fi
@@ -44,7 +43,19 @@ done < <($AVR_GCC -Wp,-v /.c 2>&1)
 mkdir build/tests
 fail=0
 for test in tests/*.c; do
-    $CC -Itests/support/ -Ibuild/ $AVR_INCLUDE_PATH -Isrc/ -Wall -Werror -DUNITTEST -D__AVR_ATtiny1616__ tests/support/test.c $test -o build/${test}_runner
+    $CC \
+        -Itests/support/ \
+        -Ibuild/ \
+        $AVR_INCLUDE_PATH \
+        -Isrc/ \
+        -Wall \
+        -Werror \
+        -DUNITTEST \
+        -D__AVR_ATtiny1616__ \
+        tests/support/test.c \
+        $test \
+        -o build/${test}_runner
+
     echo ${test}:
     if ! build/${test}_runner; then
         fail=1
